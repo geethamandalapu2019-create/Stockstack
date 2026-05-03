@@ -4,8 +4,10 @@ import {
   generateCandles,
   getCurrentPrice,
   computeComprehensiveScore,
+  computeIndicatorModeScore,
   generateHorizonPrediction,
   getStockBySymbol,
+  type IndicatorMode,
 } from "../lib/stockData.js";
 
 const router = Router();
@@ -17,7 +19,7 @@ const HORIZONS = [
   { key: "1mo", label: "1 Month", days: 30 },
 ];
 
-function buildStockPrediction(symbol: string) {
+function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
   const stock = getStockBySymbol(symbol);
   if (!stock) return null;
   if (stock.currency !== "INR" || stock.exchange !== "NSE") return null;
@@ -32,7 +34,7 @@ function buildStockPrediction(symbol: string) {
   const volumes = candles.map(c => c.volume);
 
   const { price: currentPrice } = getCurrentPrice(symbol);
-  const analysis = computeComprehensiveScore(closes, highs, lows, volumes);
+  const analysis = computeIndicatorModeScore(indicator, closes, highs, lows, volumes);
 
   const predictions: Record<string, {
     targetPrice: number; changeAmount: number; direction: string; confidence: number; label: string;
@@ -56,6 +58,7 @@ function buildStockPrediction(symbol: string) {
     overallSignal: analysis.overallSignal,
     signals: analysis.signals,
     currentRsi: analysis.currentRsi,
+    indicator,
     predictions,
   };
 }
@@ -76,6 +79,7 @@ function getBucket(stock: { marketCapB: number; capCategory?: "large" | "mid" | 
 router.get("/top", (req, res) => {
   const q = ((req.query.q as string) ?? "").toLowerCase().trim();
   const cap = getCapCategoryFilter((req.query.cap as string) ?? "all");
+  const indicator = ((req.query.indicator as string) ?? "app") as IndicatorMode;
   const limit = Math.min(parseInt((req.query.limit as string) ?? "10", 10), 30);
 
   let pool = STOCKS;
@@ -91,7 +95,7 @@ router.get("/top", (req, res) => {
   }
 
   const results = pool
-    .map(s => buildStockPrediction(s.symbol))
+    .map(s => buildStockPrediction(s.symbol, indicator))
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .filter(stock => {
       const meta = getStockBySymbol(stock.symbol);
@@ -113,6 +117,7 @@ router.get("/top", (req, res) => {
   res.json({
     query: q || null,
     cap: cap ?? "all",
+    indicator,
     total: results.length,
     stocks: results.slice(0, limit),
   });

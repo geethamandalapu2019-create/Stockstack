@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { useAddToWatchlist, useGetTopPredictions } from "@workspace/api-client-react";
+import { useAddToWatchlist } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,30 @@ const INDICATORS = [
 ] as const;
 
 type IndicatorKey = typeof INDICATORS[number]["key"];
+type TopPredictionResponse = {
+  stocks: Array<{
+    symbol: string;
+    name: string;
+    sector: string;
+    exchange: string;
+    currency: string;
+    capCategory: "large" | "mid" | "small";
+    currentPrice: number;
+    overallScore: number;
+    direction: string;
+    overallSignal: string;
+    signals: string[];
+    currentRsi: number | null;
+    indicator: IndicatorKey;
+    predictions: Record<string, {
+      targetPrice: number;
+      changeAmount: number;
+      direction: string;
+      confidence: number;
+      label: string;
+    }>;
+  }>;
+};
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -130,13 +154,26 @@ export default function PredictionsPage() {
   const [indicatorTab, setIndicatorTab] = useState<IndicatorKey>("app");
 
   const isSearching = committedQuery.length >= 1;
+  const [data, setData] = useState<TopPredictionResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const { data, isLoading, refetch, isFetching } = useGetTopPredictions(
-    isSearching
-      ? { q: committedQuery, cap: capTab, limit: 30 }
-      : { cap: capTab, limit: 20 },
-    { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, capTab, isSearching ? 30 : 20] } }
-  );
+  const loadPredictions = async () => {
+    const limit = isSearching ? 30 : 20;
+    const params = new URLSearchParams();
+    if (isSearching) params.set("q", committedQuery);
+    params.set("cap", capTab);
+    params.set("indicator", indicatorTab);
+    params.set("limit", String(limit));
+    const res = await fetch(`/api/predictions/top?${params.toString()}`);
+    const json = await res.json();
+    setData(json);
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    loadPredictions().finally(() => setIsLoading(false));
+  }, [committedQuery, capTab, indicatorTab]);
   const [watchlistAdded, setWatchlistAdded] = useState<Set<string>>(new Set());
   const [watchlistPending, setWatchlistPending] = useState<Set<string>>(new Set());
   const addToWatchlistMutation = useAddToWatchlist({
@@ -169,6 +206,10 @@ export default function PredictionsPage() {
 
   const handleSearch = () => setCommittedQuery(searchQuery.trim());
   const handleClear = () => { setSearchQuery(""); setCommittedQuery(""); };
+  const refetch = () => {
+    setIsFetching(true);
+    loadPredictions().finally(() => setIsFetching(false));
+  };
 
   const stocks = data?.stocks ?? [];
   const sectors = useMemo(() => {
@@ -178,11 +219,7 @@ export default function PredictionsPage() {
 
   const filteredStocks = useMemo(() => {
     const base = sectorTab === "all" ? stocks : stocks.filter(stock => stock.sector === sectorTab);
-    if (indicatorTab !== "app") return base;
-    return [...base].sort((a, b) => {
-      const bestUpside = (s: typeof a) => Math.max(...Object.values(s.predictions).map(p => ((p.targetPrice - s.currentPrice) / s.currentPrice) * 100));
-      return bestUpside(b) - bestUpside(a);
-    });
+    return base;
   }, [stocks, sectorTab, indicatorTab]);
 
   const rankedStocks = useMemo(() => {
@@ -278,7 +315,11 @@ export default function PredictionsPage() {
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">App Suggested uses the strongest overall score from the app’s technical model.</p>
+          <p className="text-[11px] text-muted-foreground">
+            {indicatorTab === "app"
+              ? "App Suggested uses the strongest overall score from the app’s technical model."
+              : `Showing predictions optimized for ${INDICATORS.find(i => i.key === indicatorTab)?.label}.`}
+          </p>
         </CardContent>
       </Card>
 

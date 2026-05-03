@@ -819,6 +819,147 @@ export function computeComprehensiveScore(
   return { score, direction, overallSignal, signals: signals.slice(0, 5), currentRsi: rsi };
 }
 
+export type IndicatorMode = "app" | "rsi" | "macd" | "sma" | "ema" | "bb";
+
+export function computeIndicatorModeScore(
+  mode: IndicatorMode,
+  closes: number[],
+  highs: number[],
+  lows: number[],
+  volumes: number[]
+) {
+  const rsiArr = calcRSI(closes);
+  const macdArr = calcMACD(closes);
+  const sma20Arr = calcSMA(closes, 20);
+  const sma50Arr = calcSMA(closes, 50);
+  const ema12Arr = calcEMA(closes, 12);
+  const ema26Arr = calcEMA(closes, 26);
+  const bbArr = calcBollingerBands(closes);
+  const stochArr = calcStochastic(highs, lows, closes);
+  const cciArr = calcCCI(highs, lows, closes);
+  const wrArr = calcWilliamsR(highs, lows, closes);
+  const obvArr = calcOBV(closes, volumes);
+
+  const latestClose = closes[closes.length - 1];
+  const latestRsi = rsiArr[rsiArr.length - 1];
+  const latestMacd = macdArr[macdArr.length - 1];
+  const latestSma20 = sma20Arr[sma20Arr.length - 1];
+  const latestSma50 = sma50Arr[sma50Arr.length - 1];
+  const latestEma12 = ema12Arr[ema12Arr.length - 1];
+  const latestEma26 = ema26Arr[ema26Arr.length - 1];
+  const latestBb = bbArr[bbArr.length - 1];
+  const latestStoch = stochArr[stochArr.length - 1];
+  const latestCci = cciArr[cciArr.length - 1];
+  const latestWr = wrArr[wrArr.length - 1];
+  const obvChange = obvArr.length > 10 ? obvArr[obvArr.length - 1] - obvArr[obvArr.length - 11] : 0;
+
+  const useApp = () => computeComprehensiveScore(closes, highs, lows, volumes);
+
+  if (mode === "app") return useApp();
+
+  let score = 50;
+  const signals: string[] = [];
+
+  if (mode === "rsi") {
+    if (latestRsi != null) {
+      if (latestRsi < 30) {
+        score = 78;
+        signals.push("RSI oversold — rebound setup");
+      } else if (latestRsi < 40) {
+        score = 64;
+        signals.push("RSI improving from weak zone");
+      } else if (latestRsi > 70) {
+        score = 28;
+        signals.push("RSI overbought — profit booking risk");
+      } else if (latestRsi > 60) {
+        score = 40;
+        signals.push("RSI elevated — trend stretched");
+      } else {
+        score = 52;
+        signals.push("RSI neutral");
+      }
+    }
+  } else if (mode === "macd") {
+    if (latestMacd.macd != null && latestMacd.histogram != null) {
+      if (latestMacd.histogram > 0 && latestMacd.macd > 0) {
+        score = 77;
+        signals.push("MACD bullish crossover confirmed");
+      } else if (latestMacd.histogram > 0) {
+        score = 63;
+        signals.push("MACD turning positive");
+      } else if (latestMacd.histogram < 0 && latestMacd.macd < 0) {
+        score = 31;
+        signals.push("MACD bearish momentum");
+      } else {
+        score = 46;
+        signals.push("MACD neutral");
+      }
+    }
+  } else if (mode === "sma") {
+    if (latestSma20 != null && latestSma50 != null) {
+      if (latestClose > latestSma20 && latestSma20 > latestSma50) {
+        score = 76;
+        signals.push("Price above SMA20 and SMA50");
+      } else if (latestClose > latestSma20) {
+        score = 61;
+        signals.push("Price above short-term SMA");
+      } else if (latestClose < latestSma50) {
+        score = 34;
+        signals.push("Price below SMA50");
+      } else {
+        score = 48;
+        signals.push("SMA trend mixed");
+      }
+    }
+  } else if (mode === "ema") {
+    if (latestEma12 != null && latestEma26 != null) {
+      if (latestEma12 > latestEma26 && latestClose > latestEma12) {
+        score = 75;
+        signals.push("EMA12 above EMA26 with price confirmation");
+      } else if (latestEma12 > latestEma26) {
+        score = 62;
+        signals.push("EMA bullish alignment");
+      } else if (latestEma12 < latestEma26) {
+        score = 35;
+        signals.push("EMA bearish alignment");
+      } else {
+        score = 49;
+        signals.push("EMA mixed");
+      }
+    }
+  } else if (mode === "bb") {
+    if (latestBb.upper != null && latestBb.lower != null && latestBb.middle != null) {
+      if (latestClose <= latestBb.lower * 1.01) {
+        score = 79;
+        signals.push("Price near lower Bollinger Band");
+      } else if (latestClose < latestBb.middle) {
+        score = 60;
+        signals.push("Price below mid-band");
+      } else if (latestClose >= latestBb.upper * 0.99) {
+        score = 30;
+        signals.push("Price near upper Bollinger Band");
+      } else {
+        score = 50;
+        signals.push("Bollinger Bands neutral");
+      }
+    }
+  }
+
+  const momentumBoost =
+    (latestStoch.k != null && latestStoch.d != null && latestStoch.k < 20 && latestStoch.k > latestStoch.d ? 6 : 0) +
+    (latestCci != null && latestCci < -100 ? 4 : 0) +
+    (latestWr != null && latestWr < -80 ? 4 : 0) +
+    (obvChange > 0 ? 3 : 0);
+
+  score = Math.max(5, Math.min(95, Math.round(score + momentumBoost)));
+  const direction = score >= 58 ? "bullish" : score <= 42 ? "bearish" : "neutral";
+  const overallSignal = score >= 70 ? "strong_buy" : score >= 58 ? "buy" : score <= 30 ? "strong_sell" : score <= 42 ? "sell" : "neutral";
+
+  if (!signals.length) signals.push("Indicator mode neutral");
+
+  return { score, direction, overallSignal, signals, currentRsi: latestRsi };
+}
+
 export function generateHorizonPrediction(
   symbol: string, currentPrice: number, volatility: number, score: number, horizonDays: number
 ) {
