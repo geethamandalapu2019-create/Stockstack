@@ -142,6 +142,101 @@ function buildPrediction(
   };
 }
 
+function buildSwingConfluencePrediction(
+  symbol: string,
+  horizon: Horizon,
+  currentPrice: number,
+  volatility: number,
+  closes: number[],
+  highs: number[],
+  lows: number[],
+  volumes: number[]
+) {
+  const ema12 = calcEMA(closes, 12);
+  const ema26 = calcEMA(closes, 26);
+  const sma50 = calcSMA(closes, 50);
+  const rsi = calcRSI(closes);
+  const signals = computeSignals(closes);
+  const latestClose = closes[closes.length - 1] ?? currentPrice;
+  const latestEma12 = ema12[ema12.length - 1];
+  const latestEma26 = ema26[ema26.length - 1];
+  const latestSma50 = sma50[sma50.length - 1];
+  const latestRsi = rsi[rsi.length - 1] ?? null;
+  const lastMacd = computeSignals(closes).macdSignal;
+  const range20High = Math.max(...highs.slice(-20));
+  const range20Low = Math.min(...lows.slice(-20));
+  const avgVol20 = volumes.length >= 20 ? volumes.slice(-20).reduce((a, b) => a + b, 0) / 20 : null;
+  const avgVol5 = volumes.length >= 5 ? volumes.slice(-5).reduce((a, b) => a + b, 0) / 5 : null;
+  const volRatio = avgVol20 && avgVol5 ? avgVol5 / avgVol20 : 1;
+  const priceNearEma20 = latestEma12 ? (latestClose - latestEma12) / latestEma12 : 0;
+  const isUptrend = latestEma12 != null && latestEma26 != null && latestSma50 != null && latestClose > latestEma12 && latestEma12 > latestEma26 && latestClose > latestSma50;
+  const pullbackOk = priceNearEma20 >= -0.03 && priceNearEma20 <= 0.04;
+  const rsiOk = latestRsi != null && latestRsi >= 40 && latestRsi <= 60;
+  const macdOk = lastMacd === "bullish";
+  const volumeOk = volRatio < 0.75;
+  const squeeze = range20High > 0 && range20Low > 0 && (range20High - range20Low) / range20High < 0.08;
+
+  let score = 50;
+  if (isUptrend) score += 18;
+  if (pullbackOk) score += 15;
+  if (rsiOk) score += 12;
+  if (macdOk) score += 10;
+  if (volumeOk) score += 10;
+  if (squeeze) score += 8;
+  if (latestClose < (latestSma50 ?? latestClose)) score -= 15;
+  if (latestRsi != null && latestRsi >= 70) score -= 12;
+  if (latestRsi != null && latestRsi < 30) score -= 8;
+  score = Math.max(5, Math.min(95, score));
+
+  const bias = ((score - 50) / 50) * 0.28 * Math.min(horizon.days / 30, 2.5);
+  const horizonVol = volatility * Math.sqrt(horizon.days / 252);
+  const targetPrice = +(currentPrice * (1 + bias)).toFixed(2);
+  const changeAmount = +(targetPrice - currentPrice).toFixed(2);
+  const direction = changeAmount > 0.25 ? "bullish" : changeAmount < -0.25 ? "bearish" : "neutral";
+  const confidence = Math.max(30, Math.min(92, Math.round(72 + (score - 50) * 0.6 - Math.min(horizon.days * 0.2, 18))));
+  const supportLevel = +(Math.min(...closes.slice(-60)) * 0.995).toFixed(2);
+  const resistanceLevel = +(Math.max(...closes.slice(-60)) * 1.005).toFixed(2);
+  const forecast = Array.from({ length: horizon.points }, (_, i) => {
+    const step = i + 1;
+    const forecastPrice = +(currentPrice * (1 + bias * (step / horizon.points))).toFixed(2);
+    const band = +(forecastPrice * (volatility * 0.5)).toFixed(2);
+    const d = new Date();
+    d.setDate(d.getDate() + Math.round(step * (horizon.days / horizon.points)));
+    return {
+      date: d.toISOString().split("T")[0],
+      predicted: forecastPrice,
+      low: +(forecastPrice - band).toFixed(2),
+      high: +(forecastPrice + band).toFixed(2),
+    };
+  });
+
+  const signalsOut = [
+    isUptrend ? "Uptrend: price above EMA20 & EMA50 with golden alignment" : "Uptrend not confirmed",
+    pullbackOk ? "Pullback to EMA20 — ideal swing entry zone" : "Price not in ideal pullback zone",
+    rsiOk ? `RSI ${latestRsi!.toFixed(0)} in ideal swing entry zone (40–60)` : "RSI not in ideal swing zone",
+    macdOk ? "MACD histogram bullish crossover — momentum resuming" : "MACD momentum not yet confirmed",
+    volumeOk ? "Volume drying up on pullback — sellers exhausting" : "Volume not yet dried up",
+    squeeze ? "Tight Bollinger squeeze in uptrend — breakout setup forming" : "No tight base squeeze yet",
+  ];
+
+  return {
+    horizon: horizon.key,
+    label: horizon.label,
+    targetPrice,
+    confidenceLow: +(targetPrice * 0.97).toFixed(2),
+    confidenceHigh: +(targetPrice * 1.03).toFixed(2),
+    direction,
+    confidenceScore: confidence,
+    upside: +(((targetPrice - currentPrice) / currentPrice) * 100).toFixed(1),
+    methodology: "Trend-Pullback Confluence: uptrend + pullback to EMA20 + RSI 40–60 + MACD turn + volume dry-up + tight base.",
+    supportLevel,
+    resistanceLevel,
+    forecast,
+    signals: signalsOut,
+    overallScore: score,
+  };
+}
+
 function buildMethodology(
   signals: ReturnType<typeof computeSignals>,
   horizon: Horizon,
@@ -201,6 +296,9 @@ router.get("/:symbol/predictions", (req, res) => {
   const predictions = HORIZONS.map(h =>
     buildPrediction(symbol, h, currentPrice, stock.volatility, signals, closes, sma20, sma50)
   );
+  const swingConfluence = HORIZONS.map(h =>
+    buildSwingConfluencePrediction(symbol, h, currentPrice, stock.volatility, closes, candles.map(c => c.high), candles.map(c => c.low), candles.map(c => c.volume))
+  );
 
   res.json({
     symbol,
@@ -208,6 +306,7 @@ router.get("/:symbol/predictions", (req, res) => {
     currentPrice,
     currentRsi: latestRsi,
     predictions,
+    swingConfluence,
   });
 });
 

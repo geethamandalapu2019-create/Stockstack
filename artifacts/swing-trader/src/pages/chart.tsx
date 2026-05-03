@@ -26,6 +26,22 @@ import {
 
 type Tab = "chart" | "technical" | "predictions" | "fundamentals";
 type Horizon = "1d" | "1w" | "2w" | "1mo" | "3mo" | "6mo" | "12mo";
+type PredictionItem = {
+  horizon: string;
+  label: string;
+  targetPrice: number;
+  confidenceLow: number;
+  confidenceHigh: number;
+  direction: string;
+  confidenceScore: number;
+  upside: number;
+  methodology: string;
+  supportLevel: number;
+  resistanceLevel: number;
+  forecast: Array<{ date: string; predicted: number; low: number; high: number }>;
+  signals?: string[];
+  overallScore?: number;
+};
 
 const HORIZONS: { key: Horizon; label: string }[] = [
   { key: "1d", label: "1D" },
@@ -71,6 +87,10 @@ function sigColor(sig: string) {
 
 function MiniChart({ children }: { children: React.ReactNode }) {
   return <div className="h-36">{children}</div>;
+}
+
+function formatPct(n: number) {
+  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 }
 
 export default function ChartPage() {
@@ -133,28 +153,27 @@ export default function ChartPage() {
   const adxData = useMemo(() => indicators?.adx?.map(p => ({ date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI })) ?? [], [indicators]);
 
   const selectedPrediction = useMemo(() => {
+    const response = (quote as unknown as { swingConfluence?: PredictionItem[] } | undefined)?.swingConfluence;
     const current = quote?.price ?? 0;
-    const pct = horizon === "1d" ? 0.8 : horizon === "1w" ? 2.4 : horizon === "2w" ? 4.8 : 7.2;
-    const targetPrice = current ? current * (1 + pct / 100) : 0;
+    const match = response?.find(p => p.horizon === horizon);
+    if (match) return match;
     return {
+      horizon,
       label: HORIZONS.find(h => h.key === horizon)?.label ?? "1M",
-      direction: pct >= 0 ? "bullish" : "bearish",
-      targetPrice,
-      upside: pct,
-      confidenceScore: 62,
-      confidenceLow: targetPrice * 0.97,
-      confidenceHigh: targetPrice * 1.03,
-      supportLevel: current * 0.97,
-      resistanceLevel: current * 1.05,
-      methodology: "Live forecast uses the current quote and selected horizon so predictions are visible on open.",
-      forecast: history?.candles?.slice(-30).map((c, i) => ({
-        date: c.date,
-        high: c.high,
-        low: c.low,
-        predicted: c.close * (1 + (i / 100)),
-      })) ?? [],
+      direction: "neutral",
+      targetPrice: current,
+      confidenceLow: current,
+      confidenceHigh: current,
+      confidenceScore: 50,
+      upside: 0,
+      methodology: "Swing Confluence model unavailable.",
+      supportLevel: current,
+      resistanceLevel: current,
+      forecast: [],
+      signals: [],
+      overallScore: 50,
     };
-  }, [quote?.price, horizon, history]);
+  }, [quote, horizon]);
 
   const tt = {
     contentStyle: { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px", fontSize: "12px" },
@@ -255,8 +274,15 @@ export default function ChartPage() {
                       <span className={cn("flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full", selectedPrediction.direction === "bullish" ? "bg-bullish/15 text-bullish" : selectedPrediction.direction === "bearish" ? "bg-bearish/15 text-bearish" : "bg-secondary text-muted-foreground")}>{selectedPrediction.direction === "bullish" ? <TrendingUp className="w-3 h-3" /> : selectedPrediction.direction === "bearish" ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}{selectedPrediction.direction.toUpperCase()}</span>
                     </div>
                     <div className="text-3xl font-bold font-data">{fmt(selectedPrediction.targetPrice, currency)}</div>
-                    <div className={cn("text-sm font-data font-semibold", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{selectedPrediction.upside >= 0 ? "+" : ""}{selectedPrediction.upside.toFixed(1)}% expected upside</div>
+                    <div className={cn("text-sm font-data font-semibold", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(selectedPrediction.upside)} expected upside</div>
                     <div className="text-xs text-muted-foreground">Range: {fmt(selectedPrediction.confidenceLow, currency)} — {fmt(selectedPrediction.confidenceHigh, currency)}</div>
+                    {!!selectedPrediction.signals?.length && (
+                      <div className="space-y-1">
+                        {selectedPrediction.signals.slice(0, 4).map(s => (
+                          <div key={s} className="text-[11px] text-muted-foreground">{s}</div>
+                        ))}
+                      </div>
+                    )}
                     <div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-muted-foreground">Confidence</span>
@@ -312,8 +338,8 @@ export default function ChartPage() {
                         <button key={h.key} onClick={() => setHorizon(h.key)} className={cn("w-full flex justify-between items-center px-3 py-2.5 text-xs transition-colors hover:bg-secondary/30", horizon === h.key && "bg-secondary/50")}>
                           <span className="text-muted-foreground font-data">{h.label}</span>
                           <div className="flex items-center gap-3">
-                            <span className="font-data">{fmt((selectedPrediction.targetPrice || 0) * (h.key === horizon ? 1 : 1), currency)}</span>
-                            <span className={cn("font-semibold w-14 text-right", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{selectedPrediction.upside >= 0 ? "+" : ""}{selectedPrediction.upside.toFixed(1)}%</span>
+                            <span className="font-data">{fmt(h.key === horizon ? selectedPrediction.targetPrice : selectedPrediction.targetPrice, currency)}</span>
+                            <span className={cn("font-semibold w-14 text-right", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(selectedPrediction.upside)}</span>
                           </div>
                         </button>
                       ))}
