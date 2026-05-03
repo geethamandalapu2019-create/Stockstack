@@ -604,13 +604,23 @@ export function getStockBySymbol(symbol: string): StockMeta | undefined {
   return STOCKS.find(s => s.symbol === symbol.toUpperCase());
 }
 
+// Live price cache — written by priceCache.ts after Yahoo Finance fetch
+const livePriceMap = new Map<string, { price: number; change: number; changePercent: number }>();
+
+export function setLivePrice(
+  symbol: string,
+  data: { price: number; change: number; changePercent: number },
+): void {
+  livePriceMap.set(symbol.toUpperCase(), data);
+}
+
 export function getCurrentPrice(symbol: string): { price: number; change: number; changePercent: number } {
+  const key = symbol.toUpperCase();
+  const live = livePriceMap.get(key);
+  if (live) return live;
   const stock = getStockBySymbol(symbol);
   const price = stock?.basePrice ?? 100;
-  const prevPrice = price;
-  const change = +(price - prevPrice).toFixed(2);
-  const changePercent = prevPrice === 0 ? 0 : +((change / prevPrice) * 100).toFixed(2);
-  return { price, change, changePercent };
+  return { price, change: 0, changePercent: 0 };
 }
 
 // ── Extended Indicators ────────────────────────────────────────────────────
