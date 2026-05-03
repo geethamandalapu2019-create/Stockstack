@@ -21,6 +21,7 @@ const HORIZONS = [
 function buildStockPrediction(symbol: string) {
   const stock = getStockBySymbol(symbol);
   if (!stock) return null;
+  if (stock.currency !== "INR" || stock.exchange !== "NSE") return null;
 
   // Use 6 months of data for comprehensive analysis
   const candles = generateCandles(symbol, 180, "1d");
@@ -67,18 +68,25 @@ router.get("/top", (req, res) => {
   let pool = STOCKS;
   if (q) {
     pool = STOCKS.filter(s =>
-      s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+      s.currency === "INR" &&
+      s.exchange === "NSE" &&
+      (s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))
     );
+  } else {
+    pool = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE");
   }
 
   const results = pool
     .map(s => buildStockPrediction(s.symbol))
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
-  if (!q) {
-    // Sort by score (most bullish first) when no search
-    results.sort((a, b) => b.overallScore - a.overallScore);
-  }
+  results.sort((a, b) => {
+    const scoreDiff = b.overallScore - a.overallScore;
+    if (scoreDiff !== 0) return scoreDiff;
+    const aTarget = Object.values(a.predictions).reduce((max, p) => Math.max(max, p.targetPrice), 0);
+    const bTarget = Object.values(b.predictions).reduce((max, p) => Math.max(max, p.targetPrice), 0);
+    return bTarget - aTarget;
+  });
 
   res.json({
     query: q || null,
