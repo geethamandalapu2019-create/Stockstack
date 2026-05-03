@@ -252,7 +252,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "BPCL", name: "Bharat Petroleum Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 320, volatility: 0.021, currency: "INR", marketCapB: 1390,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 8.4, pb: 1.8, eps: 38.1, roe: 22.4, debtToEquity: 1.2, dividendYield: 5.6,
     revenueB: 4982, netProfitB: 165, promoterHolding: 52.9, fiiHolding: 11.2, diiHolding: 22.4, bookValue: 177,
     description: "India's second-largest oil refining and marketing company. Network of 20,000+ fuel stations.",
