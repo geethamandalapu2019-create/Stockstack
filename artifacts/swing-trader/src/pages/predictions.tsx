@@ -9,6 +9,8 @@ import {
   RefreshCw, BarChart2, CalendarDays, Trophy, Plus, Check, ChevronDown
 } from "lucide-react";
 
+const BASE_PATH = import.meta.env.BASE_URL;
+
 const HORIZONS = [
   { key: "1d", label: "1 Day" },
   { key: "1w", label: "1 Week" },
@@ -205,7 +207,7 @@ export default function PredictionsPage() {
     params.set("cap", capTab);
     params.set("indicator", indicatorTab);
     params.set("limit", String(limit));
-    const res = await fetch(`/api/predictions/top?${params.toString()}`);
+    const res = await fetch(`${BASE_PATH}api/predictions/top?${params.toString()}`);
     const json = await res.json();
     setData(json);
   };

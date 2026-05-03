@@ -40,16 +40,35 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     targetPrice: number; changeAmount: number; direction: string; confidence: number; label: string;
   }> = {};
 
-  const scoreBoost =
-    indicator === "app" ? 0 :
-    indicator === "rsi" ? 1.02 :
-    indicator === "macd" ? 1.03 :
-    indicator === "sma" ? 1.01 :
-    indicator === "ema" ? 1.015 :
-    1.025;
+  const last = closes[closes.length - 1] ?? currentPrice;
+  const prev5 = closes[Math.max(0, closes.length - 6)] ?? last;
+  const prev20 = closes[Math.max(0, closes.length - 21)] ?? last;
+  const prev60 = closes[Math.max(0, closes.length - 61)] ?? last;
+  const momentum5 = prev5 ? (last - prev5) / prev5 : 0;
+  const momentum20 = prev20 ? (last - prev20) / prev20 : 0;
+  const momentum60 = prev60 ? (last - prev60) / prev60 : 0;
+
+  const modeScore = (() => {
+    if (indicator === "app") {
+      return Math.max(5, Math.min(95, Math.round(analysis.score)));
+    }
+    if (indicator === "rsi") {
+      return Math.max(5, Math.min(95, Math.round((analysis.currentRsi != null ? 100 - analysis.currentRsi : 50) * 0.9 + momentum5 * 1200)));
+    }
+    if (indicator === "macd") {
+      return Math.max(5, Math.min(95, Math.round(50 + momentum20 * 1400 + momentum60 * 500)));
+    }
+    if (indicator === "sma") {
+      return Math.max(5, Math.min(95, Math.round(50 + momentum20 * 900 + momentum60 * 700)));
+    }
+    if (indicator === "ema") {
+      return Math.max(5, Math.min(95, Math.round(50 + momentum5 * 1000 + momentum20 * 700)));
+    }
+    return Math.max(5, Math.min(95, Math.round((analysis.overallSignal === "strong_buy" ? 72 : analysis.overallSignal === "strong_sell" ? 28 : analysis.score))));
+  })();
 
   for (const h of HORIZONS) {
-    const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, Math.round(analysis.score * scoreBoost), h.days);
+    const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, modeScore, h.days);
     predictions[h.key] = { ...pred, label: h.label };
   }
 
