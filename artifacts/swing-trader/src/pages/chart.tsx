@@ -464,13 +464,13 @@ export default function ChartPage() {
                       {showSMA50 && <Line type="monotone" dataKey="sma50" stroke="hsl(var(--chart-4))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
                       {showEMA12 && <Line type="monotone" dataKey="ema12" stroke="hsl(var(--accent))" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
                       {showEMA26 && <Line type="monotone" dataKey="ema26" stroke="#f59e0b" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
-                      {showRSI && <Line yAxisId="right" type="monotone" dataKey="rsi" data={rsiData} stroke="#8b5cf6" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showMACD && <Line yAxisId="right" type="monotone" dataKey="macd" data={macdData} stroke="#06b6d4" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showStoch && <Line yAxisId="right" type="monotone" dataKey="k" data={stochData} stroke="#10b981" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showCCI && <Line yAxisId="right" type="monotone" dataKey="value" data={cciData} stroke="#f97316" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showWilliamsR && <Line yAxisId="right" type="monotone" dataKey="value" data={wrData} stroke="#ef4444" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showADX && <Line yAxisId="right" type="monotone" dataKey="adx" data={adxData} stroke="#22c55e" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
-                      {showVolume && <Bar yAxisId="right" dataKey="volume" barSize={3} fill="#6366f1" isAnimationActive={false} />}
+                      {showRSI && <Line type="monotone" dataKey="rsi" data={rsiData} stroke="#8b5cf6" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showMACD && <Line type="monotone" dataKey="macd" data={macdData} stroke="#06b6d4" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showStoch && <Line type="monotone" dataKey="k" data={stochData} stroke="#10b981" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showCCI && <Line type="monotone" dataKey="value" data={cciData} stroke="#f97316" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showWilliamsR && <Line type="monotone" dataKey="value" data={wrData} stroke="#ef4444" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showADX && <Line type="monotone" dataKey="adx" data={adxData} stroke="#22c55e" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showVolume && <Bar dataKey="volume" barSize={3} fill="#6366f1" isAnimationActive={false} />}
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
