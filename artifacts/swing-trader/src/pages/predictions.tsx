@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { useAddToWatchlist } from "@workspace/api-client-react";
+import { useAddToWatchlist, useGetStockQuote, getGetStockQuoteQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -67,6 +67,13 @@ function formatPrice(price: number, currency: string) {
 function formatUpside(targetPrice: number, currentPrice: number) {
   const pct = ((targetPrice - currentPrice) / currentPrice) * 100;
   return { pct, formatted: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%` };
+}
+
+function LivePrice({ symbol, fallback }: { symbol: string; fallback: number }) {
+  const { data } = useGetStockQuote(symbol, {
+    query: { enabled: !!symbol, queryKey: getGetStockQuoteQueryKey(symbol) }
+  });
+  return <>{formatPrice(data?.price ?? fallback, data?.currency ?? "INR")}</>;
 }
 
 function SignalPill({ signal }: { signal: string }) {
@@ -526,7 +533,7 @@ export default function PredictionsPage() {
                           <div className="text-right">
                             <SignalPill signal={stock.overallSignal} />
                             <div className="text-[10px] text-muted-foreground mt-1">{stock.symbol} Current Price</div>
-                            <div className="font-data font-bold mt-0.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
+                            <div className="font-data font-bold mt-0.5"><LivePrice symbol={stock.symbol} fallback={stock.currentPrice} /></div>
                           </div>
                         </div>
                         <ScoreBar score={stock.overallScore} />
@@ -601,7 +608,7 @@ export default function PredictionsPage() {
                             </div>
                           </div>
                           <div className="text-right space-y-1">
-                            <div className="font-data font-bold text-sm">{formatPrice(stock.currentPrice, stock.currency)}</div>
+                            <div className="font-data font-bold text-sm"><LivePrice symbol={stock.symbol} fallback={stock.currentPrice} /></div>
                             <SignalPill signal={stock.overallSignal} />
                           </div>
                         </div>
@@ -634,7 +641,7 @@ export default function PredictionsPage() {
                           <div className="min-w-0">
                             <div className="font-bold text-sm">{stock.symbol}</div>
                             <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
-                            <div className="font-data text-xs mt-0.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
+                            <div className="font-data text-xs mt-0.5"><LivePrice symbol={stock.symbol} fallback={stock.currentPrice} /></div>
                             <div className="text-[10px] text-muted-foreground italic mt-0.5 truncate">
                               {stock.indicatorLabel}: {stock.signals[0] ?? "Indicator mode neutral"}
                             </div>
@@ -643,7 +650,7 @@ export default function PredictionsPage() {
                         <div className="space-y-1.5">
                           <ScoreBar score={stock.overallScore} />
                           <SignalPill signal={stock.overallSignal} />
-                          <div className="text-[10px] text-muted-foreground font-data">{stock.symbol} current: {formatPrice(stock.currentPrice, stock.currency)}</div>
+                          <div className="text-[10px] text-muted-foreground font-data">{stock.symbol} current: <LivePrice symbol={stock.symbol} fallback={stock.currentPrice} /></div>
                           <div className="text-[10px] text-muted-foreground font-data">{stock.indicatorLabel}</div>
                         </div>
                         {HORIZONS.map(h => {
