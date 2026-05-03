@@ -140,7 +140,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "MARUTI", name: "Maruti Suzuki India Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 12400, volatility: 0.018, currency: "INR", marketCapB: 3860,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 25.8, pb: 4.2, eps: 481.0, roe: 17.3, debtToEquity: 0.0, dividendYield: 1.0,
     revenueB: 1340, netProfitB: 149, promoterHolding: 58.2, fiiHolding: 18.3, diiHolding: 13.2, bookValue: 2950,
     description: "India's leading passenger vehicle manufacturer. Dominant market share in entry-level and mid-size segments.",
@@ -148,7 +148,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TITAN", name: "Titan Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 3450, volatility: 0.019, currency: "INR", marketCapB: 3060,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 89.4, pb: 17.2, eps: 38.6, roe: 20.1, debtToEquity: 0.04, dividendYield: 0.3,
     revenueB: 424, netProfitB: 34, promoterHolding: 52.9, fiiHolding: 17.6, diiHolding: 17.9, bookValue: 200,
     description: "Leading jewelry, watches, and eyewear company in India. Tanishq is India's most trusted jewelry brand.",
@@ -164,7 +164,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TATAMOTORS", name: "Tata Motors Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 940, volatility: 0.028, currency: "INR", marketCapB: 3450,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 10.6, pb: 3.8, eps: 88.7, roe: 41.5, debtToEquity: 1.4, dividendYield: 0.4,
     revenueB: 4384, netProfitB: 310, promoterHolding: 46.4, fiiHolding: 17.8, diiHolding: 19.5, bookValue: 247,
     description: "India's leading automobile manufacturer. Owns Jaguar Land Rover and growing EV business.",
@@ -180,7 +180,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ADANIENT", name: "Adani Enterprises Ltd.", sector: "Conglomerate", exchange: "NSE",
     basePrice: 2650, volatility: 0.038, currency: "INR", marketCapB: 3020,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 62.5, pb: 8.2, eps: 42.4, roe: 13.5, debtToEquity: 1.1, dividendYield: 0.1,
     revenueB: 988, netProfitB: 40, promoterHolding: 72.6, fiiHolding: 10.2, diiHolding: 7.4, bookValue: 323,
     description: "Flagship company of the Adani Group. Incubates new businesses across airports, green energy, defense.",
@@ -212,7 +212,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NESTLEIND", name: "Nestle India Ltd.", sector: "FMCG", exchange: "NSE",
     basePrice: 2280, volatility: 0.012, currency: "INR", marketCapB: 2200,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 72.1, pb: 68.5, eps: 31.6, roe: 97.2, debtToEquity: 0.0, dividendYield: 1.5,
     revenueB: 191, netProfitB: 31, promoterHolding: 62.8, fiiHolding: 13.6, diiHolding: 10.8, bookValue: 33,
     description: "India's leading FMCG company. Maggi noodles, KitKat, Munch and Nescafe are iconic brands.",
@@ -220,7 +220,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ASIANPAINT", name: "Asian Paints Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 2620, volatility: 0.016, currency: "INR", marketCapB: 2510,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 52.8, pb: 14.2, eps: 49.6, roe: 27.2, debtToEquity: 0.03, dividendYield: 1.0,
     revenueB: 348, netProfitB: 47, promoterHolding: 52.6, fiiHolding: 17.8, diiHolding: 17.4, bookValue: 184,
     description: "India's #1 paint company. Operations in 15 countries. Known for quality paints and innovative home decor.",
@@ -228,7 +228,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd.", sector: "Cement", exchange: "NSE",
     basePrice: 11200, volatility: 0.017, currency: "INR", marketCapB: 3240,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 38.2, pb: 5.8, eps: 293.2, roe: 15.8, debtToEquity: 0.28, dividendYield: 0.4,
     revenueB: 726, netProfitB: 81, promoterHolding: 59.7, fiiHolding: 14.6, diiHolding: 16.4, bookValue: 1931,
     description: "India's largest cement company. Significant capacity expansion underway to meet infrastructure demand.",
@@ -236,7 +236,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 268, volatility: 0.019, currency: "INR", marketCapB: 3380,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 7.8, pb: 1.1, eps: 34.4, roe: 14.6, debtToEquity: 0.36, dividendYield: 4.5,
     revenueB: 1700, netProfitB: 434, promoterHolding: 58.9, fiiHolding: 8.4, diiHolding: 26.4, bookValue: 244,
     description: "India's largest oil & gas exploration company. Government-owned with massive reserves onshore and offshore.",
@@ -244,7 +244,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NTPC", name: "NTPC Ltd.", sector: "Power", exchange: "NSE",
     basePrice: 370, volatility: 0.016, currency: "INR", marketCapB: 3590,
-    capCategory: "mid",
+    capCategory: "large",
     pe: 18.5, pb: 2.4, eps: 20.0, roe: 13.1, debtToEquity: 1.5, dividendYield: 2.4,
     revenueB: 1812, netProfitB: 202, promoterHolding: 51.1, fiiHolding: 14.6, diiHolding: 25.2, bookValue: 154,
     description: "India's largest power utility. Expanding into renewable energy with a target of 60GW by 2032.",
@@ -264,6 +264,30 @@ export const STOCKS: StockMeta[] = [
     pe: 412.0, pb: 10.8, eps: 0.6, roe: 2.8, debtToEquity: 0.0, dividendYield: 0.0,
     revenueB: 127, netProfitB: 4, promoterHolding: 0, fiiHolding: 58.2, diiHolding: 16.8, bookValue: 23,
     description: "India's leading food delivery platform. Expanding into quick commerce (Blinkit) and dining.",
+  },
+  {
+    symbol: "IRCTC", name: "Indian Railway Catering and Tourism Corp Ltd.", sector: "Services", exchange: "NSE",
+    basePrice: 935, volatility: 0.02, currency: "INR", marketCapB: 750,
+    capCategory: "small",
+    pe: 58.4, pb: 16.2, eps: 16.0, roe: 27.1, debtToEquity: 0.0, dividendYield: 1.2,
+    revenueB: 4.2, netProfitB: 1.3, promoterHolding: 62.4, fiiHolding: 9.2, diiHolding: 15.8, bookValue: 58,
+    description: "Indian Railways ticketing, catering, and tourism services company.",
+  },
+  {
+    symbol: "HUDCO", name: "Housing and Urban Development Corp Ltd.", sector: "Financials", exchange: "NSE",
+    basePrice: 285, volatility: 0.021, currency: "INR", marketCapB: 520,
+    capCategory: "small",
+    pe: 16.8, pb: 2.3, eps: 16.9, roe: 13.7, debtToEquity: 6.4, dividendYield: 1.9,
+    revenueB: 2.9, netProfitB: 0.6, promoterHolding: 89.8, fiiHolding: 2.1, diiHolding: 3.4, bookValue: 124,
+    description: "Government-owned housing finance and infrastructure lender.",
+  },
+  {
+    symbol: "NHPC", name: "NHPC Ltd.", sector: "Power", exchange: "NSE",
+    basePrice: 112, volatility: 0.019, currency: "INR", marketCapB: 410,
+    capCategory: "small",
+    pe: 18.2, pb: 1.6, eps: 6.2, roe: 8.9, debtToEquity: 0.9, dividendYield: 2.8,
+    revenueB: 1.8, netProfitB: 0.3, promoterHolding: 67.4, fiiHolding: 4.8, diiHolding: 11.2, bookValue: 70,
+    description: "Hydropower generation company focused on renewable energy.",
   },
 
   // ── US stocks ─────────────────────────────────────────────────────────────
