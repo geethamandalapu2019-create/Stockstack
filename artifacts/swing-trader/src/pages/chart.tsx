@@ -180,25 +180,25 @@ export default function ChartPage() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-3 max-w-7xl mx-auto overflow-hidden min-h-0">
+    <div className="h-full flex flex-col gap-3 max-w-7xl mx-auto overflow-hidden min-h-0 pb-24 md:pb-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 shrink-0">
         <div>
           {isQuoteLoading ? (
             <div className="space-y-2"><Skeleton className="h-8 w-40" /><Skeleton className="h-4 w-60" /></div>
           ) : quote ? (
             <>
               <div className="flex flex-wrap items-baseline gap-2 md:gap-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-lg">{currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
-                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{quote.symbol}</h1>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">{quote.symbol}</h1>
                 </div>
-                <span className="text-xl md:text-2xl font-data">{formatPrice(quote.price, currency)}</span>
-                <span className={cn("font-data text-base md:text-lg", quote.changePercent > 0 ? "text-bullish" : "text-bearish")}>
+                <span className="text-lg sm:text-xl md:text-2xl font-data">{formatPrice(quote.price, currency)}</span>
+                <span className={cn("font-data text-sm sm:text-base md:text-lg", quote.changePercent > 0 ? "text-bullish" : "text-bearish")}>
                   {quote.changePercent > 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%
                 </span>
               </div>
-              <p className="text-muted-foreground text-xs sm:text-sm flex flex-wrap gap-2 md:gap-4 mt-1">
+              <p className="text-muted-foreground text-[11px] sm:text-sm flex flex-wrap gap-2 md:gap-4 mt-1">
                 <span>{quote.name}</span>
                 <span className="text-border hidden sm:inline">|</span>
                 <span className="hidden sm:inline">Exchange: {quote.exchange}</span>
@@ -225,11 +225,11 @@ export default function ChartPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden lg:max-h-[calc(100dvh-11rem)]">
         {/* Main Chart Area */}
-        <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[400px] pb-20 lg:pb-0">
+        <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[280px] pb-24 lg:pb-0">
           {/* Price Chart */}
-          <Card className="flex-1 bg-card min-h-[300px] md:min-h-[360px] flex flex-col">
+            <Card className="flex-1 bg-card min-h-[240px] md:min-h-[360px] flex flex-col">
             <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-sm font-medium">Price Action</CardTitle>
@@ -242,7 +242,7 @@ export default function ChartPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 relative min-h-[260px]">
+            <CardContent className="p-0 flex-1 relative min-h-[220px]">
               {(isHistoryLoading || isIndicatorsLoading) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
                   <Activity className="w-8 h-8 animate-spin text-primary" />
@@ -282,7 +282,7 @@ export default function ChartPage() {
 
           {/* RSI Panel */}
           {showRSI && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">RSI (14)</CardTitle>
                 <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowRSI(false)}>
@@ -307,7 +307,7 @@ export default function ChartPage() {
 
           {/* MACD Panel */}
           {showMACD && (
-            <Card className="bg-card h-36 flex flex-col shrink-0">
+            <Card className="bg-card h-32 sm:h-36 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">MACD (12,26,9)</CardTitle>
                 <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowMACD(false)}>
@@ -339,7 +339,7 @@ export default function ChartPage() {
 
           {/* Stochastic Panel */}
           {showStoch && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-xs text-muted-foreground font-data">Stochastic (14,3)</CardTitle>
@@ -371,7 +371,7 @@ export default function ChartPage() {
 
           {/* CCI Panel */}
           {showCCI && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">CCI (20) — Commodity Channel Index</CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowCCI(false)}>Hide</Button>
@@ -395,7 +395,7 @@ export default function ChartPage() {
 
           {/* Williams %R Panel */}
           {showWilliamsR && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">Williams %R (14)</CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowWilliamsR(false)}>Hide</Button>
@@ -418,7 +418,7 @@ export default function ChartPage() {
 
           {/* Volume + OBV Panel */}
           {showVolume && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-xs text-muted-foreground font-data">Volume / OBV</CardTitle>
@@ -457,7 +457,7 @@ export default function ChartPage() {
 
           {/* ADX Panel */}
           {showADX && (
-            <Card className="bg-card h-32 flex flex-col shrink-0">
+            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-xs text-muted-foreground font-data">ADX (14)</CardTitle>
