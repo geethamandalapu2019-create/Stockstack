@@ -60,7 +60,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ICICIBANK", name: "ICICI Bank Ltd.", sector: "Banking", exchange: "NSE",
-    basePrice: 1230, volatility: 0.016, currency: "INR", marketCapB: 8650,
+    basePrice: 1263, volatility: 0.016, currency: "INR", marketCapB: 8650,
     capCategory: "large",
     pe: 18.3, pb: 3.0, eps: 67.2, roe: 17.4, debtToEquity: 7.1, dividendYield: 0.9,
     revenueB: 1680, netProfitB: 440, promoterHolding: 0, fiiHolding: 46.8, diiHolding: 32.5, bookValue: 410,
@@ -164,7 +164,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TATAMOTORS", name: "Tata Motors Ltd.", sector: "Automobile", exchange: "NSE",
-    basePrice: 940, volatility: 0.028, currency: "INR", marketCapB: 3450,
+    basePrice: 1025, volatility: 0.028, currency: "INR", marketCapB: 3450,
     capCategory: "large",
     pe: 10.6, pb: 3.8, eps: 88.7, roe: 41.5, debtToEquity: 1.4, dividendYield: 0.4,
     revenueB: 4384, netProfitB: 310, promoterHolding: 46.4, fiiHolding: 17.8, diiHolding: 19.5, bookValue: 247,
