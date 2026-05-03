@@ -30,11 +30,11 @@ function formatUpside(targetPrice: number, currentPrice: number) {
 
 function SignalPill({ signal }: { signal: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    strong_buy:  { label: "STRONG BUY",  cls: "bg-bullish/20 text-bullish border-bullish/30"     },
-    buy:         { label: "BUY",          cls: "bg-bullish/10 text-bullish border-bullish/20"     },
-    neutral:     { label: "NEUTRAL",      cls: "bg-secondary text-muted-foreground border-border" },
-    sell:        { label: "SELL",         cls: "bg-bearish/10 text-bearish border-bearish/20"     },
-    strong_sell: { label: "STRONG SELL", cls: "bg-bearish/20 text-bearish border-bearish/30"     },
+    strong_buy: { label: "STRONG BUY", cls: "bg-bullish/20 text-bullish border-bullish/30" },
+    buy: { label: "BUY", cls: "bg-bullish/10 text-bullish border-bullish/20" },
+    neutral: { label: "NEUTRAL", cls: "bg-secondary text-muted-foreground border-border" },
+    sell: { label: "SELL", cls: "bg-bearish/10 text-bearish border-bearish/20" },
+    strong_sell: { label: "STRONG SELL", cls: "bg-bearish/20 text-bearish border-bearish/30" },
   };
   const { label, cls } = map[signal] ?? map.neutral;
   return (
@@ -103,10 +103,7 @@ function WatchlistButton({ symbol, name, added, pending, onAdd }: {
         pending && "opacity-60 cursor-wait"
       )}
     >
-      {pending
-        ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-        : <Plus className="w-3.5 h-3.5" />
-      }
+      {pending ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
       {pending ? "Adding…" : "Watchlist"}
     </button>
   );
@@ -114,10 +111,11 @@ function WatchlistButton({ symbol, name, added, pending, onAdd }: {
 
 export default function PredictionsPage() {
   const [, navigate] = useLocation();
-  const [searchQuery, setSearchQuery]   = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [committedQuery, setCommittedQuery] = useState("");
-  const [sortBy, setSortBy]             = useState<"score" | "rsi" | "upside">("score");
-  const [capTab, setCapTab]             = useState<"all" | "large" | "mid" | "small">("all");
+  const [sortBy, setSortBy] = useState<"score" | "rsi" | "upside">("score");
+  const [capTab, setCapTab] = useState<"all" | "large" | "mid" | "small">("all");
+  const [sectorTab, setSectorTab] = useState<string>("all");
 
   const isSearching = committedQuery.length >= 1;
 
@@ -150,26 +148,33 @@ export default function PredictionsPage() {
   };
 
   const handleSearch = () => setCommittedQuery(searchQuery.trim());
-  const handleClear  = () => { setSearchQuery(""); setCommittedQuery(""); };
+  const handleClear = () => { setSearchQuery(""); setCommittedQuery(""); };
 
   const stocks = data?.stocks ?? [];
+  const sectors = useMemo(() => {
+    const unique = Array.from(new Set(stocks.map(stock => stock.sector))).sort();
+    return ["all", ...unique];
+  }, [stocks]);
+
+  const filteredStocks = useMemo(() => {
+    if (sectorTab === "all") return stocks;
+    return stocks.filter(stock => stock.sector === sectorTab);
+  }, [stocks, sectorTab]);
 
   const rankedStocks = useMemo(() => {
-    const list = [...stocks];
+    const list = [...filteredStocks];
     if (sortBy === "rsi") {
       return list.sort((a, b) => (a.currentRsi ?? 50) - (b.currentRsi ?? 50));
     }
     if (sortBy === "upside") {
       return list.sort((a, b) => {
         const bestUpside = (s: typeof a) =>
-          Math.max(...Object.values(s.predictions).map(p =>
-            ((p.targetPrice - s.currentPrice) / s.currentPrice) * 100
-          ));
+          Math.max(...Object.values(s.predictions).map(p => ((p.targetPrice - s.currentPrice) / s.currentPrice) * 100));
         return bestUpside(b) - bestUpside(a);
       });
     }
     return list.sort((a, b) => b.overallScore - a.overallScore);
-  }, [stocks, sortBy]);
+  }, [filteredStocks, sortBy]);
 
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const topThree = rankedStocks.slice(0, 3);
@@ -177,8 +182,6 @@ export default function PredictionsPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 pb-6">
-
-      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -200,7 +203,6 @@ export default function PredictionsPage() {
         </button>
       </div>
 
-      {/* ── Search ── */}
       <Card className="bg-card border-border">
         <CardContent className="p-3">
           <div className="flex gap-2">
@@ -232,41 +234,36 @@ export default function PredictionsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Filters (only when not searching) ── */}
       {!isSearching && (
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-muted-foreground">Sort:</span>
             {[
-              { key: "score",  label: "Composite Score" },
-              { key: "rsi",    label: "RSI Oversold"    },
-              { key: "upside", label: "Highest Upside"  },
+              { key: "score", label: "Composite Score" },
+              { key: "rsi", label: "RSI Oversold" },
+              { key: "upside", label: "Highest Upside" },
             ].map(opt => (
-              <button key={opt.key} onClick={() => setSortBy(opt.key as typeof sortBy)}
-                className={cn("px-2.5 py-1 rounded border transition-colors",
-                  sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >{opt.label}</button>
+              <button key={opt.key} onClick={() => setSortBy(opt.key as typeof sortBy)} className={cn("px-2.5 py-1 rounded border transition-colors", sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{opt.label}</button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs ml-auto sm:ml-0">
+            {sectors.map(sector => (
+              <button key={sector} onClick={() => setSectorTab(sector)} className={cn("px-2.5 py-1 rounded border transition-colors", sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{sector === "all" ? "All Sectors" : sector}</button>
             ))}
           </div>
           <div className="flex items-center gap-1.5 text-xs ml-auto sm:ml-0">
             {[
-              { key: "all",   label: "All" },
+              { key: "all", label: "All" },
               { key: "large", label: "Large Cap" },
-              { key: "mid",   label: "Mid Cap"   },
+              { key: "mid", label: "Mid Cap" },
               { key: "small", label: "Small Cap" },
             ].map(tab => (
-              <button key={tab.key} onClick={() => setCapTab(tab.key as typeof capTab)}
-                className={cn("px-2.5 py-1 rounded border transition-colors",
-                  capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >{tab.label}</button>
+              <button key={tab.key} onClick={() => setCapTab(tab.key as typeof capTab)} className={cn("px-2.5 py-1 rounded border transition-colors", capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{tab.label}</button>
             ))}
           </div>
         </div>
       )}
 
-      {/* ── Loading ── */}
       {isLoading && (
         <div className="grid gap-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -276,7 +273,6 @@ export default function PredictionsPage() {
         </div>
       )}
 
-      {/* ── Empty ── */}
       {!isLoading && stocks.length === 0 && (
         <Card className="bg-card">
           <CardContent className="p-12 text-center">
@@ -286,10 +282,8 @@ export default function PredictionsPage() {
         </Card>
       )}
 
-      {/* ── Results ── */}
       {!isLoading && stocks.length > 0 && (
         <>
-          {/* Top 3 medal cards */}
           {!isSearching && topThree.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -307,14 +301,8 @@ export default function PredictionsPage() {
                   const upside2w = pred2w ? formatUpside(pred2w.targetPrice, stock.currentPrice) : null;
                   const upside1mo = pred1mo ? formatUpside(pred1mo.targetPrice, stock.currentPrice) : null;
                   const isTopPick = idx === 0;
-
                   return (
-                    <Card key={stock.symbol}
-                      className={cn(
-                        "relative overflow-hidden transition-all hover:border-primary/50 cursor-pointer",
-                        isTopPick ? "border-amber-400/40 ring-1 ring-amber-400/20" : "border-border"
-                      )}
-                    >
+                    <Card key={stock.symbol} className={cn("relative overflow-hidden transition-all hover:border-primary/50 cursor-pointer", isTopPick ? "border-amber-400/40 ring-1 ring-amber-400/20" : "border-border")}>
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between">
                           <div>
@@ -327,9 +315,7 @@ export default function PredictionsPage() {
                             <div className="font-data font-bold mt-1.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
                           </div>
                         </div>
-
                         <ScoreBar score={stock.overallScore} />
-
                         <div className="grid grid-cols-2 gap-2">
                           {([
                             { pred: pred1d, upside: upside1d, label: "1-DAY" },
@@ -350,32 +336,19 @@ export default function PredictionsPage() {
                             </div>
                           ))}
                         </div>
-
                         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                           <span className="font-data">RSI {stock.currentRsi?.toFixed(1) ?? "—"}</span>
                           <span className="truncate max-w-[100px] text-right">{stock.sector}</span>
                         </div>
-
                         {stock.signals.length > 0 && (
-                          <p className="text-[10px] text-muted-foreground italic leading-relaxed border-t border-border pt-2">
-                            {stock.signals[0]}
-                          </p>
+                          <p className="text-[10px] text-muted-foreground italic leading-relaxed border-t border-border pt-2">{stock.signals[0]}</p>
                         )}
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => navigate(`/chart/${stock.symbol}`)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground"
-                          >
+                          <button onClick={() => navigate(`/chart/${stock.symbol}`)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground">
                             <BarChart2 className="w-3.5 h-3.5" />
                             Chart
                           </button>
-                          <WatchlistButton
-                            symbol={stock.symbol}
-                            name={stock.name}
-                            added={watchlistAdded.has(stock.symbol)}
-                            pending={watchlistPending.has(stock.symbol)}
-                            onAdd={handleAddToWatchlist}
-                          />
+                          <WatchlistButton symbol={stock.symbol} name={stock.name} added={watchlistAdded.has(stock.symbol)} pending={watchlistPending.has(stock.symbol)} onAdd={handleAddToWatchlist} />
                         </div>
                       </CardContent>
                     </Card>
@@ -385,34 +358,28 @@ export default function PredictionsPage() {
             </div>
           )}
 
-          {/* Remaining stocks table */}
           <div>
             {!isSearching && restStocks.length > 0 && (
               <h2 className="text-sm font-semibold mb-3 text-muted-foreground">All Ranked Stocks</h2>
             )}
-
-            {/* Table header — desktop */}
             <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(4,1fr)_auto] gap-3 items-center px-4 mb-1 text-[10px] font-data text-muted-foreground uppercase tracking-wide">
               <div>Stock</div>
               <div>Score / Signal</div>
               {HORIZONS.map(h => <div key={h.key} className="text-center">{h.key.toUpperCase()}</div>)}
               <div></div>
             </div>
-
             <div className="grid gap-2">
               {(isSearching ? rankedStocks : restStocks).map((stock, idx) => {
                 const flag = stock.currency === "INR" ? "🇮🇳" : "🇺🇸";
                 const rankNum = isSearching ? idx + 1 : idx + 4;
                 return (
-                  <Card key={stock.symbol}
-                    className="bg-card border border-border transition-all hover:border-primary/40"
-                  >
+                  <Card key={stock.symbol} className="bg-card border border-border transition-all hover:border-primary/40">
                     <CardContent className="p-3 md:p-4">
-                      {/* Mobile */}
                       <div className="md:hidden space-y-2.5">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-data text-muted-foreground w-5">#{rankNum}</span>
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border">{stock.sector}</span>
                             <span className="text-sm">{flag}</span>
                             <div>
                               <div className="font-bold text-sm">{stock.symbol}</div>
@@ -440,16 +407,12 @@ export default function PredictionsPage() {
                         {stock.signals.length > 0 && (
                           <p className="text-[10px] text-muted-foreground italic">{stock.signals[0]}</p>
                         )}
-                        <button
-                          onClick={() => navigate(`/chart/${stock.symbol}`)}
-                          className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground"
-                        >
+                        <button onClick={() => navigate(`/chart/${stock.symbol}`)} className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground">
                           <BarChart2 className="w-3.5 h-3.5" />
                           View Chart
                         </button>
                       </div>
 
-                      {/* Desktop */}
                       <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(4,1fr)_auto] gap-3 items-center">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-xs font-data text-muted-foreground w-5 shrink-0">#{rankNum}</span>
@@ -475,10 +438,7 @@ export default function PredictionsPage() {
                           if (!pred) return <div key={h.key} className="text-muted-foreground text-xs text-center">—</div>;
                           return <HorizonCell key={h.key} {...pred} changeAmount={pred.changeAmount ?? (pred.targetPrice - stock.currentPrice)} currency={stock.currency} />;
                         })}
-                        <button
-                          onClick={() => navigate(`/chart/${stock.symbol}`)}
-                          className="flex items-center gap-1.5 px-3 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground shrink-0"
-                        >
+                        <button onClick={() => navigate(`/chart/${stock.symbol}`)} className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground justify-self-end">
                           <BarChart2 className="w-3.5 h-3.5" />
                           Chart
                         </button>
@@ -489,10 +449,6 @@ export default function PredictionsPage() {
               })}
             </div>
           </div>
-
-          <p className="text-[11px] text-muted-foreground text-center pt-2 border-t border-border">
-            Predictions use RSI, MACD, Stochastic, CCI, Williams %R, Bollinger Bands &amp; OBV · Not financial advice
-          </p>
         </>
       )}
     </div>
