@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { SignalBadge } from "./dashboard";
-import { Activity, TrendingUp, TrendingDown, Minus, Building2, BarChart3 } from "lucide-react";
+import { Activity, TrendingUp, TrendingDown, Minus, Building2, BarChart3, X } from "lucide-react";
 
 type SidebarTab = "technical" | "predictions" | "fundamentals";
 type Horizon = "1d" | "1w" | "1mo" | "3mo" | "6mo" | "12mo";
@@ -227,7 +227,7 @@ export default function ChartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden">
         {/* Main Chart Area */}
-        <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[400px]">
+        <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[400px] pb-20 lg:pb-0">
           {/* Price Chart */}
           <Card className="flex-1 bg-card min-h-[300px] md:min-h-[360px] flex flex-col">
             <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
@@ -242,7 +242,7 @@ export default function ChartPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 relative">
+            <CardContent className="p-0 flex-1 relative min-h-[260px]">
               {(isHistoryLoading || isIndicatorsLoading) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
                   <Activity className="w-8 h-8 animate-spin text-primary" />
@@ -285,7 +285,9 @@ export default function ChartPage() {
             <Card className="bg-card h-32 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">RSI (14)</CardTitle>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowRSI(false)}>Hide</Button>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowRSI(false)}>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ResponsiveContainer width="100%" height="100%">
@@ -308,7 +310,9 @@ export default function ChartPage() {
             <Card className="bg-card h-36 flex flex-col shrink-0">
               <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">MACD (12,26,9)</CardTitle>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowMACD(false)}>Hide</Button>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowMACD(false)}>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ResponsiveContainer width="100%" height="100%">
@@ -344,7 +348,9 @@ export default function ChartPage() {
                     <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-orange-400" /> %D</span>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowStoch(false)}>Hide</Button>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowStoch(false)}>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ResponsiveContainer width="100%" height="100%">
