@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, X, TrendingUp, TrendingDown, Minus,
-  RefreshCw, BarChart2, CalendarDays, Trophy, Plus, Check
+  RefreshCw, BarChart2, CalendarDays, Trophy, Plus, Check, ChevronDown
 } from "lucide-react";
 
 const HORIZONS = [
@@ -145,6 +145,21 @@ function WatchlistButton({ symbol, name, added, pending, onAdd }: {
   );
 }
 
+function ModeDropdown({ value, onChange }: { value: IndicatorKey; onChange: (v: IndicatorKey) => void }) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value as IndicatorKey)}
+        className="appearance-none bg-background border border-border rounded-xl px-3 py-2 pr-9 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+      >
+        {INDICATORS.map(ind => <option key={ind.key} value={ind.key}>{ind.label}</option>)}
+      </select>
+      <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+    </div>
+  );
+}
+
 export default function PredictionsPage() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -246,30 +261,51 @@ export default function PredictionsPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 pb-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight">Daily Stock Picks</h1>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CalendarDays className="w-3.5 h-3.5" />
-            <span>{isSearching ? `Results for "${committedQuery}"` : `Top Indian NSE stocks · ${today}`}</span>
-          </div>
-        </div>
-        <button
+      <Card className="bg-card border-border">
+        <CardContent className="p-4 space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h1 className="text-2xl font-bold tracking-tight">Daily Stock Picks</h1>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>{isSearching ? `Results for "${committedQuery}"` : `Top Indian NSE stocks · ${today}`}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ModeDropdown value={indicatorTab} onChange={setIndicatorTab} />
+              <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded bg-secondary/50 border border-border hover:bg-secondary shrink-0"
-        >
-          <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
-          Refresh picks
-        </button>
-      </div>
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-xl bg-secondary/50 border border-border hover:bg-secondary shrink-0"
+              >
+                <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-secondary/30 p-3">
+              <div className="text-[11px] text-muted-foreground">Mode</div>
+              <div className="font-semibold">{INDICATORS.find(i => i.key === selectedIndicator)?.label}</div>
+            </div>
+            <div className="rounded-xl border border-border bg-secondary/30 p-3">
+              <div className="text-[11px] text-muted-foreground">Picks</div>
+              <div className="font-semibold">{stocks.length}</div>
+            </div>
+            <div className="rounded-xl border border-border bg-secondary/30 p-3">
+              <div className="text-[11px] text-muted-foreground">Cap Filter</div>
+              <div className="font-semibold capitalize">{capTab}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="bg-card border-border">
-        <CardContent className="p-3">
-          <div className="flex gap-2">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
@@ -281,7 +317,7 @@ export default function PredictionsPage() {
                 }}
                 type="text"
                 placeholder="Search stock (e.g. RELIANCE, TCS, WIPRO…)"
-                className="w-full bg-secondary border-none rounded-md pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
+                className="w-full bg-secondary border-none rounded-xl pl-9 pr-8 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
               />
               {searchQuery && (
                 <button onClick={handleClear} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -289,11 +325,11 @@ export default function PredictionsPage() {
                 </button>
               )}
             </div>
-            <button onClick={handleSearch} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shrink-0">
+            <button onClick={handleSearch} className="px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shrink-0">
               Search
             </button>
             {isSearching && (
-              <button onClick={handleClear} className="px-3 py-2 bg-secondary text-muted-foreground rounded-md text-sm hover:bg-secondary/70 shrink-0">
+              <button onClick={handleClear} className="px-3 py-3 bg-secondary text-muted-foreground rounded-xl text-sm hover:bg-secondary/70 shrink-0">
                 Clear
               </button>
             )}
@@ -302,86 +338,57 @@ export default function PredictionsPage() {
       </Card>
 
       <Card className="bg-card border-border">
-        <CardContent className="p-3 space-y-3">
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs text-muted-foreground">Prediction mode:</span>
-            {INDICATORS.map(ind => (
-              <button
-                key={ind.key}
-                onClick={() => setIndicatorTab(ind.key)}
-                className={cn(
-                  "px-2.5 py-1 rounded border text-xs transition-colors",
-                  indicatorTab === ind.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >
-                {ind.label}
-              </button>
-            ))}
-          </div>
-          <p className="text-[11px] text-muted-foreground">
-            {selectedIndicator === "app"
-              ? "App Suggested uses the strongest overall score from the app’s technical model."
-              : `Showing predictions optimized for ${INDICATORS.find(i => i.key === selectedIndicator)?.label}.`}
-          </p>
-        </CardContent>
-      </Card>
-
-      {!isSearching && (
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-muted-foreground">Sort:</span>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-xs text-muted-foreground self-center">Sort</span>
             {[
-              { key: "score", label: "Composite Score" },
-              { key: "rsi", label: "RSI Oversold" },
-              { key: "upside", label: "Highest Upside" },
+              { key: "score", label: "Score" },
+              { key: "rsi", label: "RSI" },
+              { key: "upside", label: "Upside" },
             ].map(opt => (
               <button
                 key={opt.key}
                 onClick={() => setSortBy(opt.key as typeof sortBy)}
-                className={cn(
-                  "px-2.5 py-1 rounded border transition-colors",
-                  sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
+                className={cn("px-3 py-2 rounded-xl border text-xs transition-colors", sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
               >
                 {opt.label}
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-1.5 text-xs ml-auto sm:ml-0">
-            {sectors.map(sector => (
-              <button
-                key={sector}
-                onClick={() => setSectorTab(sector)}
-                className={cn(
-                  "px-2.5 py-1 rounded border transition-colors",
-                  sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >
-                {sector === "all" ? "All Sectors" : sector}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs ml-auto sm:ml-0">
+          <div className="flex flex-wrap gap-2">
             {[
-              { key: "all", label: "All" },
-              { key: "large", label: "Large Cap" },
-              { key: "mid", label: "Mid Cap" },
-              { key: "small", label: "Small Cap" },
+              { key: "all", label: "All Caps" },
+              { key: "large", label: "Large" },
+              { key: "mid", label: "Mid" },
+              { key: "small", label: "Small" },
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setCapTab(tab.key as typeof capTab)}
-                className={cn(
-                  "px-2.5 py-1 rounded border transition-colors",
-                  capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
+                className={cn("px-3 py-2 rounded-xl border text-xs transition-colors", capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-        </div>
-      )}
+          <div className="flex flex-wrap gap-2">
+            {sectors.slice(0, 8).map(sector => (
+              <button
+                key={sector}
+                onClick={() => setSectorTab(sector)}
+                className={cn("px-3 py-2 rounded-xl border text-xs transition-colors", sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
+              >
+                {sector === "all" ? "All sectors" : sector}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {selectedIndicator === "app"
+              ? "App Suggested blends the strongest overall setup."
+              : `Optimized for ${INDICATORS.find(i => i.key === selectedIndicator)?.label}.`}
+          </p>
+        </CardContent>
+      </Card>
 
       {isLoading && (
         <div className="grid gap-3">
