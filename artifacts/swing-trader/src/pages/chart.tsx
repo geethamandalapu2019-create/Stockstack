@@ -225,28 +225,29 @@ export default function ChartPage() {
         </div>
       </div>
 
+      <div className="bg-secondary/50 rounded-md p-1 flex shrink-0 overflow-x-auto">
+        {([
+          { key: "chart", label: "Chart" },
+          { key: "technical", label: "Technicals" },
+          { key: "predictions", label: "Predictions" },
+          { key: "fundamentals", label: "Fundamentals" },
+        ] as const).map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setSidebarTab(tab.key)}
+            className={cn(
+              "px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap",
+              sidebarTab === tab.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden lg:max-h-[calc(100dvh-11rem)]">
         {/* Main Chart Area */}
         <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[280px] pb-24 lg:pb-0">
-          <div className="bg-secondary/50 rounded-md p-1 flex shrink-0 overflow-x-auto">
-            {([
-              { key: "chart", label: "Chart" },
-              { key: "technical", label: "Technicals" },
-              { key: "predictions", label: "Predictions" },
-              { key: "fundamentals", label: "Fundamentals" },
-            ] as const).map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setSidebarTab(tab.key)}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap",
-                  sidebarTab === tab.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
           {sidebarTab === "chart" && (
             <Card className="flex-1 bg-card min-h-[240px] md:min-h-[360px] flex flex-col">
               <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
@@ -310,25 +311,6 @@ export default function ChartPage() {
 
         {/* ── Sidebar ─────────────────────────────────────────────── */}
         <div className="flex flex-col gap-3 overflow-y-auto pb-4 max-h-[calc(100dvh-11rem)] lg:max-h-none">
-          {/* Tab Switcher */}
-          <div className="bg-secondary/50 rounded-md p-1 flex shrink-0">
-            {([
-              { key: "technical", icon: BarChart3, label: "Technical" },
-              { key: "predictions", icon: TrendingUp, label: "Predict" },
-              { key: "fundamentals", icon: Building2, label: "Fundas" },
-            ] as const).map(tab => (
-              <button key={tab.key} onClick={() => setSidebarTab(tab.key)}
-                className={cn(
-                  "flex-1 flex flex-col items-center gap-0.5 py-1.5 text-xs rounded-sm transition-colors",
-                  sidebarTab === tab.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <tab.icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           {/* ── Technical Tab ── */}
           {sidebarTab === "technical" && (
             <>
