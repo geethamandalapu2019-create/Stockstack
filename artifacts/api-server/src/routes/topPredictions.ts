@@ -65,7 +65,8 @@ function getCapCategoryFilter(cap: string | undefined) {
   return cap as "large" | "mid" | "small";
 }
 
-function getBucket(stock: { marketCapB: number }): "large" | "mid" | "small" {
+function getBucket(stock: { marketCapB: number; capCategory?: "large" | "mid" | "small" }): "large" | "mid" | "small" {
+  if (stock.capCategory) return stock.capCategory;
   if (stock.marketCapB >= 5000) return "large";
   if (stock.marketCapB >= 1000) return "mid";
   return "small";
