@@ -289,6 +289,30 @@ export const STOCKS: StockMeta[] = [
     revenueB: 1.8, netProfitB: 0.3, promoterHolding: 67.4, fiiHolding: 4.8, diiHolding: 11.2, bookValue: 70,
     description: "Hydropower generation company focused on renewable energy.",
   },
+  {
+    symbol: "SJVN", name: "SJVN Ltd.", sector: "Power", exchange: "NSE",
+    basePrice: 138, volatility: 0.022, currency: "INR", marketCapB: 115,
+    capCategory: "small",
+    pe: 21.4, pb: 2.1, eps: 6.5, roe: 9.8, debtToEquity: 0.8, dividendYield: 2.4,
+    revenueB: 1.2, netProfitB: 0.25, promoterHolding: 81.9, fiiHolding: 2.2, diiHolding: 4.1, bookValue: 65,
+    description: "Hydropower and renewable energy company with projects across India and abroad.",
+  },
+  {
+    symbol: "RVNL", name: "Rail Vikas Nigam Ltd.", sector: "Infrastructure", exchange: "NSE",
+    basePrice: 382, volatility: 0.029, currency: "INR", marketCapB: 185,
+    capCategory: "small",
+    pe: 24.8, pb: 3.4, eps: 15.4, roe: 14.2, debtToEquity: 0.3, dividendYield: 0.9,
+    revenueB: 2.1, netProfitB: 0.44, promoterHolding: 72.8, fiiHolding: 5.8, diiHolding: 9.3, bookValue: 113,
+    description: "Indian railway infrastructure execution company.",
+  },
+  {
+    symbol: "ISEC", name: "ICICI Securities Ltd.", sector: "Financials", exchange: "NSE",
+    basePrice: 684, volatility: 0.026, currency: "INR", marketCapB: 92,
+    capCategory: "small",
+    pe: 18.9, pb: 4.7, eps: 36.2, roe: 24.1, debtToEquity: 0.1, dividendYield: 2.1,
+    revenueB: 0.9, netProfitB: 0.18, promoterHolding: 79.2, fiiHolding: 4.3, diiHolding: 6.5, bookValue: 145,
+    description: "Retail brokerage and financial services company.",
+  },
 
   // ── US stocks ─────────────────────────────────────────────────────────────
   { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", exchange: "NASDAQ", basePrice: 189.5, volatility: 0.018, currency: "USD", marketCapB: 2950, pe: 28.5, pb: 47.2, eps: 6.6, roe: 171.0, dividendYield: 0.5, description: "World's most valuable consumer electronics company. iPhone, Mac, services ecosystem." },
