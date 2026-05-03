@@ -51,10 +51,26 @@ router.get("/summary", async (req, res) => {
     let topLoser = null;
 
     if (watchlist.length > 0) {
-      const withPrices = watchlist.map(entry => getWatchlistItemWithSignal(entry));
-      withPrices.sort((a, b) => b.changePercent - a.changePercent);
-      topGainer = withPrices[0];
-      topLoser = withPrices[withPrices.length - 1];
+      const withPrices = watchlist
+        .map(entry => getWatchlistItemWithSignal(entry))
+        .filter(item => item.currency === "INR");
+      if (withPrices.length > 0) {
+        withPrices.sort((a, b) => b.changePercent - a.changePercent);
+        topGainer = withPrices[0];
+        topLoser = withPrices[withPrices.length - 1];
+      }
+    }
+    // Fallback movers from NSE stocks when watchlist is empty or has no INR stocks
+    if (!topGainer || !topLoser) {
+      const nseMovers = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE")
+        .slice(0, 20)
+        .map(s => {
+          const { price, change, changePercent } = getCurrentPrice(s.symbol);
+          return { symbol: s.symbol, name: s.name, price, change, changePercent, currency: "INR" as const, overallSignal: "neutral" as const };
+        });
+      nseMovers.sort((a, b) => b.changePercent - a.changePercent);
+      if (!topGainer) topGainer = nseMovers[0] ?? null;
+      if (!topLoser) topLoser = nseMovers[nseMovers.length - 1] ?? null;
     }
 
     const signals = watchlist.map(entry => {
@@ -93,9 +109,10 @@ router.get("/signals", async (req, res) => {
   try {
     const watchlist = await db.select().from(watchlistTable);
 
+    const nseStocks = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE");
     const stocks = watchlist.length > 0
       ? watchlist.map(e => ({ symbol: e.symbol, name: e.name }))
-      : STOCKS.slice(0, 8).map(s => ({ symbol: s.symbol, name: s.name }));
+      : nseStocks.slice(0, 8).map(s => ({ symbol: s.symbol, name: s.name }));
 
     const signals = stocks.map(({ symbol, name }) => {
       const stock = getStockBySymbol(symbol);

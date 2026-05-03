@@ -41,7 +41,7 @@ export default function Trades() {
                 "text-2xl font-bold font-data",
                 (stats?.totalPnl || 0) > 0 ? "text-bullish" : (stats?.totalPnl || 0) < 0 ? "text-bearish" : ""
               )}>
-                ${stats?.totalPnl?.toFixed(2) || '0.00'}
+                ₹{stats?.totalPnl?.toFixed(2) || '0.00'}
               </div>
             )}
           </CardContent>
@@ -51,7 +51,7 @@ export default function Trades() {
             <div className="text-sm text-muted-foreground mb-2">Win Rate</div>
             {isStatsLoading ? <Skeleton className="h-8 w-16" /> : (
               <div className="text-2xl font-bold font-data text-foreground">
-                {stats?.winRate ? (stats.winRate * 100).toFixed(1) : '0'}%
+                {stats?.winRate != null ? Number(stats.winRate).toFixed(1) : '0'}%
               </div>
             )}
           </CardContent>
@@ -144,14 +144,14 @@ export default function Trades() {
                       {trade.side.toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-data">${trade.entryPrice.toFixed(2)}</td>
+                  <td className="px-4 py-3 font-data">₹{trade.entryPrice.toFixed(2)}</td>
                   <td className="px-4 py-3 font-data text-muted-foreground">
-                    {trade.exitPrice ? `$${trade.exitPrice.toFixed(2)}` : '-'}
+                    {trade.exitPrice ? `₹${trade.exitPrice.toFixed(2)}` : '-'}
                   </td>
                   <td className="px-4 py-3 text-right font-data">
                     {trade.pnl !== null ? (
                       <span className={trade.pnl > 0 ? "text-bullish" : trade.pnl < 0 ? "text-bearish" : ""}>
-                        {trade.pnl > 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+                        {trade.pnl > 0 ? "+" : ""}₹{trade.pnl.toFixed(2)}
                         <span className="text-xs ml-1 opacity-70">
                           ({trade.pnlPercent?.toFixed(2)}%)
                         </span>

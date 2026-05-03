@@ -92,7 +92,7 @@ export default function NewTrade() {
                     <FormItem>
                       <FormLabel>Symbol</FormLabel>
                       <FormControl>
-                        <Input placeholder="AAPL" {...field} className="uppercase font-data" />
+                        <Input placeholder="RELIANCE" {...field} className="uppercase font-data" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -105,7 +105,7 @@ export default function NewTrade() {
                     <FormItem>
                       <FormLabel>Company Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Apple Inc." {...field} />
+                        <Input placeholder="Reliance Industries Ltd." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

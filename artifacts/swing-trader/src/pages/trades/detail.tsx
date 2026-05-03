@@ -159,7 +159,7 @@ export default function TradeDetail() {
                     "text-3xl font-bold font-data",
                     isWin ? "text-bullish" : isLoss ? "text-bearish" : ""
                   )}>
-                    {isWin ? "+" : ""}${trade.pnl.toFixed(2)}
+                    {isWin ? "+" : ""}₹{trade.pnl.toFixed(2)}
                   </div>
                   <div className={cn(
                     "text-sm font-data",
@@ -175,12 +175,12 @@ export default function TradeDetail() {
             <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-border border-b border-border">
               <div className="p-4">
                 <div className="text-xs text-muted-foreground mb-1">Entry Price</div>
-                <div className="font-data text-lg font-medium">${trade.entryPrice.toFixed(2)}</div>
+                <div className="font-data text-lg font-medium">₹{trade.entryPrice.toFixed(2)}</div>
                 <div className="text-xs text-muted-foreground mt-1">{new Date(trade.entryDate).toLocaleDateString()}</div>
               </div>
               <div className="p-4">
                 <div className="text-xs text-muted-foreground mb-1">Exit Price</div>
-                <div className="font-data text-lg font-medium">{trade.exitPrice ? `$${trade.exitPrice.toFixed(2)}` : '-'}</div>
+                <div className="font-data text-lg font-medium">{trade.exitPrice ? `₹${trade.exitPrice.toFixed(2)}` : '-'}</div>
                 <div className="text-xs text-muted-foreground mt-1">{trade.exitDate ? new Date(trade.exitDate).toLocaleDateString() : 'Active'}</div>
               </div>
               <div className="p-4">
@@ -189,15 +189,15 @@ export default function TradeDetail() {
               </div>
               <div className="p-4">
                 <div className="text-xs text-muted-foreground mb-1">Value</div>
-                <div className="font-data text-lg font-medium">${(trade.entryPrice * trade.shares).toFixed(2)}</div>
+                <div className="font-data text-lg font-medium">₹{(trade.entryPrice * trade.shares).toFixed(2)}</div>
               </div>
               <div className="p-4">
                 <div className="text-xs text-muted-foreground mb-1">Stop Loss</div>
-                <div className="font-data text-lg font-medium">{trade.stopLoss ? `$${trade.stopLoss.toFixed(2)}` : '-'}</div>
+                <div className="font-data text-lg font-medium">{trade.stopLoss ? `₹${trade.stopLoss.toFixed(2)}` : '-'}</div>
               </div>
               <div className="p-4">
                 <div className="text-xs text-muted-foreground mb-1">Take Profit</div>
-                <div className="font-data text-lg font-medium">{trade.takeProfit ? `$${trade.takeProfit.toFixed(2)}` : '-'}</div>
+                <div className="font-data text-lg font-medium">{trade.takeProfit ? `₹${trade.takeProfit.toFixed(2)}` : '-'}</div>
               </div>
               <div className="p-4 col-span-2">
                 <div className="text-xs text-muted-foreground mb-1">Strategy</div>

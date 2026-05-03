@@ -27,7 +27,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           title="Open Trades PnL"
-          value={isLoadingSummary ? null : `$${summary?.totalPnl?.toFixed(2) || "0.00"}`}
+          value={isLoadingSummary ? null : `₹${summary?.totalPnl?.toFixed(2) || "0.00"}`}
           subtitle={summary?.totalPnl && summary.totalPnl > 0 ? "Profitable" : "In loss"}
           trend={summary?.totalPnl && summary.totalPnl > 0 ? "up" : "down"}
           icon={Activity}
