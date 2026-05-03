@@ -76,9 +76,7 @@ router.get("/:symbol/quote", (req, res) => {
   }
 
   const { price, change, changePercent } = getCurrentPrice(symbol);
-  const candles = generateCandles(symbol, 365, "1d");
-  const latest = candles[candles.length - 1];
-  const week52 = candles.slice(-252);
+  const v = stock.volatility ?? 0.015;
 
   res.json({
     symbol: stock.symbol,
@@ -86,13 +84,13 @@ router.get("/:symbol/quote", (req, res) => {
     price,
     change,
     changePercent,
-    open: latest.open,
-    high: latest.high,
-    low: latest.low,
-    volume: latest.volume,
+    open: +(price * (1 - v * 0.3)).toFixed(2),
+    high: +(price * (1 + v * 0.6)).toFixed(2),
+    low: +(price * (1 - v * 0.6)).toFixed(2),
+    volume: stock.marketCapB ? Math.floor((stock.marketCapB * 1e9) / price / 250) : 1000000,
     marketCap: stock.marketCapB ?? null,
-    week52High: +Math.max(...week52.map(c => c.high)).toFixed(2),
-    week52Low: +Math.min(...week52.map(c => c.low)).toFixed(2),
+    week52High: +(price * (1 + v * 8)).toFixed(2),
+    week52Low: +(price * (1 - v * 8)).toFixed(2),
     pe: stock.pe ?? null,
     sector: stock.sector,
     exchange: stock.exchange,

@@ -28,7 +28,7 @@ export const STOCKS: StockMeta[] = [
   // ── Indian NSE stocks ──────────────────────────────────────────────────────
   {
     symbol: "RELIANCE", name: "Reliance Industries Ltd.", sector: "Energy", exchange: "NSE",
-    basePrice: 2950, volatility: 0.015, currency: "INR", marketCapB: 19900,
+    basePrice: 1285, volatility: 0.015, currency: "INR", marketCapB: 19900,
     capCategory: "large",
     pe: 28.4, pb: 2.1, eps: 103.8, roe: 8.7, debtToEquity: 0.35, dividendYield: 0.35,
     revenueB: 9017, netProfitB: 670, promoterHolding: 50.3, fiiHolding: 21.5, diiHolding: 17.2, bookValue: 1410,
@@ -36,7 +36,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TCS", name: "Tata Consultancy Services Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 3980, volatility: 0.013, currency: "INR", marketCapB: 14500,
+    basePrice: 3310, volatility: 0.013, currency: "INR", marketCapB: 14500,
     capCategory: "large",
     pe: 31.2, pb: 14.8, eps: 127.6, roe: 47.6, debtToEquity: 0.02, dividendYield: 1.5,
     revenueB: 2380, netProfitB: 466, promoterHolding: 72.3, fiiHolding: 12.8, diiHolding: 9.4, bookValue: 268,
@@ -44,7 +44,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "HDFCBANK", name: "HDFC Bank Ltd.", sector: "Banking", exchange: "NSE",
-    basePrice: 1620, volatility: 0.014, currency: "INR", marketCapB: 12300,
+    basePrice: 1785, volatility: 0.014, currency: "INR", marketCapB: 12300,
     capCategory: "large",
     pe: 19.8, pb: 2.8, eps: 81.8, roe: 15.2, debtToEquity: 6.8, dividendYield: 1.2,
     revenueB: 2174, netProfitB: 645, promoterHolding: 0, fiiHolding: 52.1, diiHolding: 26.4, bookValue: 579,
@@ -52,7 +52,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "INFY", name: "Infosys Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 1780, volatility: 0.016, currency: "INR", marketCapB: 7400,
+    basePrice: 1480, volatility: 0.016, currency: "INR", marketCapB: 7400,
     capCategory: "large",
     pe: 25.4, pb: 7.6, eps: 70.1, roe: 30.7, debtToEquity: 0.04, dividendYield: 2.4,
     revenueB: 1535, netProfitB: 262, promoterHolding: 14.7, fiiHolding: 33.5, diiHolding: 34.2, bookValue: 234,
@@ -68,7 +68,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "HINDUNILVR", name: "Hindustan Unilever Ltd.", sector: "FMCG", exchange: "NSE",
-    basePrice: 2350, volatility: 0.011, currency: "INR", marketCapB: 5520,
+    basePrice: 2175, volatility: 0.011, currency: "INR", marketCapB: 5520,
     capCategory: "large",
     pe: 53.4, pb: 11.8, eps: 44.0, roe: 21.7, debtToEquity: 0.0, dividendYield: 1.8,
     revenueB: 601, netProfitB: 102, promoterHolding: 61.9, fiiHolding: 14.6, diiHolding: 14.5, bookValue: 199,
@@ -76,7 +76,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "SBIN", name: "State Bank of India", sector: "Banking", exchange: "NSE",
-    basePrice: 820, volatility: 0.018, currency: "INR", marketCapB: 7320,
+    basePrice: 775, volatility: 0.018, currency: "INR", marketCapB: 7320,
     capCategory: "large",
     pe: 10.4, pb: 1.7, eps: 78.8, roe: 16.6, debtToEquity: 12.1, dividendYield: 1.8,
     revenueB: 3940, netProfitB: 618, promoterHolding: 57.5, fiiHolding: 10.4, diiHolding: 24.6, bookValue: 482,
@@ -84,7 +84,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "BAJFINANCE", name: "Bajaj Finance Ltd.", sector: "NBFC", exchange: "NSE",
-    basePrice: 7200, volatility: 0.024, currency: "INR", marketCapB: 4350,
+    basePrice: 8820, volatility: 0.024, currency: "INR", marketCapB: 4350,
     capCategory: "large",
     pe: 33.8, pb: 6.2, eps: 213.0, roe: 19.2, debtToEquity: 3.9, dividendYield: 0.3,
     revenueB: 528, netProfitB: 144, promoterHolding: 54.8, fiiHolding: 22.5, diiHolding: 12.4, bookValue: 1160,
@@ -92,7 +92,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "BHARTIARTL", name: "Bharti Airtel Ltd.", sector: "Telecom", exchange: "NSE",
-    basePrice: 1680, volatility: 0.019, currency: "INR", marketCapB: 9820,
+    basePrice: 1835, volatility: 0.019, currency: "INR", marketCapB: 9820,
     capCategory: "large",
     pe: 78.2, pb: 8.5, eps: 21.5, roe: 11.3, debtToEquity: 2.4, dividendYield: 0.4,
     revenueB: 1514, netProfitB: 88, promoterHolding: 55.9, fiiHolding: 18.1, diiHolding: 14.6, bookValue: 197,
@@ -100,7 +100,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Ltd.", sector: "Banking", exchange: "NSE",
-    basePrice: 1870, volatility: 0.015, currency: "INR", marketCapB: 3720,
+    basePrice: 2125, volatility: 0.015, currency: "INR", marketCapB: 3720,
     capCategory: "large",
     pe: 22.1, pb: 3.5, eps: 84.6, roe: 16.3, debtToEquity: 6.2, dividendYield: 0.1,
     revenueB: 862, netProfitB: 160, promoterHolding: 25.9, fiiHolding: 38.4, diiHolding: 23.5, bookValue: 534,
@@ -108,7 +108,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "WIPRO", name: "Wipro Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 480, volatility: 0.017, currency: "INR", marketCapB: 2500,
+    basePrice: 265, volatility: 0.017, currency: "INR", marketCapB: 2500,
     capCategory: "mid",
     pe: 22.6, pb: 3.7, eps: 21.2, roe: 16.8, debtToEquity: 0.12, dividendYield: 0.2,
     revenueB: 897, netProfitB: 111, promoterHolding: 72.9, fiiHolding: 10.4, diiHolding: 9.1, bookValue: 130,
@@ -116,7 +116,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "LT", name: "Larsen & Toubro Ltd.", sector: "Infrastructure", exchange: "NSE",
-    basePrice: 3620, volatility: 0.016, currency: "INR", marketCapB: 5080,
+    basePrice: 3485, volatility: 0.016, currency: "INR", marketCapB: 5080,
     capCategory: "large",
     pe: 34.5, pb: 4.8, eps: 104.8, roe: 14.6, debtToEquity: 1.8, dividendYield: 0.8,
     revenueB: 2209, netProfitB: 148, promoterHolding: 0, fiiHolding: 22.4, diiHolding: 36.8, bookValue: 754,
@@ -124,7 +124,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "AXISBANK", name: "Axis Bank Ltd.", sector: "Banking", exchange: "NSE",
-    basePrice: 1120, volatility: 0.018, currency: "INR", marketCapB: 3460,
+    basePrice: 1162, volatility: 0.018, currency: "INR", marketCapB: 3460,
     capCategory: "large",
     pe: 15.8, pb: 2.1, eps: 70.9, roe: 14.2, debtToEquity: 7.5, dividendYield: 0.1,
     revenueB: 1120, netProfitB: 220, promoterHolding: 8.2, fiiHolding: 50.2, diiHolding: 26.4, bookValue: 534,
@@ -132,7 +132,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "HCLTECH", name: "HCL Technologies Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 1680, volatility: 0.014, currency: "INR", marketCapB: 4560,
+    basePrice: 1635, volatility: 0.014, currency: "INR", marketCapB: 4560,
     capCategory: "large",
     pe: 27.2, pb: 7.1, eps: 61.8, roe: 26.2, debtToEquity: 0.06, dividendYield: 3.1,
     revenueB: 1094, netProfitB: 165, promoterHolding: 60.8, fiiHolding: 18.2, diiHolding: 13.5, bookValue: 236,
@@ -140,7 +140,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "MARUTI", name: "Maruti Suzuki India Ltd.", sector: "Automobile", exchange: "NSE",
-    basePrice: 12400, volatility: 0.018, currency: "INR", marketCapB: 3860,
+    basePrice: 11980, volatility: 0.018, currency: "INR", marketCapB: 3860,
     capCategory: "large",
     pe: 25.8, pb: 4.2, eps: 481.0, roe: 17.3, debtToEquity: 0.0, dividendYield: 1.0,
     revenueB: 1340, netProfitB: 149, promoterHolding: 58.2, fiiHolding: 18.3, diiHolding: 13.2, bookValue: 2950,
@@ -148,7 +148,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TITAN", name: "Titan Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 3450, volatility: 0.019, currency: "INR", marketCapB: 3060,
+    basePrice: 3215, volatility: 0.019, currency: "INR", marketCapB: 3060,
     capCategory: "large",
     pe: 89.4, pb: 17.2, eps: 38.6, roe: 20.1, debtToEquity: 0.04, dividendYield: 0.3,
     revenueB: 424, netProfitB: 34, promoterHolding: 52.9, fiiHolding: 17.6, diiHolding: 17.9, bookValue: 200,
@@ -156,7 +156,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries", sector: "Pharmaceuticals", exchange: "NSE",
-    basePrice: 1820, volatility: 0.016, currency: "INR", marketCapB: 4360,
+    basePrice: 1685, volatility: 0.016, currency: "INR", marketCapB: 4360,
     capCategory: "large",
     pe: 38.4, pb: 5.4, eps: 47.4, roe: 14.8, debtToEquity: 0.03, dividendYield: 0.6,
     revenueB: 486, netProfitB: 99, promoterHolding: 54.5, fiiHolding: 19.2, diiHolding: 16.4, bookValue: 338,
@@ -172,7 +172,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TATASTEEL", name: "Tata Steel Ltd.", sector: "Metals", exchange: "NSE",
-    basePrice: 162, volatility: 0.026, currency: "INR", marketCapB: 2020,
+    basePrice: 148, volatility: 0.026, currency: "INR", marketCapB: 2020,
     capCategory: "mid",
     pe: 15.4, pb: 1.6, eps: 10.5, roe: 10.8, debtToEquity: 1.9, dividendYield: 1.2,
     revenueB: 2297, netProfitB: 131, promoterHolding: 33.8, fiiHolding: 18.4, diiHolding: 26.4, bookValue: 101,
@@ -180,7 +180,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ADANIENT", name: "Adani Enterprises Ltd.", sector: "Conglomerate", exchange: "NSE",
-    basePrice: 2650, volatility: 0.038, currency: "INR", marketCapB: 3020,
+    basePrice: 2385, volatility: 0.038, currency: "INR", marketCapB: 3020,
     capCategory: "large",
     pe: 62.5, pb: 8.2, eps: 42.4, roe: 13.5, debtToEquity: 1.1, dividendYield: 0.1,
     revenueB: 988, netProfitB: 40, promoterHolding: 72.6, fiiHolding: 10.2, diiHolding: 7.4, bookValue: 323,
@@ -188,7 +188,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ITC", name: "ITC Ltd.", sector: "FMCG", exchange: "NSE",
-    basePrice: 468, volatility: 0.014, currency: "INR", marketCapB: 5830,
+    basePrice: 428, volatility: 0.014, currency: "INR", marketCapB: 5830,
     capCategory: "large",
     pe: 27.6, pb: 7.5, eps: 16.9, roe: 27.8, debtToEquity: 0.0, dividendYield: 3.3,
     revenueB: 753, netProfitB: 199, promoterHolding: 0, fiiHolding: 41.7, diiHolding: 37.6, bookValue: 62,
@@ -196,7 +196,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TECHM", name: "Tech Mahindra Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 1520, volatility: 0.022, currency: "INR", marketCapB: 1860,
+    basePrice: 1585, volatility: 0.022, currency: "INR", marketCapB: 1860,
     capCategory: "mid",
     pe: 28.4, pb: 3.9, eps: 53.5, roe: 14.1, debtToEquity: 0.07, dividendYield: 1.6,
     revenueB: 538, netProfitB: 59, promoterHolding: 35.2, fiiHolding: 25.8, diiHolding: 18.4, bookValue: 390,
@@ -204,7 +204,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "JSWSTEEL", name: "JSW Steel Ltd.", sector: "Metals", exchange: "NSE",
-    basePrice: 940, volatility: 0.024, currency: "INR", marketCapB: 2290,
+    basePrice: 915, volatility: 0.024, currency: "INR", marketCapB: 2290,
     capCategory: "mid",
     pe: 20.4, pb: 2.8, eps: 46.1, roe: 14.5, debtToEquity: 1.3, dividendYield: 0.6,
     revenueB: 1730, netProfitB: 96, promoterHolding: 44.8, fiiHolding: 26.2, diiHolding: 16.8, bookValue: 335,
@@ -212,7 +212,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "NESTLEIND", name: "Nestle India Ltd.", sector: "FMCG", exchange: "NSE",
-    basePrice: 2280, volatility: 0.012, currency: "INR", marketCapB: 2200,
+    basePrice: 2185, volatility: 0.012, currency: "INR", marketCapB: 2200,
     capCategory: "large",
     pe: 72.1, pb: 68.5, eps: 31.6, roe: 97.2, debtToEquity: 0.0, dividendYield: 1.5,
     revenueB: 191, netProfitB: 31, promoterHolding: 62.8, fiiHolding: 13.6, diiHolding: 10.8, bookValue: 33,
@@ -220,7 +220,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ASIANPAINT", name: "Asian Paints Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 2620, volatility: 0.016, currency: "INR", marketCapB: 2510,
+    basePrice: 2215, volatility: 0.016, currency: "INR", marketCapB: 2510,
     capCategory: "large",
     pe: 52.8, pb: 14.2, eps: 49.6, roe: 27.2, debtToEquity: 0.03, dividendYield: 1.0,
     revenueB: 348, netProfitB: 47, promoterHolding: 52.6, fiiHolding: 17.8, diiHolding: 17.4, bookValue: 184,
@@ -228,7 +228,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd.", sector: "Cement", exchange: "NSE",
-    basePrice: 11200, volatility: 0.017, currency: "INR", marketCapB: 3240,
+    basePrice: 11480, volatility: 0.017, currency: "INR", marketCapB: 3240,
     capCategory: "large",
     pe: 38.2, pb: 5.8, eps: 293.2, roe: 15.8, debtToEquity: 0.28, dividendYield: 0.4,
     revenueB: 726, netProfitB: 81, promoterHolding: 59.7, fiiHolding: 14.6, diiHolding: 16.4, bookValue: 1931,
@@ -236,7 +236,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Energy", exchange: "NSE",
-    basePrice: 268, volatility: 0.019, currency: "INR", marketCapB: 3380,
+    basePrice: 248, volatility: 0.019, currency: "INR", marketCapB: 3380,
     capCategory: "large",
     pe: 7.8, pb: 1.1, eps: 34.4, roe: 14.6, debtToEquity: 0.36, dividendYield: 4.5,
     revenueB: 1700, netProfitB: 434, promoterHolding: 58.9, fiiHolding: 8.4, diiHolding: 26.4, bookValue: 244,
@@ -244,7 +244,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "NTPC", name: "NTPC Ltd.", sector: "Power", exchange: "NSE",
-    basePrice: 370, volatility: 0.016, currency: "INR", marketCapB: 3590,
+    basePrice: 348, volatility: 0.016, currency: "INR", marketCapB: 3590,
     capCategory: "large",
     pe: 18.5, pb: 2.4, eps: 20.0, roe: 13.1, debtToEquity: 1.5, dividendYield: 2.4,
     revenueB: 1812, netProfitB: 202, promoterHolding: 51.1, fiiHolding: 14.6, diiHolding: 25.2, bookValue: 154,
@@ -252,7 +252,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "BPCL", name: "Bharat Petroleum Corp Ltd.", sector: "Energy", exchange: "NSE",
-    basePrice: 320, volatility: 0.021, currency: "INR", marketCapB: 1390,
+    basePrice: 285, volatility: 0.021, currency: "INR", marketCapB: 1390,
     capCategory: "mid", trendBias: -0.015,
     pe: 8.4, pb: 1.8, eps: 38.1, roe: 22.4, debtToEquity: 1.2, dividendYield: 5.6,
     revenueB: 4982, netProfitB: 165, promoterHolding: 52.9, fiiHolding: 11.2, diiHolding: 22.4, bookValue: 177,
@@ -260,7 +260,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ZOMATO", name: "Zomato Ltd.", sector: "Internet & Technology", exchange: "NSE",
-    basePrice: 248, volatility: 0.035, currency: "INR", marketCapB: 2200,
+    basePrice: 225, volatility: 0.035, currency: "INR", marketCapB: 2200,
     capCategory: "mid", trendBias: -0.018,
     pe: 412.0, pb: 10.8, eps: 0.6, roe: 2.8, debtToEquity: 0.0, dividendYield: 0.0,
     revenueB: 127, netProfitB: 4, promoterHolding: 0, fiiHolding: 58.2, diiHolding: 16.8, bookValue: 23,
@@ -268,7 +268,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "IRCTC", name: "Indian Railway Catering and Tourism Corp Ltd.", sector: "Services", exchange: "NSE",
-    basePrice: 935, volatility: 0.02, currency: "INR", marketCapB: 750,
+    basePrice: 845, volatility: 0.02, currency: "INR", marketCapB: 750,
     capCategory: "large",
     pe: 58.4, pb: 16.2, eps: 16.0, roe: 27.1, debtToEquity: 0.0, dividendYield: 1.2,
     revenueB: 4.2, netProfitB: 1.3, promoterHolding: 62.4, fiiHolding: 9.2, diiHolding: 15.8, bookValue: 58,
@@ -276,7 +276,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "HUDCO", name: "Housing and Urban Development Corp Ltd.", sector: "Financials", exchange: "NSE",
-    basePrice: 285, volatility: 0.021, currency: "INR", marketCapB: 520,
+    basePrice: 212, volatility: 0.021, currency: "INR", marketCapB: 520,
     capCategory: "mid",
     pe: 16.8, pb: 2.3, eps: 16.9, roe: 13.7, debtToEquity: 6.4, dividendYield: 1.9,
     revenueB: 2.9, netProfitB: 0.6, promoterHolding: 89.8, fiiHolding: 2.1, diiHolding: 3.4, bookValue: 124,
@@ -284,7 +284,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "NHPC", name: "NHPC Ltd.", sector: "Power", exchange: "NSE",
-    basePrice: 112, volatility: 0.019, currency: "INR", marketCapB: 410,
+    basePrice: 82, volatility: 0.019, currency: "INR", marketCapB: 410,
     capCategory: "mid",
     pe: 18.2, pb: 1.6, eps: 6.2, roe: 8.9, debtToEquity: 0.9, dividendYield: 2.8,
     revenueB: 1.8, netProfitB: 0.3, promoterHolding: 67.4, fiiHolding: 4.8, diiHolding: 11.2, bookValue: 70,
@@ -292,7 +292,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "SJVN", name: "SJVN Ltd.", sector: "Power", exchange: "NSE",
-    basePrice: 138, volatility: 0.022, currency: "INR", marketCapB: 115,
+    basePrice: 98, volatility: 0.022, currency: "INR", marketCapB: 115,
     capCategory: "small",
     pe: 21.4, pb: 2.1, eps: 6.5, roe: 9.8, debtToEquity: 0.8, dividendYield: 2.4,
     revenueB: 1.2, netProfitB: 0.25, promoterHolding: 81.9, fiiHolding: 2.2, diiHolding: 4.1, bookValue: 65,
@@ -308,7 +308,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ISEC", name: "ICICI Securities Ltd.", sector: "Financials", exchange: "NSE",
-    basePrice: 684, volatility: 0.026, currency: "INR", marketCapB: 92,
+    basePrice: 795, volatility: 0.026, currency: "INR", marketCapB: 92,
     capCategory: "small",
     pe: 18.9, pb: 4.7, eps: 36.2, roe: 24.1, debtToEquity: 0.1, dividendYield: 2.1,
     revenueB: 0.9, netProfitB: 0.18, promoterHolding: 79.2, fiiHolding: 4.3, diiHolding: 6.5, bookValue: 145,
@@ -316,7 +316,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "TATAPOWER", name: "Tata Power Company Ltd.", sector: "Power", exchange: "NSE",
-    basePrice: 428, volatility: 0.028, currency: "INR", marketCapB: 1370,
+    basePrice: 388, volatility: 0.028, currency: "INR", marketCapB: 1370,
     capCategory: "mid", trendBias: -0.016,
     pe: 34.6, pb: 4.2, eps: 12.4, roe: 12.8, debtToEquity: 1.6, dividendYield: 0.5,
     revenueB: 587, netProfitB: 43, promoterHolding: 46.9, fiiHolding: 19.4, diiHolding: 17.8, bookValue: 102,
@@ -324,7 +324,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "IRFC", name: "Indian Railway Finance Corp Ltd.", sector: "Financial Services", exchange: "NSE",
-    basePrice: 195, volatility: 0.031, currency: "INR", marketCapB: 2540,
+    basePrice: 172, volatility: 0.031, currency: "INR", marketCapB: 2540,
     capCategory: "mid", trendBias: -0.014,
     pe: 28.2, pb: 3.8, eps: 6.9, roe: 13.6, debtToEquity: 9.4, dividendYield: 1.1,
     revenueB: 262, netProfitB: 64, promoterHolding: 86.4, fiiHolding: 3.2, diiHolding: 4.8, bookValue: 51,
@@ -332,7 +332,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "POLYCAB", name: "Polycab India Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 6180, volatility: 0.022, currency: "INR", marketCapB: 922,
+    basePrice: 5680, volatility: 0.022, currency: "INR", marketCapB: 922,
     capCategory: "mid", trendBias: -0.017,
     pe: 44.2, pb: 9.8, eps: 139.8, roe: 23.4, debtToEquity: 0.1, dividendYield: 0.5,
     revenueB: 203, netProfitB: 17, promoterHolding: 67.6, fiiHolding: 14.2, diiHolding: 9.6, bookValue: 631,
@@ -348,7 +348,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "COFORGE", name: "Coforge Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 7820, volatility: 0.027, currency: "INR", marketCapB: 486,
+    basePrice: 7380, volatility: 0.027, currency: "INR", marketCapB: 486,
     capCategory: "mid", trendBias: -0.021,
     pe: 70.4, pb: 14.2, eps: 111.1, roe: 21.8, debtToEquity: 0.2, dividendYield: 0.4,
     revenueB: 79, netProfitB: 7, promoterHolding: 0, fiiHolding: 38.4, diiHolding: 22.8, bookValue: 550,
@@ -356,7 +356,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "INDHOTEL", name: "The Indian Hotels Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 692, volatility: 0.026, currency: "INR", marketCapB: 986,
+    basePrice: 705, volatility: 0.026, currency: "INR", marketCapB: 986,
     capCategory: "mid", trendBias: -0.013,
     pe: 64.8, pb: 9.2, eps: 10.7, roe: 15.4, debtToEquity: 0.4, dividendYield: 0.4,
     revenueB: 79, netProfitB: 15, promoterHolding: 38.1, fiiHolding: 22.6, diiHolding: 26.4, bookValue: 75,
@@ -364,7 +364,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "MUTHOOTFIN", name: "Muthoot Finance Ltd.", sector: "Financial Services", exchange: "NSE",
-    basePrice: 1980, volatility: 0.023, currency: "INR", marketCapB: 795,
+    basePrice: 2150, volatility: 0.023, currency: "INR", marketCapB: 795,
     capCategory: "mid", trendBias: -0.012,
     pe: 16.8, pb: 3.2, eps: 117.9, roe: 20.8, debtToEquity: 3.4, dividendYield: 1.0,
     revenueB: 142, netProfitB: 43, promoterHolding: 73.4, fiiHolding: 9.2, diiHolding: 12.8, bookValue: 619,
@@ -372,7 +372,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "VOLTAS", name: "Voltas Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 1620, volatility: 0.025, currency: "INR", marketCapB: 536,
+    basePrice: 1480, volatility: 0.025, currency: "INR", marketCapB: 536,
     capCategory: "small",
     pe: 82.4, pb: 8.6, eps: 19.7, roe: 11.2, debtToEquity: 0.0, dividendYield: 0.5,
     revenueB: 106, netProfitB: 7, promoterHolding: 30.3, fiiHolding: 20.8, diiHolding: 26.4, bookValue: 188,
@@ -380,7 +380,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "DIXON", name: "Dixon Technologies Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 16800, volatility: 0.038, currency: "INR", marketCapB: 1010,
+    basePrice: 15800, volatility: 0.038, currency: "INR", marketCapB: 1010,
     capCategory: "mid",
     pe: 148.2, pb: 28.4, eps: 113.4, roe: 21.6, debtToEquity: 0.3, dividendYield: 0.1,
     revenueB: 337, netProfitB: 7, promoterHolding: 34.2, fiiHolding: 26.8, diiHolding: 22.4, bookValue: 591,
@@ -388,7 +388,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "CUMMINSIND", name: "Cummins India Ltd.", sector: "Capital Goods", exchange: "NSE",
-    basePrice: 3490, volatility: 0.022, currency: "INR", marketCapB: 484,
+    basePrice: 2850, volatility: 0.022, currency: "INR", marketCapB: 484,
     capCategory: "small",
     pe: 42.6, pb: 12.2, eps: 81.9, roe: 29.6, debtToEquity: 0.0, dividendYield: 1.4,
     revenueB: 73, netProfitB: 11, promoterHolding: 51.0, fiiHolding: 19.4, diiHolding: 18.6, bookValue: 286,
@@ -396,7 +396,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ABFRL", name: "Aditya Birla Fashion and Retail Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 294, volatility: 0.034, currency: "INR", marketCapB: 284,
+    basePrice: 148, volatility: 0.034, currency: "INR", marketCapB: 284,
     capCategory: "small",
     pe: undefined, pb: 6.8, eps: -4.2, roe: -8.4, debtToEquity: 2.1, dividendYield: 0.0,
     revenueB: 147, netProfitB: -4, promoterHolding: 55.2, fiiHolding: 14.6, diiHolding: 22.4, bookValue: 43,
@@ -404,7 +404,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "ASTRAL", name: "Astral Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
-    basePrice: 2140, volatility: 0.026, currency: "INR", marketCapB: 360,
+    basePrice: 1580, volatility: 0.026, currency: "INR", marketCapB: 360,
     capCategory: "small", trendBias: -0.014,
     pe: 72.8, pb: 14.2, eps: 29.4, roe: 20.8, debtToEquity: 0.06, dividendYield: 0.2,
     revenueB: 66, netProfitB: 5, promoterHolding: 56.4, fiiHolding: 16.8, diiHolding: 16.2, bookValue: 151,
@@ -412,16 +412,16 @@ export const STOCKS: StockMeta[] = [
   },
 
   // ── US stocks ─────────────────────────────────────────────────────────────
-  { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", exchange: "NASDAQ", basePrice: 189.5, volatility: 0.018, currency: "USD", marketCapB: 2950, pe: 28.5, pb: 47.2, eps: 6.6, roe: 171.0, dividendYield: 0.5, description: "World's most valuable consumer electronics company. iPhone, Mac, services ecosystem." },
-  { symbol: "MSFT", name: "Microsoft Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 415.2, volatility: 0.016, currency: "USD", marketCapB: 3080, pe: 36.4, pb: 13.2, eps: 11.4, roe: 37.3, dividendYield: 0.7, description: "Enterprise software and cloud leader. Azure, Office 365, and Copilot AI products." },
-  { symbol: "NVDA", name: "NVIDIA Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 875.0, volatility: 0.032, currency: "USD", marketCapB: 2160, pe: 67.4, pb: 34.0, eps: 13.0, roe: 53.2, dividendYield: 0.04, description: "World's leading GPU maker. Dominant in AI training chips and data center accelerators." },
-  { symbol: "TSLA", name: "Tesla Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 248.0, volatility: 0.042, currency: "USD", marketCapB: 792, pe: 62.1, pb: 12.4, eps: 4.0, roe: 22.5, dividendYield: 0.0, description: "Leading EV manufacturer. Expanding into energy storage and autonomous driving." },
-  { symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 185.0, volatility: 0.022, currency: "USD", marketCapB: 1940, pe: 43.5, pb: 8.2, eps: 4.3, roe: 19.2, dividendYield: 0.0, description: "World's largest e-commerce company. AWS cloud platform and Prime ecosystem." },
-  { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 176.0, volatility: 0.019, currency: "USD", marketCapB: 2190, pe: 23.8, pb: 6.2, eps: 7.4, roe: 26.4, dividendYield: 0.5, description: "Google search, YouTube, cloud, and Waymo autonomous vehicles." },
-  { symbol: "META", name: "Meta Platforms Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 510.0, volatility: 0.025, currency: "USD", marketCapB: 1310, pe: 26.3, pb: 8.1, eps: 19.4, roe: 32.8, dividendYield: 0.4, description: "Facebook, Instagram, WhatsApp. Investing heavily in AI and metaverse." },
-  { symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financials", exchange: "NYSE", basePrice: 198.0, volatility: 0.014, currency: "USD", marketCapB: 571, pe: 11.8, pb: 1.9, eps: 16.8, roe: 16.2, dividendYield: 2.4, description: "America's largest bank. Investment banking, consumer banking, and asset management." },
-  { symbol: "AMD", name: "Advanced Micro Devices", sector: "Technology", exchange: "NASDAQ", basePrice: 178.0, volatility: 0.038, currency: "USD", marketCapB: 288, pe: 148.0, pb: 3.8, eps: 1.2, roe: 2.6, dividendYield: 0.0, description: "CPU and GPU maker competing with Intel and NVIDIA. EPYC data center chips gaining share." },
-  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 225.0, volatility: 0.055, currency: "USD", marketCapB: 54, pe: undefined, pb: 6.2, eps: undefined, roe: 35.4, dividendYield: 0.0, description: "Largest US crypto exchange. Revenue tied to crypto trading volumes and institutional adoption." },
+  { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", exchange: "NASDAQ", basePrice: 195.0, volatility: 0.018, currency: "USD", marketCapB: 2950, pe: 28.5, pb: 47.2, eps: 6.6, roe: 171.0, dividendYield: 0.5, description: "World's most valuable consumer electronics company. iPhone, Mac, services ecosystem." },
+  { symbol: "MSFT", name: "Microsoft Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 425.0, volatility: 0.016, currency: "USD", marketCapB: 3080, pe: 36.4, pb: 13.2, eps: 11.4, roe: 37.3, dividendYield: 0.7, description: "Enterprise software and cloud leader. Azure, Office 365, and Copilot AI products." },
+  { symbol: "NVDA", name: "NVIDIA Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 820.0, volatility: 0.032, currency: "USD", marketCapB: 2160, pe: 67.4, pb: 34.0, eps: 13.0, roe: 53.2, dividendYield: 0.04, description: "World's leading GPU maker. Dominant in AI training chips and data center accelerators." },
+  { symbol: "TSLA", name: "Tesla Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 255.0, volatility: 0.042, currency: "USD", marketCapB: 792, pe: 62.1, pb: 12.4, eps: 4.0, roe: 22.5, dividendYield: 0.0, description: "Leading EV manufacturer. Expanding into energy storage and autonomous driving." },
+  { symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 190.0, volatility: 0.022, currency: "USD", marketCapB: 1940, pe: 43.5, pb: 8.2, eps: 4.3, roe: 19.2, dividendYield: 0.0, description: "World's largest e-commerce company. AWS cloud platform and Prime ecosystem." },
+  { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 172.0, volatility: 0.019, currency: "USD", marketCapB: 2190, pe: 23.8, pb: 6.2, eps: 7.4, roe: 26.4, dividendYield: 0.5, description: "Google search, YouTube, cloud, and Waymo autonomous vehicles." },
+  { symbol: "META", name: "Meta Platforms Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 545.0, volatility: 0.025, currency: "USD", marketCapB: 1310, pe: 26.3, pb: 8.1, eps: 19.4, roe: 32.8, dividendYield: 0.4, description: "Facebook, Instagram, WhatsApp. Investing heavily in AI and metaverse." },
+  { symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financials", exchange: "NYSE", basePrice: 205.0, volatility: 0.014, currency: "USD", marketCapB: 571, pe: 11.8, pb: 1.9, eps: 16.8, roe: 16.2, dividendYield: 2.4, description: "America's largest bank. Investment banking, consumer banking, and asset management." },
+  { symbol: "AMD", name: "Advanced Micro Devices", sector: "Technology", exchange: "NASDAQ", basePrice: 165.0, volatility: 0.038, currency: "USD", marketCapB: 288, pe: 148.0, pb: 3.8, eps: 1.2, roe: 2.6, dividendYield: 0.0, description: "CPU and GPU maker competing with Intel and NVIDIA. EPYC data center chips gaining share." },
+  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 195.0, volatility: 0.055, currency: "USD", marketCapB: 54, pe: undefined, pb: 6.2, eps: undefined, roe: 35.4, dividendYield: 0.0, description: "Largest US crypto exchange. Revenue tied to crypto trading volumes and institutional adoption." },
 ];
 
 // Seeded random number generator for deterministic data
