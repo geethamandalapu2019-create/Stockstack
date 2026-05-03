@@ -1,16 +1,14 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "wouter";
 import {
   useGetStockHistory,
   useGetStockIndicators,
   useGetStockQuote,
   useGetStockFundamentals,
-  useGetStockPredictions,
   getGetStockHistoryQueryKey,
   getGetStockIndicatorsQueryKey,
   getGetStockQuoteQueryKey,
   getGetStockFundamentalsQueryKey,
-  getGetStockPredictionsQueryKey,
 } from "@workspace/api-client-react";
 import {
   ComposedChart, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -23,30 +21,40 @@ import { cn } from "@/lib/utils";
 import { SignalBadge } from "./dashboard";
 import {
   Activity, TrendingUp, TrendingDown, Minus,
-  Building2, BarChart3, X, LineChart as LineChartIcon, ChevronDown, Check
+  Building2, BarChart3, X, LineChart as LineChartIcon, ChevronDown, Check, Search, RefreshCw
 } from "lucide-react";
 
 type Tab = "chart" | "technical" | "predictions" | "fundamentals";
 type Horizon = "1d" | "1w" | "2w" | "1mo" | "3mo" | "6mo" | "12mo";
-type PredictionItem = {
-  horizon: string;
-  label: string;
-  targetPrice: number;
-  confidenceLow: number;
-  confidenceHigh: number;
-  direction: string;
-  confidenceScore: number;
-  upside: number;
-  methodology: string;
-  supportLevel: number;
-  resistanceLevel: number;
-  forecast: Array<{ date: string; predicted: number; low: number; high: number }>;
-  signals?: string[];
-  overallScore?: number;
-};
 type TechOption = { key: string; label: string; color: string };
 type StockImpact = { national?: string[]; global?: string[]; verdict?: string; note?: string };
 type IndicatorKey = "app" | "swing_confluence" | "rsi" | "macd" | "sma" | "ema" | "bb" | "price_action";
+type TopPredictionResponse = {
+  indicator: IndicatorKey;
+  stocks: Array<{
+    symbol: string;
+    name: string;
+    sector: string;
+    exchange: string;
+    currency: string;
+    capCategory: "large" | "mid" | "small";
+    currentPrice: number;
+    overallScore: number;
+    direction: string;
+    overallSignal: string;
+    signals: string[];
+    currentRsi: number | null;
+    indicator: IndicatorKey;
+    indicatorLabel: string;
+    predictions: Record<string, {
+      targetPrice: number;
+      changeAmount: number;
+      direction: string;
+      confidence: number;
+      label: string;
+    }>;
+  }>;
+};
 
 const HORIZONS: { key: Horizon; label: string }[] = [
   { key: "1d", label: "1D" },
@@ -119,6 +127,16 @@ function SelectDropdown({
       <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
     </div>
   );
+}
+
+function formatPrice(price: number, currency: string) {
+  const sym = currency === "INR" ? "₹" : "$";
+  return `${sym}${price.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
+
+function formatUpside(targetPrice: number, currentPrice: number) {
+  const pct = ((targetPrice - currentPrice) / currentPrice) * 100;
+  return { pct, formatted: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%` };
 }
 
 const SWING_FALLBACK = {
@@ -231,7 +249,6 @@ export default function ChartPage() {
   const [tab, setTab] = useState<Tab>("chart");
   const [horizon, setHorizon] = useState<Horizon>("1mo");
   const [predictionMode, setPredictionMode] = useState<IndicatorKey>("app");
-
   const [showSMA20, setShowSMA20] = useState(true);
   const [showSMA50, setShowSMA50] = useState(true);
   const [showEMA12, setShowEMA12] = useState(false);
@@ -258,10 +275,6 @@ export default function ChartPage() {
   const { data: fundamentals, isLoading: fl } = useGetStockFundamentals(symbol, {
     query: { enabled: !!symbol && tab === "fundamentals", queryKey: getGetStockFundamentalsQueryKey(symbol) }
   });
-  const { data: stockPredictions } = useGetStockPredictions(symbol, {
-    query: { enabled: !!symbol, queryKey: getGetStockPredictionsQueryKey(symbol) }
-  });
-
   const currency = quote?.currency ?? "INR";
 
   const chartData = useMemo(() => {
@@ -288,13 +301,7 @@ export default function ChartPage() {
   const wrData = useMemo(() => indicators?.williamsR?.map(p => ({ date: p.date.split("T")[0], value: p.value })) ?? [], [indicators]);
   const volumeData = useMemo(() => history?.candles?.map((c, i) => ({ date: c.date.split("T")[0], volume: c.volume, obv: indicators?.obv[i]?.value, isBullish: c.close >= c.open })) ?? [], [history, indicators]);
   const adxData = useMemo(() => indicators?.adx?.map(p => ({ date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI })) ?? [], [indicators]);
-  const predictionsData = stockPredictions as unknown as { predictions?: PredictionItem[]; swingConfluence?: PredictionItem[] } | undefined;
   const impactNotes = deriveStockImpact(quote, fundamentals);
-
-  const selectedPrediction = useMemo(() => {
-    const response = predictionMode === "swing_confluence" ? predictionsData?.swingConfluence : predictionsData?.predictions;
-    return response?.find(p => p.horizon === horizon) ?? null;
-  }, [predictionMode, predictionsData, horizon]);
 
   const activeTechs = useMemo(() => {
     const list = [];
