@@ -109,6 +109,18 @@ function formatImpactList(items?: string[]) {
   return items?.slice(0, 3) ?? [];
 }
 
+function getCurrentVerdict(quote?: any, fundamentals?: any) {
+  const changePercent = quote?.changePercent ?? 0;
+  const pe = fundamentals?.pe ?? quote?.pe ?? null;
+  const marketCap = fundamentals?.marketCap ?? quote?.marketCap ?? null;
+  let verdict = "Neutral / wait";
+  if (changePercent > 0.5 && (pe == null || pe < 35)) verdict = "Watch / possible buy";
+  if (changePercent > 1.2 && pe != null && pe < 30) verdict = "Good momentum / invest";
+  if (changePercent < -1.2 && pe != null && pe > 35) verdict = "Avoid / weak now";
+  if (changePercent < -2 && marketCap != null && marketCap > 0) verdict = "High risk / avoid";
+  return verdict;
+}
+
 export default function ChartPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const [period, setPeriod] = useState<"1mo" | "3mo" | "6mo" | "1y">("3mo");
@@ -403,18 +415,31 @@ export default function ChartPage() {
               </CardHeader>
               <CardContent className="p-3 space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-3">
-                <div><div className="text-muted-foreground text-xs mb-1">Market Cap</div><div className="font-data font-semibold">{fmtLarge(fundamentals?.marketCap ?? null, currency)}</div></div>
-                <div><div className="text-muted-foreground text-xs mb-1">P/E Ratio</div><div className="font-data font-semibold">{fundamentals?.pe ?? "N/A"}</div></div>
-                <div><div className="text-muted-foreground text-xs mb-1">52W High</div><div className="font-data font-semibold">{fundamentals?.week52High ? fmt(fundamentals.week52High, currency) : "N/A"}</div></div>
-                <div><div className="text-muted-foreground text-xs mb-1">52W Low</div><div className="font-data font-semibold">{fundamentals?.week52Low ? fmt(fundamentals.week52Low, currency) : "N/A"}</div></div>
+                  <div><div className="text-muted-foreground text-xs mb-1">Market Cap</div><div className="font-data font-semibold">{fmtLarge(fundamentals?.marketCap ?? null, currency)}</div></div>
+                  <div><div className="text-muted-foreground text-xs mb-1">P/E Ratio</div><div className="font-data font-semibold">{fundamentals?.pe ?? "N/A"}</div></div>
+                  <div><div className="text-muted-foreground text-xs mb-1">52W High</div><div className="font-data font-semibold">{fundamentals?.week52High ? fmt(fundamentals.week52High, currency) : "N/A"}</div></div>
+                  <div><div className="text-muted-foreground text-xs mb-1">52W Low</div><div className="font-data font-semibold">{fundamentals?.week52Low ? fmt(fundamentals.week52Low, currency) : "N/A"}</div></div>
+                </div>
+                <div className="rounded-lg border border-border bg-primary/5 p-3 space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground">Current stock verdict</div>
+                  <div className="text-sm font-semibold">{getCurrentVerdict(quote, fundamentals)}</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">
+                    Based on live price change, valuation, and the selected stock’s current conditions.
+                  </div>
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
-                  <div className="text-xs font-semibold text-muted-foreground">National impact</div>
+                  <div className="text-xs font-semibold text-muted-foreground">Current national impact</div>
                   {formatImpactList(impactNotes?.national).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
-                  <div className="text-xs font-semibold text-muted-foreground">Global impact</div>
+                  <div className="text-xs font-semibold text-muted-foreground">Current global impact</div>
                   {formatImpactList(impactNotes?.global).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
+                </div>
+                <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground">What to watch now</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">
+                    Earnings, RBI/Fed moves, crude prices, rupee strength, sector news, and sudden market risk-off can change this stock fast.
+                  </div>
                 </div>
               </CardContent>
             </Card>
