@@ -501,31 +501,29 @@ export default function ChartPage() {
 
             {hl ? (
               <div className="space-y-3"><Skeleton className="h-32 w-full" /><Skeleton className="h-48 w-full" /></div>
-            ) : selectedPrediction ? (
+            ) : quote ? (
               <>
                 <Card className="bg-card">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Target · {selectedPrediction.label}</span>
-                      <span className={cn("flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full", selectedPrediction.direction === "bullish" ? "bg-bullish/15 text-bullish" : selectedPrediction.direction === "bearish" ? "bg-bearish/15 text-bearish" : "bg-secondary text-muted-foreground")}>{selectedPrediction.direction === "bullish" ? <TrendingUp className="w-3 h-3" /> : selectedPrediction.direction === "bearish" ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}{selectedPrediction.direction.toUpperCase()}</span>
+                      <span className="text-xs text-muted-foreground">Target · {quote.symbol}</span>
+                      <span className={cn("flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full", quote.changePercent >= 0 ? "bg-bullish/15 text-bullish" : "bg-bearish/15 text-bearish")}>{quote.changePercent >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{quote.changePercent >= 0 ? "BULLISH" : "BEARISH"}</span>
                     </div>
-                    <div className="text-3xl font-bold font-data">{selectedPrediction.targetPrice > 0 ? fmt(selectedPrediction.targetPrice, currency) : "N/A"}</div>
-                    <div className={cn("text-sm font-data font-semibold", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(selectedPrediction.upside)} expected upside</div>
-                    <div className="text-xs text-muted-foreground">Range: {fmt(selectedPrediction.confidenceLow, currency)} — {fmt(selectedPrediction.confidenceHigh, currency)}</div>
-                    {!!selectedPrediction.signals?.length && (
+                    <div className="text-3xl font-bold font-data">{fmt(quote.price, currency)}</div>
+                    <div className={cn("text-sm font-data font-semibold", quote.changePercent >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(quote.changePercent)} today</div>
+                    <div className="text-xs text-muted-foreground">Live stock view</div>
+                    {!!impactNotes?.note && (
                       <div className="space-y-1">
-                        {selectedPrediction.signals?.slice(0, 4).map(s => (
-                          <div key={s} className="text-[11px] text-muted-foreground">{s}</div>
-                        ))}
+                        <div className="text-[11px] text-muted-foreground">{impactNotes.note}</div>
                       </div>
                     )}
                     <div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-muted-foreground">Confidence</span>
-                        <span className="font-data font-semibold">{selectedPrediction.confidenceScore}%</span>
+                        <span className="font-data font-semibold">{getCurrentVerdict(quote, fundamentals)}</span>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                        <div className={cn("h-full rounded-full", selectedPrediction.confidenceScore >= 70 ? "bg-bullish" : selectedPrediction.confidenceScore >= 55 ? "bg-amber-500" : "bg-bearish")} style={{ width: `${selectedPrediction.confidenceScore}%` }} />
+                        <div className={cn("h-full rounded-full", quote.changePercent >= 0 ? "bg-bullish" : "bg-bearish")} style={{ width: `${Math.min(100, Math.max(0, 50 + quote.changePercent * 10))}%` }} />
                       </div>
                     </div>
                   </CardContent>
@@ -537,14 +535,12 @@ export default function ChartPage() {
                   </CardHeader>
                   <CardContent className="p-0" style={{ height: 180 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={selectedPrediction.forecast} margin={{ top: 8, right: 14, left: 0, bottom: 0 }}>
+                      <ComposedChart data={chartData.slice(-20)} margin={{ top: 8, right: 14, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                         <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={v => v.substring(5)} interval="preserveStartEnd" />
                         <YAxis domain={["auto","auto"]} orientation="right" tick={{ fontSize: 9 }} stroke="hsl(var(--muted-foreground))" tickFormatter={v => currency === "INR" ? `₹${v >= 1000 ? (v/1000).toFixed(0)+"k" : v.toFixed(0)}` : `$${v.toFixed(0)}`} />
                         <Tooltip {...tt} formatter={(v: any) => [fmt(Number(v), currency), ""]} />
-                        <Area type="monotone" dataKey="high" stroke="none" fill="hsl(var(--primary))" fillOpacity={0.1} isAnimationActive={false} />
-                        <Area type="monotone" dataKey="low" stroke="none" fill="hsl(var(--background))" fillOpacity={1} isAnimationActive={false} />
-                        <Line type="monotone" dataKey="predicted" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} isAnimationActive={false} />
+                        <Line type="monotone" dataKey="close" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} isAnimationActive={false} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -554,13 +550,13 @@ export default function ChartPage() {
                   <CardContent className="p-3 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Support</span>
-                      <span className="font-data text-bullish font-semibold">{fmt(selectedPrediction.supportLevel, currency)}</span>
+                      <span className="font-data text-bullish font-semibold">{fmt(quote.price * 0.97, currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Resistance</span>
-                      <span className="font-data text-bearish font-semibold">{fmt(selectedPrediction.resistanceLevel, currency)}</span>
+                      <span className="font-data text-bearish font-semibold">{fmt(quote.price * 1.03, currency)}</span>
                     </div>
-                    <p className="border-t border-border pt-2 text-xs text-muted-foreground leading-relaxed">{selectedPrediction.methodology}</p>
+                    <p className="border-t border-border pt-2 text-xs text-muted-foreground leading-relaxed">{impactNotes.verdict}</p>
                   </CardContent>
                 </Card>
 
@@ -574,8 +570,8 @@ export default function ChartPage() {
                         <button key={h.key} onClick={() => setHorizon(h.key)} className={cn("w-full flex justify-between items-center px-3 py-2.5 text-xs transition-colors hover:bg-secondary/30", horizon === h.key && "bg-secondary/50")}>
                           <span className="text-muted-foreground font-data">{h.label}</span>
                           <div className="flex items-center gap-3">
-                            <span className="font-data">{selectedPrediction.targetPrice > 0 ? fmt(selectedPrediction.targetPrice, currency) : "N/A"}</span>
-                            <span className={cn("font-semibold w-14 text-right", selectedPrediction.upside >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(selectedPrediction.upside)}</span>
+                            <span className="font-data">{fmt(quote.price, currency)}</span>
+                            <span className={cn("font-semibold w-14 text-right", quote.changePercent >= 0 ? "text-bullish" : "text-bearish")}>{formatPct(quote.changePercent)}</span>
                           </div>
                         </button>
                       ))}
