@@ -75,17 +75,15 @@ router.get("/:symbol/quote", (req, res) => {
     return;
   }
 
+  const { price, change, changePercent } = getCurrentPrice(symbol);
   const candles = generateCandles(symbol, 365, "1d");
   const latest = candles[candles.length - 1];
-  const prev = candles[candles.length - 2];
   const week52 = candles.slice(-252);
-  const change = +(latest.close - prev.close).toFixed(2);
-  const changePercent = +((change / prev.close) * 100).toFixed(2);
 
   res.json({
     symbol: stock.symbol,
     name: stock.name,
-    price: latest.close,
+    price,
     change,
     changePercent,
     open: latest.open,
