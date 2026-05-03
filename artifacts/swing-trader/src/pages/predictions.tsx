@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useGetTopPredictions } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,7 +79,7 @@ export default function PredictionsPage() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [committedQuery, setCommittedQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"score" | "rsi">("score");
+  const [sortBy, setSortBy] = useState<"score" | "rsi" | "upside">("score");
   const [capTab, setCapTab] = useState<"all" | "large" | "mid" | "small">("all");
 
   const isSearching = committedQuery.length >= 1;
@@ -99,6 +99,20 @@ export default function PredictionsPage() {
   };
 
   const stocks = data?.stocks ?? [];
+  const rankedStocks = useMemo(() => {
+    const list = [...stocks];
+    if (sortBy === "rsi") return list.sort((a, b) => (a.currentRsi ?? 50) - (b.currentRsi ?? 50));
+    if (sortBy === "upside") {
+      return list.sort((a, b) => {
+        const aUp = Math.max(...Object.values(a.predictions).map(p => p.upside ?? 0));
+        const bUp = Math.max(...Object.values(b.predictions).map(p => p.upside ?? 0));
+        return bUp - aUp;
+      });
+    }
+    return list.sort((a, b) => b.overallScore - a.overallScore);
+  }, [stocks, sortBy]);
+
+  const topPick = rankedStocks[0];
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
@@ -110,9 +124,9 @@ export default function PredictionsPage() {
             <h1 className="text-2xl font-bold tracking-tight">Stock Predictions</h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            {isSearching
+          {isSearching
               ? `Search results for "${committedQuery}" — multi-indicator composite analysis`
-              : `Top ${capTab === "all" ? "Indian" : capTab} cap stocks ranked by composite multi-indicator score`}
+              : `Daily Indian stock picks ranked by composite score, upside, and technical strength`}
           </p>
         </div>
         <button
@@ -170,6 +184,7 @@ export default function PredictionsPage() {
           {[
             { key: "score", label: "Composite Score" },
             { key: "rsi", label: "RSI Oversold" },
+            { key: "upside", label: "Highest Upside" },
           ].map(opt => (
             <button
               key={opt.key}
@@ -222,6 +237,36 @@ export default function PredictionsPage() {
         ))}
       </div>
 
+      {!isSearching && topPick && (
+        <Card className="bg-card border-primary/30 ring-1 ring-primary/10">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-data">Today’s Top Pick</div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-base">{topPick.currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
+                <div>
+                  <div className="font-bold text-lg">{topPick.symbol}</div>
+                  <div className="text-xs text-muted-foreground">{topPick.name}</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-xs text-muted-foreground">Score</div>
+                <div className="text-lg font-data font-bold">{topPick.overallScore}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-muted-foreground">Current Price</div>
+                <div className="text-lg font-data font-bold">{formatPrice(topPick.currentPrice, topPick.currency)}</div>
+              </div>
+              <button onClick={() => navigate(`/chart/${topPick.symbol}`)} className="px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium">
+                View
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Results */}
       {isLoading ? (
         <div className="grid gap-3">
@@ -248,10 +293,7 @@ export default function PredictionsPage() {
             <div></div>
           </div>
 
-          {(sortBy === "rsi" && !isSearching
-            ? [...stocks].sort((a, b) => (a.currentRsi ?? 50) - (b.currentRsi ?? 50))
-            : stocks
-          ).map((stock, idx) => {
+          {rankedStocks.map((stock, idx) => {
             const flag = stock.currency === "INR" ? "🇮🇳" : "🇺🇸";
             return (
               <Card key={stock.symbol} className={cn(
