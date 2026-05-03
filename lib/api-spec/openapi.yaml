@@ -1,22 +1,29 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Swing Trader API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: stocks
+    description: Stock data and indicators
+  - name: watchlist
+    description: Watchlist management
+  - name: trades
+    description: Trade journal
+  - name: dashboard
+    description: Dashboard summaries
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,341 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /stocks/search:
+    get:
+      operationId: searchStocks
+      tags: [stocks]
+      summary: Search stocks by symbol or name
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockSearchResult"
+
+  /stocks/{symbol}/quote:
+    get:
+      operationId: getStockQuote
+      tags: [stocks]
+      summary: Get current stock quote
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stock quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockQuote"
+        "404":
+          description: Symbol not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stocks/{symbol}/history:
+    get:
+      operationId: getStockHistory
+      tags: [stocks]
+      summary: Get OHLCV historical data
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [1mo, 3mo, 6mo, 1y, 2y]
+            default: 3mo
+        - name: interval
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [1d, 1w]
+            default: 1d
+      responses:
+        "200":
+          description: Historical OHLCV data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockHistory"
+        "404":
+          description: Symbol not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stocks/{symbol}/indicators:
+    get:
+      operationId: getStockIndicators
+      tags: [stocks]
+      summary: Get technical indicators for a stock
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [1mo, 3mo, 6mo, 1y, 2y]
+            default: 3mo
+      responses:
+        "200":
+          description: Technical indicators
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicalIndicators"
+        "404":
+          description: Symbol not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /watchlist:
+    get:
+      operationId: getWatchlist
+      tags: [watchlist]
+      summary: Get watchlist with current quotes and signals
+      responses:
+        "200":
+          description: Watchlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WatchlistItem"
+    post:
+      operationId: addToWatchlist
+      tags: [watchlist]
+      summary: Add stock to watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToWatchlistBody"
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchlistItem"
+        "409":
+          description: Already in watchlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /watchlist/{symbol}:
+    delete:
+      operationId: removeFromWatchlist
+      tags: [watchlist]
+      summary: Remove stock from watchlist
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Removed
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trades:
+    get:
+      operationId: getTrades
+      tags: [trades]
+      summary: Get trade journal entries
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed]
+        - name: symbol
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trades list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+    post:
+      operationId: createTrade
+      tags: [trades]
+      summary: Log a new trade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTradeBody"
+      responses:
+        "201":
+          description: Trade created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
+  /trades/{id}:
+    get:
+      operationId: getTrade
+      tags: [trades]
+      summary: Get a single trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateTrade
+      tags: [trades]
+      summary: Update a trade (close, add notes, etc.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTradeBody"
+      responses:
+        "200":
+          description: Updated trade
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTrade
+      tags: [trades]
+      summary: Delete a trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trades/stats:
+    get:
+      operationId: getTradeStats
+      tags: [trades]
+      summary: Get trade statistics
+      responses:
+        "200":
+          description: Trade statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeStats"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard overview summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/signals:
+    get:
+      operationId: getDashboardSignals
+      tags: [dashboard]
+      summary: Get top swing trading signals from watchlist
+      responses:
+        "200":
+          description: Trading signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SwingSignal"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +373,372 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    StockSearchResult:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        sector:
+          type: string
+        exchange:
+          type: string
+      required: [symbol, name, sector, exchange]
+
+    StockQuote:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        change:
+          type: number
+        changePercent:
+          type: number
+        open:
+          type: number
+        high:
+          type: number
+        low:
+          type: number
+        volume:
+          type: integer
+        marketCap:
+          type: ["number", "null"]
+        week52High:
+          type: number
+        week52Low:
+          type: number
+        pe:
+          type: ["number", "null"]
+        sector:
+          type: string
+        exchange:
+          type: string
+      required: [symbol, name, price, change, changePercent, open, high, low, volume, marketCap, week52High, week52Low, pe, sector, exchange]
+
+    Candle:
+      type: object
+      properties:
+        date:
+          type: string
+        open:
+          type: number
+        high:
+          type: number
+        low:
+          type: number
+        close:
+          type: number
+        volume:
+          type: integer
+      required: [date, open, high, low, close, volume]
+
+    StockHistory:
+      type: object
+      properties:
+        symbol:
+          type: string
+        period:
+          type: string
+        interval:
+          type: string
+        candles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candle"
+      required: [symbol, period, interval, candles]
+
+    IndicatorPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        value:
+          type: ["number", "null"]
+      required: [date, value]
+
+    BollingerPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        upper:
+          type: ["number", "null"]
+        middle:
+          type: ["number", "null"]
+        lower:
+          type: ["number", "null"]
+      required: [date, upper, middle, lower]
+
+    MACDPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        macd:
+          type: ["number", "null"]
+        signal:
+          type: ["number", "null"]
+        histogram:
+          type: ["number", "null"]
+      required: [date, macd, signal, histogram]
+
+    TechnicalIndicators:
+      type: object
+      properties:
+        symbol:
+          type: string
+        period:
+          type: string
+        rsi:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        sma20:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        sma50:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        ema12:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        ema26:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        macd:
+          type: array
+          items:
+            $ref: "#/components/schemas/MACDPoint"
+        bollingerBands:
+          type: array
+          items:
+            $ref: "#/components/schemas/BollingerPoint"
+        currentRsi:
+          type: ["number", "null"]
+        rsiSignal:
+          type: string
+          enum: [oversold, neutral, overbought]
+        macdSignal:
+          type: string
+          enum: [bullish, neutral, bearish]
+        bbSignal:
+          type: string
+          enum: [near_upper, neutral, near_lower]
+        overallSignal:
+          type: string
+          enum: [strong_buy, buy, neutral, sell, strong_sell]
+      required: [symbol, period, rsi, sma20, sma50, ema12, ema26, macd, bollingerBands, currentRsi, rsiSignal, macdSignal, bbSignal, overallSignal]
+
+    WatchlistItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        change:
+          type: number
+        changePercent:
+          type: number
+        overallSignal:
+          type: string
+          enum: [strong_buy, buy, neutral, sell, strong_sell]
+        addedAt:
+          type: string
+      required: [id, symbol, name, price, change, changePercent, overallSignal, addedAt]
+
+    AddToWatchlistBody:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+      required: [symbol, name]
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        name:
+          type: string
+        side:
+          type: string
+          enum: [long, short]
+        status:
+          type: string
+          enum: [open, closed]
+        entryPrice:
+          type: number
+        exitPrice:
+          type: ["number", "null"]
+        shares:
+          type: number
+        entryDate:
+          type: string
+        exitDate:
+          type: ["string", "null"]
+        stopLoss:
+          type: ["number", "null"]
+        takeProfit:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        pnl:
+          type: ["number", "null"]
+        pnlPercent:
+          type: ["number", "null"]
+        strategy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, symbol, name, side, status, entryPrice, exitPrice, shares, entryDate, exitDate, stopLoss, takeProfit, notes, pnl, pnlPercent, strategy, createdAt, updatedAt]
+
+    CreateTradeBody:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        side:
+          type: string
+          enum: [long, short]
+        entryPrice:
+          type: number
+        shares:
+          type: number
+        entryDate:
+          type: string
+        stopLoss:
+          type: ["number", "null"]
+        takeProfit:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        strategy:
+          type: ["string", "null"]
+      required: [symbol, name, side, entryPrice, shares, entryDate]
+
+    UpdateTradeBody:
+      type: object
+      properties:
+        exitPrice:
+          type: ["number", "null"]
+        exitDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, closed]
+        stopLoss:
+          type: ["number", "null"]
+        takeProfit:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        strategy:
+          type: ["string", "null"]
+
+    TradeStats:
+      type: object
+      properties:
+        totalTrades:
+          type: integer
+        openTrades:
+          type: integer
+        closedTrades:
+          type: integer
+        winRate:
+          type: number
+        totalPnl:
+          type: number
+        avgWin:
+          type: number
+        avgLoss:
+          type: number
+        bestTrade:
+          type: ["number", "null"]
+        worstTrade:
+          type: ["number", "null"]
+        profitFactor:
+          type: ["number", "null"]
+        avgHoldingDays:
+          type: ["number", "null"]
+      required: [totalTrades, openTrades, closedTrades, winRate, totalPnl, avgWin, avgLoss, bestTrade, worstTrade, profitFactor, avgHoldingDays]
+
+    DashboardSummary:
+      type: object
+      properties:
+        watchlistCount:
+          type: integer
+        openTradesCount:
+          type: integer
+        totalPnl:
+          type: number
+        winRate:
+          type: number
+        topGainer:
+          $ref: "#/components/schemas/WatchlistItem"
+        topLoser:
+          $ref: "#/components/schemas/WatchlistItem"
+        marketMood:
+          type: string
+          enum: [bullish, neutral, bearish]
+      required: [watchlistCount, openTradesCount, totalPnl, winRate, marketMood]
+
+    SwingSignal:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        changePercent:
+          type: number
+        overallSignal:
+          type: string
+          enum: [strong_buy, buy, neutral, sell, strong_sell]
+        rsiSignal:
+          type: string
+          enum: [oversold, neutral, overbought]
+        macdSignal:
+          type: string
+          enum: [bullish, neutral, bearish]
+        bbSignal:
+          type: string
+          enum: [near_upper, neutral, near_lower]
+        currentRsi:
+          type: ["number", "null"]
+        rationale:
+          type: string
+      required: [symbol, name, price, changePercent, overallSignal, rsiSignal, macdSignal, bbSignal, currentRsi, rationale]
