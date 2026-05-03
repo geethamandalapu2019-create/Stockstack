@@ -497,11 +497,13 @@ export const getTopPredictionsQueryLimitDefault = 10;
 
 export const GetTopPredictionsQueryParams = zod.object({
   q: zod.coerce.string().optional(),
+  cap: zod.enum(["all", "large", "mid", "small"]).optional(),
   limit: zod.coerce.number().default(getTopPredictionsQueryLimitDefault),
 });
 
 export const GetTopPredictionsResponse = zod.object({
   query: zod.string().nullable(),
+  cap: zod.enum(["all", "large", "mid", "small"]),
   total: zod.number(),
   stocks: zod.array(
     zod.object({

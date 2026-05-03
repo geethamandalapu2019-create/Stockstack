@@ -20,6 +20,7 @@ export interface StockMeta {
   diiHolding?: number;
   bookValue?: number;
   description?: string;
+  capCategory?: "large" | "mid" | "small";
 }
 
 export const STOCKS: StockMeta[] = [
@@ -27,6 +28,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "RELIANCE", name: "Reliance Industries Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 2950, volatility: 0.015, currency: "INR", marketCapB: 19900,
+    capCategory: "large",
     pe: 28.4, pb: 2.1, eps: 103.8, roe: 8.7, debtToEquity: 0.35, dividendYield: 0.35,
     revenueB: 9017, netProfitB: 670, promoterHolding: 50.3, fiiHolding: 21.5, diiHolding: 17.2, bookValue: 1410,
     description: "India's largest company by revenue. Operates in energy, petrochemicals, retail, and digital services (Jio).",
@@ -34,6 +36,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TCS", name: "Tata Consultancy Services Ltd.", sector: "Information Technology", exchange: "NSE",
     basePrice: 3980, volatility: 0.013, currency: "INR", marketCapB: 14500,
+    capCategory: "large",
     pe: 31.2, pb: 14.8, eps: 127.6, roe: 47.6, debtToEquity: 0.02, dividendYield: 1.5,
     revenueB: 2380, netProfitB: 466, promoterHolding: 72.3, fiiHolding: 12.8, diiHolding: 9.4, bookValue: 268,
     description: "India's largest IT services company. Serves global clients across banking, retail, manufacturing and more.",
@@ -41,6 +44,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "HDFCBANK", name: "HDFC Bank Ltd.", sector: "Banking", exchange: "NSE",
     basePrice: 1620, volatility: 0.014, currency: "INR", marketCapB: 12300,
+    capCategory: "large",
     pe: 19.8, pb: 2.8, eps: 81.8, roe: 15.2, debtToEquity: 6.8, dividendYield: 1.2,
     revenueB: 2174, netProfitB: 645, promoterHolding: 0, fiiHolding: 52.1, diiHolding: 26.4, bookValue: 579,
     description: "India's largest private sector bank by assets. Known for strong retail banking and quality loan book.",
@@ -48,6 +52,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "INFY", name: "Infosys Ltd.", sector: "Information Technology", exchange: "NSE",
     basePrice: 1780, volatility: 0.016, currency: "INR", marketCapB: 7400,
+    capCategory: "large",
     pe: 25.4, pb: 7.6, eps: 70.1, roe: 30.7, debtToEquity: 0.04, dividendYield: 2.4,
     revenueB: 1535, netProfitB: 262, promoterHolding: 14.7, fiiHolding: 33.5, diiHolding: 34.2, bookValue: 234,
     description: "India's second-largest IT services company. Strong presence in North America with digital transformation services.",
@@ -55,6 +60,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ICICIBANK", name: "ICICI Bank Ltd.", sector: "Banking", exchange: "NSE",
     basePrice: 1230, volatility: 0.016, currency: "INR", marketCapB: 8650,
+    capCategory: "large",
     pe: 18.3, pb: 3.0, eps: 67.2, roe: 17.4, debtToEquity: 7.1, dividendYield: 0.9,
     revenueB: 1680, netProfitB: 440, promoterHolding: 0, fiiHolding: 46.8, diiHolding: 32.5, bookValue: 410,
     description: "India's second-largest private sector bank. Diversified across retail, corporate, and SME segments.",
@@ -62,6 +68,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "HINDUNILVR", name: "Hindustan Unilever Ltd.", sector: "FMCG", exchange: "NSE",
     basePrice: 2350, volatility: 0.011, currency: "INR", marketCapB: 5520,
+    capCategory: "large",
     pe: 53.4, pb: 11.8, eps: 44.0, roe: 21.7, debtToEquity: 0.0, dividendYield: 1.8,
     revenueB: 601, netProfitB: 102, promoterHolding: 61.9, fiiHolding: 14.6, diiHolding: 14.5, bookValue: 199,
     description: "India's leading FMCG company. Portfolio spans food, home care, personal care and beauty segments.",
@@ -69,6 +76,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "SBIN", name: "State Bank of India", sector: "Banking", exchange: "NSE",
     basePrice: 820, volatility: 0.018, currency: "INR", marketCapB: 7320,
+    capCategory: "large",
     pe: 10.4, pb: 1.7, eps: 78.8, roe: 16.6, debtToEquity: 12.1, dividendYield: 1.8,
     revenueB: 3940, netProfitB: 618, promoterHolding: 57.5, fiiHolding: 10.4, diiHolding: 24.6, bookValue: 482,
     description: "India's largest public sector bank. Extensive rural and urban network across the country.",
@@ -76,6 +84,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "BAJFINANCE", name: "Bajaj Finance Ltd.", sector: "NBFC", exchange: "NSE",
     basePrice: 7200, volatility: 0.024, currency: "INR", marketCapB: 4350,
+    capCategory: "large",
     pe: 33.8, pb: 6.2, eps: 213.0, roe: 19.2, debtToEquity: 3.9, dividendYield: 0.3,
     revenueB: 528, netProfitB: 144, promoterHolding: 54.8, fiiHolding: 22.5, diiHolding: 12.4, bookValue: 1160,
     description: "India's largest non-banking financial company. Specializes in consumer lending, SME finance and deposits.",
@@ -83,6 +92,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "BHARTIARTL", name: "Bharti Airtel Ltd.", sector: "Telecom", exchange: "NSE",
     basePrice: 1680, volatility: 0.019, currency: "INR", marketCapB: 9820,
+    capCategory: "large",
     pe: 78.2, pb: 8.5, eps: 21.5, roe: 11.3, debtToEquity: 2.4, dividendYield: 0.4,
     revenueB: 1514, netProfitB: 88, promoterHolding: 55.9, fiiHolding: 18.1, diiHolding: 14.6, bookValue: 197,
     description: "India's largest telecom operator. Rapidly expanding 5G network across 500+ cities.",
@@ -90,6 +100,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Ltd.", sector: "Banking", exchange: "NSE",
     basePrice: 1870, volatility: 0.015, currency: "INR", marketCapB: 3720,
+    capCategory: "large",
     pe: 22.1, pb: 3.5, eps: 84.6, roe: 16.3, debtToEquity: 6.2, dividendYield: 0.1,
     revenueB: 862, netProfitB: 160, promoterHolding: 25.9, fiiHolding: 38.4, diiHolding: 23.5, bookValue: 534,
     description: "India's premium private sector bank known for quality assets and strong capital adequacy.",
@@ -97,6 +108,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "WIPRO", name: "Wipro Ltd.", sector: "Information Technology", exchange: "NSE",
     basePrice: 480, volatility: 0.017, currency: "INR", marketCapB: 2500,
+    capCategory: "mid",
     pe: 22.6, pb: 3.7, eps: 21.2, roe: 16.8, debtToEquity: 0.12, dividendYield: 0.2,
     revenueB: 897, netProfitB: 111, promoterHolding: 72.9, fiiHolding: 10.4, diiHolding: 9.1, bookValue: 130,
     description: "Global IT services and consulting firm. Strong footprint in North America and Europe.",
@@ -104,6 +116,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "LT", name: "Larsen & Toubro Ltd.", sector: "Infrastructure", exchange: "NSE",
     basePrice: 3620, volatility: 0.016, currency: "INR", marketCapB: 5080,
+    capCategory: "large",
     pe: 34.5, pb: 4.8, eps: 104.8, roe: 14.6, debtToEquity: 1.8, dividendYield: 0.8,
     revenueB: 2209, netProfitB: 148, promoterHolding: 0, fiiHolding: 22.4, diiHolding: 36.8, bookValue: 754,
     description: "India's largest engineering & construction conglomerate. Active in defense, IT, and heavy engineering.",
@@ -111,6 +124,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "AXISBANK", name: "Axis Bank Ltd.", sector: "Banking", exchange: "NSE",
     basePrice: 1120, volatility: 0.018, currency: "INR", marketCapB: 3460,
+    capCategory: "large",
     pe: 15.8, pb: 2.1, eps: 70.9, roe: 14.2, debtToEquity: 7.5, dividendYield: 0.1,
     revenueB: 1120, netProfitB: 220, promoterHolding: 8.2, fiiHolding: 50.2, diiHolding: 26.4, bookValue: 534,
     description: "India's third largest private sector bank. Growing retail and digital banking franchise.",
@@ -118,6 +132,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "HCLTECH", name: "HCL Technologies Ltd.", sector: "Information Technology", exchange: "NSE",
     basePrice: 1680, volatility: 0.014, currency: "INR", marketCapB: 4560,
+    capCategory: "large",
     pe: 27.2, pb: 7.1, eps: 61.8, roe: 26.2, debtToEquity: 0.06, dividendYield: 3.1,
     revenueB: 1094, netProfitB: 165, promoterHolding: 60.8, fiiHolding: 18.2, diiHolding: 13.5, bookValue: 236,
     description: "Third-largest Indian IT company. Known for software and infrastructure services to global enterprises.",
@@ -125,6 +140,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "MARUTI", name: "Maruti Suzuki India Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 12400, volatility: 0.018, currency: "INR", marketCapB: 3860,
+    capCategory: "large",
     pe: 25.8, pb: 4.2, eps: 481.0, roe: 17.3, debtToEquity: 0.0, dividendYield: 1.0,
     revenueB: 1340, netProfitB: 149, promoterHolding: 58.2, fiiHolding: 18.3, diiHolding: 13.2, bookValue: 2950,
     description: "India's leading passenger vehicle manufacturer. Dominant market share in entry-level and mid-size segments.",
@@ -132,6 +148,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TITAN", name: "Titan Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 3450, volatility: 0.019, currency: "INR", marketCapB: 3060,
+    capCategory: "large",
     pe: 89.4, pb: 17.2, eps: 38.6, roe: 20.1, debtToEquity: 0.04, dividendYield: 0.3,
     revenueB: 424, netProfitB: 34, promoterHolding: 52.9, fiiHolding: 17.6, diiHolding: 17.9, bookValue: 200,
     description: "Leading jewelry, watches, and eyewear company in India. Tanishq is India's most trusted jewelry brand.",
@@ -139,6 +156,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries", sector: "Pharmaceuticals", exchange: "NSE",
     basePrice: 1820, volatility: 0.016, currency: "INR", marketCapB: 4360,
+    capCategory: "large",
     pe: 38.4, pb: 5.4, eps: 47.4, roe: 14.8, debtToEquity: 0.03, dividendYield: 0.6,
     revenueB: 486, netProfitB: 99, promoterHolding: 54.5, fiiHolding: 19.2, diiHolding: 16.4, bookValue: 338,
     description: "India's largest pharmaceutical company. Strong generic drug presence in the US and emerging markets.",
@@ -146,6 +164,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TATAMOTORS", name: "Tata Motors Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 940, volatility: 0.028, currency: "INR", marketCapB: 3450,
+    capCategory: "large",
     pe: 10.6, pb: 3.8, eps: 88.7, roe: 41.5, debtToEquity: 1.4, dividendYield: 0.4,
     revenueB: 4384, netProfitB: 310, promoterHolding: 46.4, fiiHolding: 17.8, diiHolding: 19.5, bookValue: 247,
     description: "India's leading automobile manufacturer. Owns Jaguar Land Rover and growing EV business.",
@@ -153,6 +172,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TATASTEEL", name: "Tata Steel Ltd.", sector: "Metals", exchange: "NSE",
     basePrice: 162, volatility: 0.026, currency: "INR", marketCapB: 2020,
+    capCategory: "mid",
     pe: 15.4, pb: 1.6, eps: 10.5, roe: 10.8, debtToEquity: 1.9, dividendYield: 1.2,
     revenueB: 2297, netProfitB: 131, promoterHolding: 33.8, fiiHolding: 18.4, diiHolding: 26.4, bookValue: 101,
     description: "One of the world's top steel producers. Operations in India and Europe with high-grade steel products.",
@@ -160,6 +180,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ADANIENT", name: "Adani Enterprises Ltd.", sector: "Conglomerate", exchange: "NSE",
     basePrice: 2650, volatility: 0.038, currency: "INR", marketCapB: 3020,
+    capCategory: "mid",
     pe: 62.5, pb: 8.2, eps: 42.4, roe: 13.5, debtToEquity: 1.1, dividendYield: 0.1,
     revenueB: 988, netProfitB: 40, promoterHolding: 72.6, fiiHolding: 10.2, diiHolding: 7.4, bookValue: 323,
     description: "Flagship company of the Adani Group. Incubates new businesses across airports, green energy, defense.",
@@ -167,6 +188,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ITC", name: "ITC Ltd.", sector: "FMCG", exchange: "NSE",
     basePrice: 468, volatility: 0.014, currency: "INR", marketCapB: 5830,
+    capCategory: "large",
     pe: 27.6, pb: 7.5, eps: 16.9, roe: 27.8, debtToEquity: 0.0, dividendYield: 3.3,
     revenueB: 753, netProfitB: 199, promoterHolding: 0, fiiHolding: 41.7, diiHolding: 37.6, bookValue: 62,
     description: "Leading Indian conglomerate with cigarettes, FMCG, agri-business, paper, and hotels.",
@@ -174,6 +196,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TECHM", name: "Tech Mahindra Ltd.", sector: "Information Technology", exchange: "NSE",
     basePrice: 1520, volatility: 0.022, currency: "INR", marketCapB: 1860,
+    capCategory: "mid",
     pe: 28.4, pb: 3.9, eps: 53.5, roe: 14.1, debtToEquity: 0.07, dividendYield: 1.6,
     revenueB: 538, netProfitB: 59, promoterHolding: 35.2, fiiHolding: 25.8, diiHolding: 18.4, bookValue: 390,
     description: "IT and BPO services company. Strong in telecom vertical. Part of Mahindra Group.",
@@ -181,6 +204,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "JSWSTEEL", name: "JSW Steel Ltd.", sector: "Metals", exchange: "NSE",
     basePrice: 940, volatility: 0.024, currency: "INR", marketCapB: 2290,
+    capCategory: "mid",
     pe: 20.4, pb: 2.8, eps: 46.1, roe: 14.5, debtToEquity: 1.3, dividendYield: 0.6,
     revenueB: 1730, netProfitB: 96, promoterHolding: 44.8, fiiHolding: 26.2, diiHolding: 16.8, bookValue: 335,
     description: "India's largest private steel producer. Expanding capacity aggressively to serve domestic demand.",
@@ -188,6 +212,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NESTLEIND", name: "Nestle India Ltd.", sector: "FMCG", exchange: "NSE",
     basePrice: 2280, volatility: 0.012, currency: "INR", marketCapB: 2200,
+    capCategory: "large",
     pe: 72.1, pb: 68.5, eps: 31.6, roe: 97.2, debtToEquity: 0.0, dividendYield: 1.5,
     revenueB: 191, netProfitB: 31, promoterHolding: 62.8, fiiHolding: 13.6, diiHolding: 10.8, bookValue: 33,
     description: "India's leading FMCG company. Maggi noodles, KitKat, Munch and Nescafe are iconic brands.",
@@ -195,6 +220,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ASIANPAINT", name: "Asian Paints Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 2620, volatility: 0.016, currency: "INR", marketCapB: 2510,
+    capCategory: "large",
     pe: 52.8, pb: 14.2, eps: 49.6, roe: 27.2, debtToEquity: 0.03, dividendYield: 1.0,
     revenueB: 348, netProfitB: 47, promoterHolding: 52.6, fiiHolding: 17.8, diiHolding: 17.4, bookValue: 184,
     description: "India's #1 paint company. Operations in 15 countries. Known for quality paints and innovative home decor.",
@@ -202,6 +228,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd.", sector: "Cement", exchange: "NSE",
     basePrice: 11200, volatility: 0.017, currency: "INR", marketCapB: 3240,
+    capCategory: "large",
     pe: 38.2, pb: 5.8, eps: 293.2, roe: 15.8, debtToEquity: 0.28, dividendYield: 0.4,
     revenueB: 726, netProfitB: 81, promoterHolding: 59.7, fiiHolding: 14.6, diiHolding: 16.4, bookValue: 1931,
     description: "India's largest cement company. Significant capacity expansion underway to meet infrastructure demand.",
@@ -209,6 +236,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 268, volatility: 0.019, currency: "INR", marketCapB: 3380,
+    capCategory: "large",
     pe: 7.8, pb: 1.1, eps: 34.4, roe: 14.6, debtToEquity: 0.36, dividendYield: 4.5,
     revenueB: 1700, netProfitB: 434, promoterHolding: 58.9, fiiHolding: 8.4, diiHolding: 26.4, bookValue: 244,
     description: "India's largest oil & gas exploration company. Government-owned with massive reserves onshore and offshore.",
@@ -216,6 +244,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NTPC", name: "NTPC Ltd.", sector: "Power", exchange: "NSE",
     basePrice: 370, volatility: 0.016, currency: "INR", marketCapB: 3590,
+    capCategory: "large",
     pe: 18.5, pb: 2.4, eps: 20.0, roe: 13.1, debtToEquity: 1.5, dividendYield: 2.4,
     revenueB: 1812, netProfitB: 202, promoterHolding: 51.1, fiiHolding: 14.6, diiHolding: 25.2, bookValue: 154,
     description: "India's largest power utility. Expanding into renewable energy with a target of 60GW by 2032.",
@@ -223,6 +252,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "BPCL", name: "Bharat Petroleum Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 320, volatility: 0.021, currency: "INR", marketCapB: 1390,
+    capCategory: "mid",
     pe: 8.4, pb: 1.8, eps: 38.1, roe: 22.4, debtToEquity: 1.2, dividendYield: 5.6,
     revenueB: 4982, netProfitB: 165, promoterHolding: 52.9, fiiHolding: 11.2, diiHolding: 22.4, bookValue: 177,
     description: "India's second-largest oil refining and marketing company. Network of 20,000+ fuel stations.",
@@ -230,6 +260,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ZOMATO", name: "Zomato Ltd.", sector: "Internet & Technology", exchange: "NSE",
     basePrice: 248, volatility: 0.035, currency: "INR", marketCapB: 2200,
+    capCategory: "mid",
     pe: 412.0, pb: 10.8, eps: 0.6, roe: 2.8, debtToEquity: 0.0, dividendYield: 0.0,
     revenueB: 127, netProfitB: 4, promoterHolding: 0, fiiHolding: 58.2, diiHolding: 16.8, bookValue: 23,
     description: "India's leading food delivery platform. Expanding into quick commerce (Blinkit) and dining.",

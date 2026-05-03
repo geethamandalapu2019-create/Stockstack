@@ -135,9 +135,20 @@ export interface TopStockPrediction {
   predictions: TopStockPredictionPredictions;
 }
 
+export type TopPredictionsResponseCap =
+  (typeof TopPredictionsResponseCap)[keyof typeof TopPredictionsResponseCap];
+
+export const TopPredictionsResponseCap = {
+  all: "all",
+  large: "large",
+  mid: "mid",
+  small: "small",
+} as const;
+
 export interface TopPredictionsResponse {
   /** @nullable */
   query: string | null;
+  cap: TopPredictionsResponseCap;
   total: number;
   stocks: TopStockPrediction[];
 }
@@ -639,5 +650,16 @@ export const GetTradesStatus = {
 
 export type GetTopPredictionsParams = {
   q?: string;
+  cap?: GetTopPredictionsCap;
   limit?: number;
 };
+
+export type GetTopPredictionsCap =
+  (typeof GetTopPredictionsCap)[keyof typeof GetTopPredictionsCap];
+
+export const GetTopPredictionsCap = {
+  all: "all",
+  large: "large",
+  mid: "mid",
+  small: "small",
+} as const;

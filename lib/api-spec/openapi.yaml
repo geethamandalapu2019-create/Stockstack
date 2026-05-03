@@ -403,6 +403,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: cap
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, large, mid, small]
         - name: limit
           in: query
           required: false
@@ -603,13 +609,16 @@ components:
       properties:
         query:
           type: ["string", "null"]
+        cap:
+          type: string
+          enum: [all, large, mid, small]
         total:
           type: integer
         stocks:
           type: array
           items:
             $ref: "#/components/schemas/TopStockPrediction"
-      required: [query, total, stocks]
+      required: [query, cap, total, stocks]
 
     IndicatorPoint:
       type: object

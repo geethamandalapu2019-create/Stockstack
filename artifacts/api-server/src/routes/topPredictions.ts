@@ -60,9 +60,15 @@ function buildStockPrediction(symbol: string) {
   };
 }
 
+function getCapCategoryFilter(cap: string | undefined) {
+  if (!cap || cap === "all") return null;
+  return cap as "large" | "mid" | "small";
+}
+
 // GET /predictions/top?q=&limit=10
 router.get("/top", (req, res) => {
   const q = ((req.query.q as string) ?? "").toLowerCase().trim();
+  const cap = getCapCategoryFilter((req.query.cap as string) ?? "all");
   const limit = Math.min(parseInt((req.query.limit as string) ?? "10", 10), 30);
 
   let pool = STOCKS;
@@ -70,10 +76,11 @@ router.get("/top", (req, res) => {
     pool = STOCKS.filter(s =>
       s.currency === "INR" &&
       s.exchange === "NSE" &&
+      (!cap || s.capCategory === cap) &&
       (s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))
     );
   } else {
-    pool = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE");
+    pool = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE" && (!cap || s.capCategory === cap));
   }
 
   const results = pool
@@ -90,6 +97,7 @@ router.get("/top", (req, res) => {
 
   res.json({
     query: q || null,
+    cap: cap ?? "all",
     total: results.length,
     stocks: results.slice(0, limit),
   });

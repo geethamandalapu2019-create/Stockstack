@@ -80,12 +80,13 @@ export default function PredictionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [committedQuery, setCommittedQuery] = useState("");
   const [sortBy, setSortBy] = useState<"score" | "rsi">("score");
+  const [capTab, setCapTab] = useState<"all" | "large" | "mid" | "small">("all");
 
   const isSearching = committedQuery.length >= 1;
 
   const { data, isLoading, refetch, isFetching } = useGetTopPredictions(
-    isSearching ? { q: committedQuery, limit: 30 } : { limit: 10 },
-    { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, isSearching ? 30 : 10] } }
+    isSearching ? { q: committedQuery, cap: capTab, limit: 30 } : { cap: capTab, limit: 10 },
+    { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, capTab, isSearching ? 30 : 10] } }
   );
 
   const handleSearch = () => {
@@ -111,7 +112,7 @@ export default function PredictionsPage() {
           <p className="text-sm text-muted-foreground">
             {isSearching
               ? `Search results for "${committedQuery}" — multi-indicator composite analysis`
-              : "Top 10 stocks ranked by composite multi-indicator score (RSI · MACD · Stochastic · CCI · Williams %R · BB · OBV)"}
+              : `Top ${capTab === "all" ? "Indian" : capTab} cap stocks ranked by composite multi-indicator score`}
           </p>
         </div>
         <button
@@ -181,6 +182,30 @@ export default function PredictionsPage() {
               )}
             >
               {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!isSearching && (
+        <div className="flex flex-wrap gap-2 text-xs">
+          {[
+            { key: "all", label: "All Caps" },
+            { key: "large", label: "Large Cap" },
+            { key: "mid", label: "Mid Cap" },
+            { key: "small", label: "Small Cap" },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setCapTab(tab.key as typeof capTab)}
+              className={cn(
+                "px-3 py-1.5 rounded border transition-colors",
+                capTab === tab.key
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              )}
+            >
+              {tab.label}
             </button>
           ))}
         </div>
