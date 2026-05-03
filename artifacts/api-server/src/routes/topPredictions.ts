@@ -40,8 +40,16 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     targetPrice: number; changeAmount: number; direction: string; confidence: number; label: string;
   }> = {};
 
+  const scoreBoost =
+    indicator === "app" ? 0 :
+    indicator === "rsi" ? 1.02 :
+    indicator === "macd" ? 1.03 :
+    indicator === "sma" ? 1.01 :
+    indicator === "ema" ? 1.015 :
+    1.025;
+
   for (const h of HORIZONS) {
-    const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, analysis.score, h.days);
+    const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, Math.round(analysis.score * scoreBoost), h.days);
     predictions[h.key] = { ...pred, label: h.label };
   }
 

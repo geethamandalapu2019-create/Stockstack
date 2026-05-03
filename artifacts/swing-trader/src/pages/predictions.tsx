@@ -27,6 +27,7 @@ const INDICATORS = [
 
 type IndicatorKey = typeof INDICATORS[number]["key"];
 type TopPredictionResponse = {
+  indicator: IndicatorKey;
   stocks: Array<{
     symbol: string;
     name: string;
@@ -217,10 +218,12 @@ export default function PredictionsPage() {
     return ["all", ...unique];
   }, [stocks]);
 
+  const selectedIndicator = data?.indicator ?? indicatorTab;
+
   const filteredStocks = useMemo(() => {
     const base = sectorTab === "all" ? stocks : stocks.filter(stock => stock.sector === sectorTab);
     return base;
-  }, [stocks, sectorTab, indicatorTab]);
+  }, [stocks, sectorTab]);
 
   const rankedStocks = useMemo(() => {
     const list = [...filteredStocks];
@@ -234,7 +237,7 @@ export default function PredictionsPage() {
         return bestUpside(b) - bestUpside(a);
       });
     }
-    return list.sort((a, b) => b.overallScore - a.overallScore);
+    return list;
   }, [filteredStocks, sortBy]);
 
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
@@ -316,9 +319,9 @@ export default function PredictionsPage() {
             ))}
           </div>
           <p className="text-[11px] text-muted-foreground">
-            {indicatorTab === "app"
+            {selectedIndicator === "app"
               ? "App Suggested uses the strongest overall score from the app’s technical model."
-              : `Showing predictions optimized for ${INDICATORS.find(i => i.key === indicatorTab)?.label}.`}
+              : `Showing predictions optimized for ${INDICATORS.find(i => i.key === selectedIndicator)?.label}.`}
           </p>
         </CardContent>
       </Card>
