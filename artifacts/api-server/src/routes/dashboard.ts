@@ -110,15 +110,19 @@ router.get("/signals", async (req, res) => {
     const watchlist = await db.select().from(watchlistTable);
 
     const nseStocks = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE");
-    const stocks = watchlist.length > 0
-      ? watchlist.map(e => ({ symbol: e.symbol, name: e.name }))
+    const watchlistNse = watchlist.filter(e => {
+      const st = getStockBySymbol(e.symbol);
+      return st?.currency === "INR" && st?.exchange === "NSE";
+    });
+    const stocks = watchlistNse.length > 0
+      ? watchlistNse.map(e => ({ symbol: e.symbol, name: e.name }))
       : nseStocks.slice(0, 8).map(s => ({ symbol: s.symbol, name: s.name }));
 
     const signals = stocks.map(({ symbol, name }) => {
       const stock = getStockBySymbol(symbol);
       const candles = generateCandles(symbol, 90, "1d");
       const closes = candles.map(c => c.close);
-      const { price, changePercent } = getCurrentPrice(symbol);
+      const { price, change, changePercent } = getCurrentPrice(symbol);
       const s = computeSignals(closes);
 
       const rationale = [
@@ -134,6 +138,7 @@ router.get("/signals", async (req, res) => {
         symbol,
         name,
         price,
+        change,
         changePercent,
         overallSignal: s.overallSignal,
         rsiSignal: s.rsiSignal,
@@ -141,7 +146,7 @@ router.get("/signals", async (req, res) => {
         bbSignal: s.bbSignal,
         currentRsi: s.currentRsi ?? null,
         rationale,
-        currency: stock?.currency ?? "USD",
+        currency: stock?.currency ?? "INR",
       };
     });
 

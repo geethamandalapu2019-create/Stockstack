@@ -300,9 +300,11 @@ export default function PredictionsPage() {
                 {topThree.map((stock, idx) => {
                   const pred1d = stock.predictions["1d"];
                   const pred1w = stock.predictions["1w"];
+                  const pred2w = stock.predictions["2w"];
                   const pred1mo = stock.predictions["1mo"];
                   const upside1d = pred1d ? formatUpside(pred1d.targetPrice, stock.currentPrice) : null;
                   const upside1w = pred1w ? formatUpside(pred1w.targetPrice, stock.currentPrice) : null;
+                  const upside2w = pred2w ? formatUpside(pred2w.targetPrice, stock.currentPrice) : null;
                   const upside1mo = pred1mo ? formatUpside(pred1mo.targetPrice, stock.currentPrice) : null;
                   const isTopPick = idx === 0;
 
@@ -328,46 +330,25 @@ export default function PredictionsPage() {
 
                         <ScoreBar score={stock.overallScore} />
 
-                        <div className="grid grid-cols-3 gap-2">
-                          {pred1d && (
-                            <div className="bg-secondary/40 rounded-lg p-2 text-center">
-                              <div className="text-[9px] text-muted-foreground font-data mb-0.5">1-DAY TARGET</div>
-                              <div className={cn("font-bold text-sm font-data", pred1d.direction === "bullish" ? "text-bullish" : "text-bearish")}>
-                                {formatPrice(pred1d.targetPrice, stock.currency)}
+                        <div className="grid grid-cols-2 gap-2">
+                          {([
+                            { pred: pred1d, upside: upside1d, label: "1-DAY" },
+                            { pred: pred1w, upside: upside1w, label: "1-WEEK" },
+                            { pred: pred2w, upside: upside2w, label: "2-WEEK" },
+                            { pred: pred1mo, upside: upside1mo, label: "1-MONTH" },
+                          ] as const).map(({ pred, upside, label }) => pred && (
+                            <div key={label} className="bg-secondary/40 rounded-lg p-2 text-center">
+                              <div className="text-[9px] text-muted-foreground font-data mb-0.5">{label} TARGET</div>
+                              <div className={cn("font-bold text-sm font-data", pred.direction === "bullish" ? "text-bullish" : pred.direction === "bearish" ? "text-bearish" : "text-muted-foreground")}>
+                                {formatPrice(pred.targetPrice, stock.currency)}
                               </div>
-                              {upside1d && (
-                                <div className={cn("text-[10px] font-semibold", upside1d.pct >= 0 ? "text-bullish" : "text-bearish")}>
-                                  {upside1d.formatted}
+                              {upside && (
+                                <div className={cn("text-[10px] font-semibold", upside.pct >= 0 ? "text-bullish" : "text-bearish")}>
+                                  {upside.formatted}
                                 </div>
                               )}
                             </div>
-                          )}
-                          {pred1w && (
-                            <div className="bg-secondary/40 rounded-lg p-2 text-center">
-                              <div className="text-[9px] text-muted-foreground font-data mb-0.5">1-WEEK TARGET</div>
-                              <div className={cn("font-bold text-sm font-data", pred1w.direction === "bullish" ? "text-bullish" : "text-bearish")}>
-                                {formatPrice(pred1w.targetPrice, stock.currency)}
-                              </div>
-                              {upside1w && (
-                                <div className={cn("text-[10px] font-semibold", upside1w.pct >= 0 ? "text-bullish" : "text-bearish")}>
-                                  {upside1w.formatted}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          {pred1mo && (
-                            <div className="bg-secondary/40 rounded-lg p-2 text-center">
-                              <div className="text-[9px] text-muted-foreground font-data mb-0.5">1-MONTH TARGET</div>
-                              <div className={cn("font-bold text-sm font-data", pred1mo.direction === "bullish" ? "text-bullish" : "text-bearish")}>
-                                {formatPrice(pred1mo.targetPrice, stock.currency)}
-                              </div>
-                              {upside1mo && (
-                                <div className={cn("text-[10px] font-semibold", upside1mo.pct >= 0 ? "text-bullish" : "text-bearish")}>
-                                  {upside1mo.formatted}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          ))}
                         </div>
 
                         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
@@ -411,7 +392,7 @@ export default function PredictionsPage() {
             )}
 
             {/* Table header — desktop */}
-            <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(5,1fr)_auto] gap-3 items-center px-4 mb-1 text-[10px] font-data text-muted-foreground uppercase tracking-wide">
+            <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(4,1fr)_auto] gap-3 items-center px-4 mb-1 text-[10px] font-data text-muted-foreground uppercase tracking-wide">
               <div>Stock</div>
               <div>Score / Signal</div>
               {HORIZONS.map(h => <div key={h.key} className="text-center">{h.key.toUpperCase()}</div>)}
@@ -445,10 +426,9 @@ export default function PredictionsPage() {
                         </div>
                         <ScoreBar score={stock.overallScore} />
                         <div className="flex gap-1.5 overflow-x-auto pb-1">
-                        {HORIZONS.map(h => {
+                          {HORIZONS.map(h => {
                             const pred = stock.predictions[h.key];
-                          if (!pred) return null;
-                          if (capTab === "small" && pred.direction !== "bearish") return null;
+                            if (!pred) return null;
                             return (
                               <div key={h.key} className="shrink-0">
                                 <div className="text-[9px] text-muted-foreground text-center mb-0.5 font-data">{h.key.toUpperCase()}</div>
@@ -470,7 +450,7 @@ export default function PredictionsPage() {
                       </div>
 
                       {/* Desktop */}
-                      <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(5,1fr)_auto] gap-3 items-center">
+                      <div className="hidden md:grid grid-cols-[2fr_1fr_repeat(4,1fr)_auto] gap-3 items-center">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-xs font-data text-muted-foreground w-5 shrink-0">#{rankNum}</span>
                           <span className="text-base shrink-0">{flag}</span>
@@ -492,9 +472,6 @@ export default function PredictionsPage() {
                         </div>
                         {HORIZONS.map(h => {
                           const pred = stock.predictions[h.key];
-                          if (capTab === "small" && pred && pred.direction !== "bearish") {
-                            return <div key={h.key} className="text-muted-foreground text-xs text-center">—</div>;
-                          }
                           if (!pred) return <div key={h.key} className="text-muted-foreground text-xs text-center">—</div>;
                           return <HorizonCell key={h.key} {...pred} changeAmount={pred.changeAmount ?? (pred.targetPrice - stock.currentPrice)} currency={stock.currency} />;
                         })}

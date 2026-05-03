@@ -279,9 +279,11 @@ export const GetWatchlistResponseItem = zod.object({
   id: zod.number(),
   symbol: zod.string(),
   name: zod.string(),
+  sector: zod.string(),
   price: zod.number(),
   change: zod.number(),
   changePercent: zod.number(),
+  rsi: zod.number().nullable(),
   overallSignal: zod.enum([
     "strong_buy",
     "buy",
@@ -289,7 +291,10 @@ export const GetWatchlistResponseItem = zod.object({
     "sell",
     "strong_sell",
   ]),
+  rsiSignal: zod.enum(["oversold", "overbought", "neutral"]),
+  macdSignal: zod.enum(["bullish", "bearish", "neutral"]),
   currency: zod.string(),
+  capCategory: zod.enum(["large", "mid", "small"]),
   addedAt: zod.string(),
 });
 export const GetWatchlistResponse = zod.array(GetWatchlistResponseItem);
@@ -431,9 +436,11 @@ export const GetDashboardSummaryResponse = zod.object({
       id: zod.number(),
       symbol: zod.string(),
       name: zod.string(),
+      sector: zod.string(),
       price: zod.number(),
       change: zod.number(),
       changePercent: zod.number(),
+      rsi: zod.number().nullable(),
       overallSignal: zod.enum([
         "strong_buy",
         "buy",
@@ -441,7 +448,10 @@ export const GetDashboardSummaryResponse = zod.object({
         "sell",
         "strong_sell",
       ]),
+      rsiSignal: zod.enum(["oversold", "overbought", "neutral"]),
+      macdSignal: zod.enum(["bullish", "bearish", "neutral"]),
       currency: zod.string(),
+      capCategory: zod.enum(["large", "mid", "small"]),
       addedAt: zod.string(),
     })
     .optional(),
@@ -450,9 +460,11 @@ export const GetDashboardSummaryResponse = zod.object({
       id: zod.number(),
       symbol: zod.string(),
       name: zod.string(),
+      sector: zod.string(),
       price: zod.number(),
       change: zod.number(),
       changePercent: zod.number(),
+      rsi: zod.number().nullable(),
       overallSignal: zod.enum([
         "strong_buy",
         "buy",
@@ -460,7 +472,10 @@ export const GetDashboardSummaryResponse = zod.object({
         "sell",
         "strong_sell",
       ]),
+      rsiSignal: zod.enum(["oversold", "overbought", "neutral"]),
+      macdSignal: zod.enum(["bullish", "bearish", "neutral"]),
       currency: zod.string(),
+      capCategory: zod.enum(["large", "mid", "small"]),
       addedAt: zod.string(),
     })
     .optional(),
@@ -471,6 +486,7 @@ export const GetDashboardSignalsResponseItem = zod.object({
   symbol: zod.string(),
   name: zod.string(),
   price: zod.number(),
+  change: zod.number(),
   changePercent: zod.number(),
   overallSignal: zod.enum([
     "strong_buy",

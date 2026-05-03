@@ -57,12 +57,13 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-3">
           <h2 className="text-base md:text-lg font-semibold tracking-tight">Top Swing Signals</h2>
           <div className="bg-card border border-border rounded-lg overflow-hidden overflow-x-auto">
-            <table className="w-full text-sm text-left min-w-[560px]">
+            <table className="w-full text-sm text-left min-w-[700px]">
               <thead className="bg-secondary/50 text-muted-foreground font-data text-xs border-b border-border">
                 <tr>
                   <th className="px-3 md:px-4 py-3 font-medium">SYMBOL</th>
                   <th className="px-3 md:px-4 py-3 font-medium text-right">PRICE</th>
-                  <th className="px-3 md:px-4 py-3 font-medium text-right">CHANGE</th>
+                  <th className="px-3 md:px-4 py-3 font-medium text-right">CHANGE (₹)</th>
+                  <th className="px-3 md:px-4 py-3 font-medium text-right">CHANGE (%)</th>
                   <th className="px-3 md:px-4 py-3 font-medium">SIGNAL</th>
                   <th className="px-3 md:px-4 py-3 font-medium">RSI / MACD</th>
                   <th className="px-3 md:px-4 py-3 font-medium">ACTION</th>
@@ -92,9 +93,15 @@ export default function Dashboard() {
                     </td>
                     <td className={cn(
                       "px-3 md:px-4 py-3 text-right font-data",
-                      signal.changePercent > 0 ? "text-bullish" : "text-bearish"
+                      signal.change >= 0 ? "text-bullish" : "text-bearish"
                     )}>
-                      {signal.changePercent > 0 ? "+" : ""}{signal.changePercent.toFixed(2)}%
+                      {signal.change >= 0 ? "+" : ""}₹{Math.abs(signal.change).toFixed(2)}
+                    </td>
+                    <td className={cn(
+                      "px-3 md:px-4 py-3 text-right font-data",
+                      signal.changePercent >= 0 ? "text-bullish" : "text-bearish"
+                    )}>
+                      {signal.changePercent >= 0 ? "+" : ""}{signal.changePercent.toFixed(2)}%
                     </td>
                     <td className="px-3 md:px-4 py-3">
                       <SignalBadge signal={signal.overallSignal} />
@@ -108,7 +115,7 @@ export default function Dashboard() {
                         <span className={cn(
                           signal.macdSignal === "bullish" ? "text-bullish" :
                           signal.macdSignal === "bearish" ? "text-bearish" : "text-muted-foreground"
-                        )}>MACD</span>
+                        )}>MACD: {signal.macdSignal === "bullish" ? "↑" : signal.macdSignal === "bearish" ? "↓" : "—"}</span>
                       </div>
                     </td>
                     <td className="px-3 md:px-4 py-3">

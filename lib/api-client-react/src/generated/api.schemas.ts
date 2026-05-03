@@ -393,15 +393,48 @@ export const WatchlistItemOverallSignal = {
   strong_sell: "strong_sell",
 } as const;
 
+export type WatchlistItemRsiSignal =
+  (typeof WatchlistItemRsiSignal)[keyof typeof WatchlistItemRsiSignal];
+
+export const WatchlistItemRsiSignal = {
+  oversold: "oversold",
+  overbought: "overbought",
+  neutral: "neutral",
+} as const;
+
+export type WatchlistItemMacdSignal =
+  (typeof WatchlistItemMacdSignal)[keyof typeof WatchlistItemMacdSignal];
+
+export const WatchlistItemMacdSignal = {
+  bullish: "bullish",
+  bearish: "bearish",
+  neutral: "neutral",
+} as const;
+
+export type WatchlistItemCapCategory =
+  (typeof WatchlistItemCapCategory)[keyof typeof WatchlistItemCapCategory];
+
+export const WatchlistItemCapCategory = {
+  large: "large",
+  mid: "mid",
+  small: "small",
+} as const;
+
 export interface WatchlistItem {
   id: number;
   symbol: string;
   name: string;
+  sector: string;
   price: number;
   change: number;
   changePercent: number;
+  /** @nullable */
+  rsi: number | null;
   overallSignal: WatchlistItemOverallSignal;
+  rsiSignal: WatchlistItemRsiSignal;
+  macdSignal: WatchlistItemMacdSignal;
   currency: string;
+  capCategory: WatchlistItemCapCategory;
   addedAt: string;
 }
 
@@ -581,6 +614,7 @@ export interface SwingSignal {
   symbol: string;
   name: string;
   price: number;
+  change: number;
   changePercent: number;
   overallSignal: SwingSignalOverallSignal;
   rsiSignal: SwingSignalRsiSignal;

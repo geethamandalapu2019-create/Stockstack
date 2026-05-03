@@ -17,6 +17,31 @@ function formatPrice(price: number, currency: string) {
   return `${sym}${price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function formatChange(change: number, currency: string) {
+  const sym = currency === "INR" ? "₹" : "$";
+  const sign = change >= 0 ? "+" : "";
+  return `${sign}${sym}${Math.abs(change).toFixed(2)}`;
+}
+
+function CapBadge({ cap }: { cap: string }) {
+  const cfg: Record<string, string> = {
+    large: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
+    mid:   "bg-purple-500/20 text-purple-400 border border-purple-500/30",
+    small: "bg-orange-500/20 text-orange-400 border border-orange-500/30",
+  };
+  return (
+    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase", cfg[cap] ?? cfg.large)}>
+      {cap}
+    </span>
+  );
+}
+
+function RsiBadge({ rsi, signal }: { rsi: number | null; signal: string }) {
+  if (rsi === null) return null;
+  const cls = signal === "oversold" ? "text-bullish" : signal === "overbought" ? "text-bearish" : "text-muted-foreground";
+  return <span className={cn("font-data text-xs", cls)}>{Math.round(rsi)}</span>;
+}
+
 export default function Watchlist() {
   const { data: watchlist, isLoading } = useGetWatchlist();
   const removeFromWatchlist = useRemoveFromWatchlist();
@@ -122,19 +147,29 @@ export default function Watchlist() {
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
+                  {/* Row 1: flag + symbol + signal + cap */}
+                  <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                     <span className="text-sm">{item.currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
                     <Link href={`/chart/${item.symbol}`} className="font-bold text-base hover:text-primary transition-colors">
                       {item.symbol}
                     </Link>
                     <SignalBadge signal={item.overallSignal} />
+                    <CapBadge cap={item.capCategory} />
                   </div>
-                  <div className="text-xs text-muted-foreground truncate mb-2">{item.name}</div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-data font-semibold">{formatPrice(item.price, item.currency)}</span>
-                    <span className={cn("font-data text-sm", item.changePercent > 0 ? "text-bullish" : "text-bearish")}>
-                      {item.changePercent > 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
+                  {/* Row 2: name + sector */}
+                  <div className="text-xs text-muted-foreground truncate mb-2">
+                    {item.name} · <span className="text-muted-foreground/70">{item.sector}</span>
+                  </div>
+                  {/* Row 3: price + changes */}
+                  <div className="flex items-center gap-2">
+                    <span className="font-data font-semibold text-sm">{formatPrice(item.price, item.currency)}</span>
+                    <span className={cn("font-data text-xs", item.change >= 0 ? "text-bullish" : "text-bearish")}>
+                      {formatChange(item.change, item.currency)}
                     </span>
+                    <span className={cn("font-data text-xs", item.changePercent >= 0 ? "text-bullish" : "text-bearish")}>
+                      ({item.changePercent >= 0 ? "+" : ""}{item.changePercent.toFixed(2)}%)
+                    </span>
+                    <span className="text-muted-foreground text-xs ml-auto">RSI <RsiBadge rsi={item.rsi} signal={item.rsiSignal} /></span>
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
@@ -163,11 +198,13 @@ export default function Watchlist() {
           <thead className="bg-secondary/50 text-muted-foreground font-data text-xs border-b border-border sticky top-0 backdrop-blur">
             <tr>
               <th className="px-4 py-3 font-medium">SYMBOL</th>
-              <th className="px-4 py-3 font-medium">NAME</th>
+              <th className="px-4 py-3 font-medium">NAME / SECTOR</th>
               <th className="px-4 py-3 font-medium text-right">PRICE</th>
-              <th className="px-4 py-3 font-medium text-right">CHANGE</th>
+              <th className="px-4 py-3 font-medium text-right">CHANGE (₹)</th>
+              <th className="px-4 py-3 font-medium text-right">CHANGE (%)</th>
+              <th className="px-4 py-3 font-medium text-center">RSI</th>
               <th className="px-4 py-3 font-medium">SIGNAL</th>
-              <th className="px-4 py-3 font-medium">ADDED</th>
+              <th className="px-4 py-3 font-medium">CAP</th>
               <th className="px-4 py-3 font-medium text-right">ACTIONS</th>
             </tr>
           </thead>
@@ -175,14 +212,14 @@ export default function Watchlist() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i}>
-                  {Array.from({ length: 7 }).map((_, j) => (
+                  {Array.from({ length: 9 }).map((_, j) => (
                     <td key={j} className="px-4 py-4"><Skeleton className="h-4 w-16" /></td>
                   ))}
                 </tr>
               ))
             ) : watchlist?.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center">
+                <td colSpan={9} className="px-4 py-12 text-center">
                   <Activity className="w-12 h-12 text-muted/50 mx-auto mb-4" />
                   <div className="text-muted-foreground">Watchlist is empty. Search for a symbol to add it.</div>
                 </td>
@@ -195,19 +232,31 @@ export default function Watchlist() {
                     {item.symbol}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground truncate max-w-[180px]">{item.name}</td>
+                <td className="px-4 py-3 max-w-[200px]">
+                  <div className="text-foreground truncate text-xs font-medium">{item.name}</div>
+                  <div className="text-muted-foreground text-xs truncate">{item.sector}</div>
+                </td>
                 <td className="px-4 py-3 text-right font-data">{formatPrice(item.price, item.currency)}</td>
                 <td className={cn(
                   "px-4 py-3 text-right font-data",
-                  item.changePercent > 0 ? "text-bullish" : "text-bearish"
+                  item.change >= 0 ? "text-bullish" : "text-bearish"
                 )}>
-                  {item.changePercent > 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
+                  {formatChange(item.change, item.currency)}
+                </td>
+                <td className={cn(
+                  "px-4 py-3 text-right font-data",
+                  item.changePercent >= 0 ? "text-bullish" : "text-bearish"
+                )}>
+                  {item.changePercent >= 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <RsiBadge rsi={item.rsi} signal={item.rsiSignal} />
                 </td>
                 <td className="px-4 py-3">
                   <SignalBadge signal={item.overallSignal} />
                 </td>
-                <td className="px-4 py-3 text-muted-foreground text-xs">
-                  {new Date(item.addedAt).toLocaleDateString()}
+                <td className="px-4 py-3">
+                  <CapBadge cap={item.capCategory} />
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

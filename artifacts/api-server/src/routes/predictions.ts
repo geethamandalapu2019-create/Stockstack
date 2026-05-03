@@ -20,10 +20,12 @@ interface Horizon {
 
 const HORIZONS: Horizon[] = [
   { key: "1d",   label: "1 Day",    days: 1,   points: 24 },
-  { key: "5d",   label: "5 Days",   days: 5,   points: 5 },
-  { key: "10d",  label: "10 Days",  days: 10,  points: 10 },
+  { key: "1w",   label: "1 Week",   days: 5,   points: 5  },
   { key: "2w",   label: "2 Weeks",  days: 14,  points: 14 },
   { key: "1mo",  label: "1 Month",  days: 30,  points: 30 },
+  { key: "3mo",  label: "3 Months", days: 90,  points: 30 },
+  { key: "6mo",  label: "6 Months", days: 180, points: 30 },
+  { key: "12mo", label: "1 Year",   days: 365, points: 52 },
 ];
 
 function seededRng(seed: number) {

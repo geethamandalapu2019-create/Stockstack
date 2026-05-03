@@ -229,9 +229,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="w-px h-4 bg-border hidden lg:block" />
                 <div className="hidden lg:flex items-center gap-1.5">
-                  <span className="text-muted-foreground">SPY</span>
-                  <span className="text-bullish">512.42</span>
-                  <span className="text-bullish">+1.2%</span>
+                  <span className="text-muted-foreground">BANKNIFTY</span>
+                  <span className="text-bullish">48,271</span>
+                  <span className="text-bullish">+0.9%</span>
                 </div>
               </div>
 

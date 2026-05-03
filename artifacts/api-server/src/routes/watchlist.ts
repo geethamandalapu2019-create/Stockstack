@@ -1,14 +1,17 @@
 import { Router } from "express";
 import { db, watchlistTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { getCurrentPrice, getStockBySymbol, generateCandles, computeSignals } from "../lib/stockData.js";
+import { getCurrentPrice, getStockBySymbol, generateCandles, computeSignals, calcRSI } from "../lib/stockData.js";
 
 const router = Router();
 
-function computeWatchlistSignal(symbol: string) {
+function computeWatchlistData(symbol: string) {
   const candles = generateCandles(symbol, 90, "1d");
   const closes = candles.map(c => c.close);
-  return computeSignals(closes);
+  const signals = computeSignals(closes);
+  const rsiArr = calcRSI(closes);
+  const rsi = rsiArr[rsiArr.length - 1] ?? null;
+  return { signals, rsi };
 }
 
 // GET /watchlist
@@ -18,16 +21,21 @@ router.get("/", async (req, res) => {
     const items = entries.map(entry => {
       const stock = getStockBySymbol(entry.symbol);
       const { price, change, changePercent } = getCurrentPrice(entry.symbol);
-      const signals = computeWatchlistSignal(entry.symbol);
+      const { signals, rsi } = computeWatchlistData(entry.symbol);
       return {
         id: entry.id,
         symbol: entry.symbol,
         name: entry.name,
+        sector: stock?.sector ?? "Unknown",
         price,
         change,
         changePercent,
+        rsi,
         overallSignal: signals.overallSignal,
-        currency: stock?.currency ?? "USD",
+        rsiSignal: signals.rsiSignal,
+        macdSignal: signals.macdSignal,
+        currency: stock?.currency ?? "INR",
+        capCategory: stock?.capCategory ?? "large",
         addedAt: entry.addedAt.toISOString(),
       };
     });
@@ -60,17 +68,22 @@ router.post("/", async (req, res) => {
 
     const stock = getStockBySymbol(created.symbol);
     const { price, change, changePercent } = getCurrentPrice(created.symbol);
-    const signals = computeWatchlistSignal(created.symbol);
+    const { signals, rsi } = computeWatchlistData(created.symbol);
 
     res.status(201).json({
       id: created.id,
       symbol: created.symbol,
       name: created.name,
+      sector: stock?.sector ?? "Unknown",
       price,
       change,
       changePercent,
+      rsi,
       overallSignal: signals.overallSignal,
-      currency: stock?.currency ?? "USD",
+      rsiSignal: signals.rsiSignal,
+      macdSignal: signals.macdSignal,
+      currency: stock?.currency ?? "INR",
+      capCategory: stock?.capCategory ?? "large",
       addedAt: created.addedAt.toISOString(),
     });
   } catch (err) {

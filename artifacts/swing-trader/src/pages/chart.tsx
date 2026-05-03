@@ -27,14 +27,15 @@ import {
 } from "lucide-react";
 
 type Tab = "chart" | "technical" | "predictions" | "fundamentals";
-type Horizon = "1d" | "1w" | "1mo" | "3mo" | "6mo" | "12mo";
+type Horizon = "1d" | "1w" | "2w" | "1mo" | "3mo" | "6mo" | "12mo";
 
 const HORIZONS: { key: Horizon; label: string }[] = [
-  { key: "1d", label: "1D" },
-  { key: "1w", label: "1W" },
-  { key: "1mo", label: "1M" },
-  { key: "3mo", label: "3M" },
-  { key: "6mo", label: "6M" },
+  { key: "1d",   label: "1D" },
+  { key: "1w",   label: "1W" },
+  { key: "2w",   label: "2W" },
+  { key: "1mo",  label: "1M" },
+  { key: "3mo",  label: "3M" },
+  { key: "6mo",  label: "6M" },
   { key: "12mo", label: "1Y" },
 ];
 
@@ -561,7 +562,7 @@ export default function ChartPage() {
         {tab === "predictions" && (
           <div className="flex flex-col gap-3">
             {/* Horizon picker */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
               {HORIZONS.map(h => (
                 <button key={h.key} onClick={() => setHorizon(h.key)}
                   className={cn("py-2 text-xs font-semibold rounded-lg transition-colors",

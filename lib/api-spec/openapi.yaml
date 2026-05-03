@@ -881,20 +881,33 @@ components:
           type: string
         name:
           type: string
+        sector:
+          type: string
         price:
           type: number
         change:
           type: number
         changePercent:
           type: number
+        rsi:
+          type: ["number", "null"]
         overallSignal:
           type: string
           enum: [strong_buy, buy, neutral, sell, strong_sell]
+        rsiSignal:
+          type: string
+          enum: [oversold, overbought, neutral]
+        macdSignal:
+          type: string
+          enum: [bullish, bearish, neutral]
         currency:
           type: string
+        capCategory:
+          type: string
+          enum: [large, mid, small]
         addedAt:
           type: string
-      required: [id, symbol, name, price, change, changePercent, overallSignal, currency, addedAt]
+      required: [id, symbol, name, sector, price, change, changePercent, rsi, overallSignal, rsiSignal, macdSignal, currency, capCategory, addedAt]
 
     AddToWatchlistBody:
       type: object
@@ -1049,6 +1062,8 @@ components:
           type: string
         price:
           type: number
+        change:
+          type: number
         changePercent:
           type: number
         overallSignal:
@@ -1069,4 +1084,4 @@ components:
           type: string
         currency:
           type: string
-      required: [symbol, name, price, changePercent, overallSignal, rsiSignal, macdSignal, bbSignal, currentRsi, rationale, currency]
+      required: [symbol, name, price, change, changePercent, overallSignal, rsiSignal, macdSignal, bbSignal, currentRsi, rationale, currency]
