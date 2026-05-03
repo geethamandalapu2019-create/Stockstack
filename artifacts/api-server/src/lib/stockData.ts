@@ -140,7 +140,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "MARUTI", name: "Maruti Suzuki India Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 12400, volatility: 0.018, currency: "INR", marketCapB: 3860,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 25.8, pb: 4.2, eps: 481.0, roe: 17.3, debtToEquity: 0.0, dividendYield: 1.0,
     revenueB: 1340, netProfitB: 149, promoterHolding: 58.2, fiiHolding: 18.3, diiHolding: 13.2, bookValue: 2950,
     description: "India's leading passenger vehicle manufacturer. Dominant market share in entry-level and mid-size segments.",
@@ -148,7 +148,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TITAN", name: "Titan Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 3450, volatility: 0.019, currency: "INR", marketCapB: 3060,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 89.4, pb: 17.2, eps: 38.6, roe: 20.1, debtToEquity: 0.04, dividendYield: 0.3,
     revenueB: 424, netProfitB: 34, promoterHolding: 52.9, fiiHolding: 17.6, diiHolding: 17.9, bookValue: 200,
     description: "Leading jewelry, watches, and eyewear company in India. Tanishq is India's most trusted jewelry brand.",
@@ -164,7 +164,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "TATAMOTORS", name: "Tata Motors Ltd.", sector: "Automobile", exchange: "NSE",
     basePrice: 940, volatility: 0.028, currency: "INR", marketCapB: 3450,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 10.6, pb: 3.8, eps: 88.7, roe: 41.5, debtToEquity: 1.4, dividendYield: 0.4,
     revenueB: 4384, netProfitB: 310, promoterHolding: 46.4, fiiHolding: 17.8, diiHolding: 19.5, bookValue: 247,
     description: "India's leading automobile manufacturer. Owns Jaguar Land Rover and growing EV business.",
@@ -212,7 +212,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NESTLEIND", name: "Nestle India Ltd.", sector: "FMCG", exchange: "NSE",
     basePrice: 2280, volatility: 0.012, currency: "INR", marketCapB: 2200,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 72.1, pb: 68.5, eps: 31.6, roe: 97.2, debtToEquity: 0.0, dividendYield: 1.5,
     revenueB: 191, netProfitB: 31, promoterHolding: 62.8, fiiHolding: 13.6, diiHolding: 10.8, bookValue: 33,
     description: "India's leading FMCG company. Maggi noodles, KitKat, Munch and Nescafe are iconic brands.",
@@ -220,7 +220,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ASIANPAINT", name: "Asian Paints Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
     basePrice: 2620, volatility: 0.016, currency: "INR", marketCapB: 2510,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 52.8, pb: 14.2, eps: 49.6, roe: 27.2, debtToEquity: 0.03, dividendYield: 1.0,
     revenueB: 348, netProfitB: 47, promoterHolding: 52.6, fiiHolding: 17.8, diiHolding: 17.4, bookValue: 184,
     description: "India's #1 paint company. Operations in 15 countries. Known for quality paints and innovative home decor.",
@@ -228,7 +228,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd.", sector: "Cement", exchange: "NSE",
     basePrice: 11200, volatility: 0.017, currency: "INR", marketCapB: 3240,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 38.2, pb: 5.8, eps: 293.2, roe: 15.8, debtToEquity: 0.28, dividendYield: 0.4,
     revenueB: 726, netProfitB: 81, promoterHolding: 59.7, fiiHolding: 14.6, diiHolding: 16.4, bookValue: 1931,
     description: "India's largest cement company. Significant capacity expansion underway to meet infrastructure demand.",
@@ -236,7 +236,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 268, volatility: 0.019, currency: "INR", marketCapB: 3380,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 7.8, pb: 1.1, eps: 34.4, roe: 14.6, debtToEquity: 0.36, dividendYield: 4.5,
     revenueB: 1700, netProfitB: 434, promoterHolding: 58.9, fiiHolding: 8.4, diiHolding: 26.4, bookValue: 244,
     description: "India's largest oil & gas exploration company. Government-owned with massive reserves onshore and offshore.",
@@ -244,7 +244,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NTPC", name: "NTPC Ltd.", sector: "Power", exchange: "NSE",
     basePrice: 370, volatility: 0.016, currency: "INR", marketCapB: 3590,
-    capCategory: "large",
+    capCategory: "mid",
     pe: 18.5, pb: 2.4, eps: 20.0, roe: 13.1, debtToEquity: 1.5, dividendYield: 2.4,
     revenueB: 1812, netProfitB: 202, promoterHolding: 51.1, fiiHolding: 14.6, diiHolding: 25.2, bookValue: 154,
     description: "India's largest power utility. Expanding into renewable energy with a target of 60GW by 2032.",
