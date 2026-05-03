@@ -525,7 +525,8 @@ export default function PredictionsPage() {
                           </div>
                           <div className="text-right">
                             <SignalPill signal={stock.overallSignal} />
-                            <div className="font-data font-bold mt-1.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
+                            <div className="text-[10px] text-muted-foreground mt-1">Current Price</div>
+                            <div className="font-data font-bold mt-0.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
                           </div>
                         </div>
                         <ScoreBar score={stock.overallScore} />
@@ -642,6 +643,7 @@ export default function PredictionsPage() {
                         <div className="space-y-1.5">
                           <ScoreBar score={stock.overallScore} />
                           <SignalPill signal={stock.overallSignal} />
+                          <div className="text-[10px] text-muted-foreground font-data">Current: {formatPrice(stock.currentPrice, stock.currency)}</div>
                           <div className="text-[10px] text-muted-foreground font-data">{stock.indicatorLabel}</div>
                         </div>
                         {HORIZONS.map(h => {
