@@ -4,6 +4,7 @@ import {
   computeSignals,
   calcSMA,
   calcEMA,
+  calcRSI,
   getStockBySymbol,
   getCurrentPrice,
 } from "../lib/stockData.js";
@@ -19,11 +20,10 @@ interface Horizon {
 
 const HORIZONS: Horizon[] = [
   { key: "1d",   label: "1 Day",    days: 1,   points: 24 },
-  { key: "1w",   label: "1 Week",   days: 7,   points: 7 },
+  { key: "5d",   label: "5 Days",   days: 5,   points: 5 },
+  { key: "10d",  label: "10 Days",  days: 10,  points: 10 },
+  { key: "2w",   label: "2 Weeks",  days: 14,  points: 14 },
   { key: "1mo",  label: "1 Month",  days: 30,  points: 30 },
-  { key: "3mo",  label: "3 Months", days: 90,  points: 12 },
-  { key: "6mo",  label: "6 Months", days: 180, points: 12 },
-  { key: "12mo", label: "12 Months",days: 365, points: 12 },
 ];
 
 function seededRng(seed: number) {
@@ -193,6 +193,8 @@ router.get("/:symbol/predictions", (req, res) => {
   const signals = computeSignals(closes);
   const sma20 = calcSMA(closes, 20);
   const sma50 = calcSMA(closes, 50);
+  const rsi = calcRSI(closes);
+  const latestRsi = rsi[rsi.length - 1];
 
   const predictions = HORIZONS.map(h =>
     buildPrediction(symbol, h, currentPrice, stock.volatility, signals, closes, sma20, sma50)
@@ -202,6 +204,7 @@ router.get("/:symbol/predictions", (req, res) => {
     symbol,
     currency: stock.currency,
     currentPrice,
+    currentRsi: latestRsi,
     predictions,
   });
 });

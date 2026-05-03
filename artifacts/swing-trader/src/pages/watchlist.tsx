@@ -26,7 +26,7 @@ export default function Watchlist() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const { data: searchResults, isLoading: isSearchLoading } = useSearchStocks({ q: searchQuery }, {
-    query: { enabled: searchQuery.length > 1 }
+    query: { enabled: searchQuery.length >= 1 }
   });
 
   const handleRemove = (symbol: string) => {
@@ -69,7 +69,7 @@ export default function Watchlist() {
             placeholder="Search to add (RELIANCE, TCS…)"
             className="pl-9"
           />
-          {searchQuery.length > 1 && (
+          {searchQuery.length >= 1 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-50 max-h-64 overflow-y-auto">
               {isSearchLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">Searching…</div>

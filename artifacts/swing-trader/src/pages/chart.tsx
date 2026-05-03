@@ -180,7 +180,7 @@ export default function ChartPage() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-3 max-w-7xl mx-auto overflow-hidden">
+    <div className="h-full flex flex-col gap-3 max-w-7xl mx-auto overflow-hidden min-h-0">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 shrink-0">
         <div>
@@ -227,7 +227,7 @@ export default function ChartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0">
         {/* Main Chart Area */}
-        <div className="lg:col-span-3 flex flex-col gap-3 overflow-auto min-h-[400px]">
+        <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[400px]">
           {/* Price Chart */}
           <Card className="flex-1 bg-card min-h-[300px] md:min-h-[360px] flex flex-col">
             <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">

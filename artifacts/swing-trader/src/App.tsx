@@ -8,10 +8,10 @@ import { Layout } from "@/components/layout";
 import Dashboard from "@/pages/dashboard";
 import Watchlist from "@/pages/watchlist";
 import ChartPage from "@/pages/chart";
+import PredictionsPage from "@/pages/predictions";
 import Trades from "@/pages/trades/index";
 import NewTrade from "@/pages/trades/new";
 import TradeDetail from "@/pages/trades/detail";
-import Predictions from "@/pages/predictions";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -22,7 +22,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/watchlist" component={Watchlist} />
-        <Route path="/predictions" component={Predictions} />
+        <Route path="/predictions" component={PredictionsPage} />
         <Route path="/chart/:symbol" component={ChartPage} />
         <Route path="/trades" component={Trades} />
         <Route path="/trades/new" component={NewTrade} />
