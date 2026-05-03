@@ -10,11 +10,22 @@ import {
 } from "lucide-react";
 
 const HORIZONS = [
-  { key: "1d",  label: "1 Day"   },
-  { key: "1w",  label: "1 Week"  },
-  { key: "2w",  label: "2 Weeks" },
+  { key: "1d", label: "1 Day" },
+  { key: "1w", label: "1 Week" },
+  { key: "2w", label: "2 Weeks" },
   { key: "1mo", label: "1 Month" },
 ];
+
+const INDICATORS = [
+  { key: "app", label: "App Suggested" },
+  { key: "rsi", label: "RSI" },
+  { key: "macd", label: "MACD" },
+  { key: "sma", label: "SMA" },
+  { key: "ema", label: "EMA" },
+  { key: "bb", label: "Bollinger Bands" },
+] as const;
+
+type IndicatorKey = typeof INDICATORS[number]["key"];
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -116,6 +127,7 @@ export default function PredictionsPage() {
   const [sortBy, setSortBy] = useState<"score" | "rsi" | "upside">("score");
   const [capTab, setCapTab] = useState<"all" | "large" | "mid" | "small">("all");
   const [sectorTab, setSectorTab] = useState<string>("all");
+  const [indicatorTab, setIndicatorTab] = useState<IndicatorKey>("app");
 
   const isSearching = committedQuery.length >= 1;
 
@@ -132,11 +144,19 @@ export default function PredictionsPage() {
       onSuccess: (_data, variables) => {
         const sym = variables.data.symbol;
         setWatchlistAdded(prev => new Set([...prev, sym]));
-        setWatchlistPending(prev => { const n = new Set(prev); n.delete(sym); return n; });
+        setWatchlistPending(prev => {
+          const next = new Set(prev);
+          next.delete(sym);
+          return next;
+        });
       },
       onError: (_err, variables) => {
         const sym = variables.data.symbol;
-        setWatchlistPending(prev => { const n = new Set(prev); n.delete(sym); return n; });
+        setWatchlistPending(prev => {
+          const next = new Set(prev);
+          next.delete(sym);
+          return next;
+        });
       },
     }
   });
@@ -157,9 +177,13 @@ export default function PredictionsPage() {
   }, [stocks]);
 
   const filteredStocks = useMemo(() => {
-    if (sectorTab === "all") return stocks;
-    return stocks.filter(stock => stock.sector === sectorTab);
-  }, [stocks, sectorTab]);
+    const base = sectorTab === "all" ? stocks : stocks.filter(stock => stock.sector === sectorTab);
+    if (indicatorTab !== "app") return base;
+    return [...base].sort((a, b) => {
+      const bestUpside = (s: typeof a) => Math.max(...Object.values(s.predictions).map(p => ((p.targetPrice - s.currentPrice) / s.currentPrice) * 100));
+      return bestUpside(b) - bestUpside(a);
+    });
+  }, [stocks, sectorTab, indicatorTab]);
 
   const rankedStocks = useMemo(() => {
     const list = [...filteredStocks];
@@ -211,7 +235,10 @@ export default function PredictionsPage() {
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") handleSearch(); if (e.key === "Escape") handleClear(); }}
+                onKeyDown={e => {
+                  if (e.key === "Enter") handleSearch();
+                  if (e.key === "Escape") handleClear();
+                }}
                 type="text"
                 placeholder="Search stock (e.g. RELIANCE, TCS, WIPRO…)"
                 className="w-full bg-secondary border-none rounded-md pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
@@ -234,6 +261,27 @@ export default function PredictionsPage() {
         </CardContent>
       </Card>
 
+      <Card className="bg-card border-border">
+        <CardContent className="p-3 space-y-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-muted-foreground">Prediction mode:</span>
+            {INDICATORS.map(ind => (
+              <button
+                key={ind.key}
+                onClick={() => setIndicatorTab(ind.key)}
+                className={cn(
+                  "px-2.5 py-1 rounded border text-xs transition-colors",
+                  indicatorTab === ind.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                {ind.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">App Suggested uses the strongest overall score from the app’s technical model.</p>
+        </CardContent>
+      </Card>
+
       {!isSearching && (
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs">
@@ -243,12 +291,30 @@ export default function PredictionsPage() {
               { key: "rsi", label: "RSI Oversold" },
               { key: "upside", label: "Highest Upside" },
             ].map(opt => (
-              <button key={opt.key} onClick={() => setSortBy(opt.key as typeof sortBy)} className={cn("px-2.5 py-1 rounded border transition-colors", sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{opt.label}</button>
+              <button
+                key={opt.key}
+                onClick={() => setSortBy(opt.key as typeof sortBy)}
+                className={cn(
+                  "px-2.5 py-1 rounded border transition-colors",
+                  sortBy === opt.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                {opt.label}
+              </button>
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs ml-auto sm:ml-0">
             {sectors.map(sector => (
-              <button key={sector} onClick={() => setSectorTab(sector)} className={cn("px-2.5 py-1 rounded border transition-colors", sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{sector === "all" ? "All Sectors" : sector}</button>
+              <button
+                key={sector}
+                onClick={() => setSectorTab(sector)}
+                className={cn(
+                  "px-2.5 py-1 rounded border transition-colors",
+                  sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                {sector === "all" ? "All Sectors" : sector}
+              </button>
             ))}
           </div>
           <div className="flex items-center gap-1.5 text-xs ml-auto sm:ml-0">
@@ -258,7 +324,16 @@ export default function PredictionsPage() {
               { key: "mid", label: "Mid Cap" },
               { key: "small", label: "Small Cap" },
             ].map(tab => (
-              <button key={tab.key} onClick={() => setCapTab(tab.key as typeof capTab)} className={cn("px-2.5 py-1 rounded border transition-colors", capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}>{tab.label}</button>
+              <button
+                key={tab.key}
+                onClick={() => setCapTab(tab.key as typeof capTab)}
+                className={cn(
+                  "px-2.5 py-1 rounded border transition-colors",
+                  capTab === tab.key ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                {tab.label}
+              </button>
             ))}
           </div>
         </div>
@@ -267,7 +342,7 @@ export default function PredictionsPage() {
       {isLoading && (
         <div className="grid gap-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[0,1,2].map(i => <Skeleton key={i} className="h-44 rounded-xl" />)}
+            {[0, 1, 2].map(i => <Skeleton key={i} className="h-44 rounded-xl" />)}
           </div>
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
         </div>
