@@ -455,6 +455,14 @@ export default function ChartPage() {
 
         {tab === "predictions" && (
           <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-xs text-muted-foreground">Prediction mode</div>
+              <SelectDropdown
+                value={predictionMode}
+                onChange={v => setPredictionMode(v as IndicatorKey)}
+                options={PREDICTION_INDICATORS.map(ind => ({ value: ind.key, label: ind.label }))}
+              />
+            </div>
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
               {HORIZONS.map(h => (
                 <button key={h.key} onClick={() => setHorizon(h.key)} className={cn("py-2 text-xs font-semibold rounded-lg transition-colors", horizon === h.key ? "bg-primary text-primary-foreground" : "bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground")}>{h.label}</button>
