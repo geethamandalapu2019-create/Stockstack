@@ -59,6 +59,10 @@ function buildStockPrediction(symbol: string) {
   };
 }
 
+function bullishHorizonCount(predictions: Record<string, { direction: string }>) {
+  return Object.values(predictions).filter(p => p.direction === "bullish").length;
+}
+
 function getCapCategoryFilter(cap: string | undefined) {
   if (!cap || cap === "all") return null;
   return cap as "large" | "mid" | "small";
@@ -91,7 +95,14 @@ router.get("/top", (req, res) => {
 
   const results = pool
     .map(s => buildStockPrediction(s.symbol))
-    .filter((x): x is NonNullable<typeof x> => x !== null);
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .filter(stock => {
+      const meta = getStockBySymbol(stock.symbol);
+      if (!meta) return false;
+      const bucket = getBucket(meta);
+      if (bucket === "large") return true;
+      return bullishHorizonCount(stock.predictions) >= 2;
+    });
 
   results.sort((a, b) => {
     const scoreDiff = b.overallScore - a.overallScore;
