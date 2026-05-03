@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { useGetTopPredictions } from "@workspace/api-client-react";
+import { useAddToWatchlist, useGetTopPredictions } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, X, TrendingUp, TrendingDown, Minus,
-  RefreshCw, BarChart2, CalendarDays, Trophy
+  RefreshCw, BarChart2, CalendarDays, Trophy, Plus
 } from "lucide-react";
 
 const HORIZONS = [
@@ -95,6 +95,7 @@ export default function PredictionsPage() {
       : { cap: capTab, limit: 20 },
     { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, capTab, isSearching ? 30 : 20] } }
   );
+  const addToWatchlist = useAddToWatchlist();
 
   const handleSearch = () => setCommittedQuery(searchQuery.trim());
   const handleClear  = () => { setSearchQuery(""); setCommittedQuery(""); };
@@ -257,7 +258,6 @@ export default function PredictionsPage() {
                         "relative overflow-hidden transition-all hover:border-primary/50 cursor-pointer",
                         isTopPick ? "border-amber-400/40 ring-1 ring-amber-400/20" : "border-border"
                       )}
-                      onClick={() => navigate(`/chart/${stock.symbol}`)}
                     >
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between">
@@ -313,6 +313,23 @@ export default function PredictionsPage() {
                             {stock.signals[0]}
                           </p>
                         )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/chart/${stock.symbol}`)}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground"
+                          >
+                            <BarChart2 className="w-3.5 h-3.5" />
+                            Chart
+                          </button>
+                          <button
+                            onClick={() => addToWatchlist.mutate({ symbol: stock.symbol })}
+                            disabled={addToWatchlist.isPending}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-primary/30 rounded bg-primary/10 text-primary hover:bg-primary/15 transition-colors disabled:opacity-50"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            Watchlist
+                          </button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
