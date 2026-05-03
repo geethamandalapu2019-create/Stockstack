@@ -340,7 +340,7 @@ export const STOCKS: StockMeta[] = [
   },
   {
     symbol: "PERSISTENT", name: "Persistent Systems Ltd.", sector: "Information Technology", exchange: "NSE",
-    basePrice: 5240, volatility: 0.024, currency: "INR", marketCapB: 808,
+    basePrice: 4800, volatility: 0.024, currency: "INR", marketCapB: 808,
     capCategory: "mid", trendBias: -0.019,
     pe: 62.8, pb: 16.4, eps: 83.4, roe: 27.2, debtToEquity: 0.0, dividendYield: 0.4,
     revenueB: 99, netProfitB: 12, promoterHolding: 31.2, fiiHolding: 32.4, diiHolding: 24.6, bookValue: 319,
@@ -605,14 +605,9 @@ export function getStockBySymbol(symbol: string): StockMeta | undefined {
 }
 
 export function getCurrentPrice(symbol: string): { price: number; change: number; changePercent: number } {
-  const candles = generateCandles(symbol.toUpperCase(), 5, "1d");
   const stock = getStockBySymbol(symbol);
-  if (candles.length < 2) return { price: stock?.basePrice ?? 100, change: 0, changePercent: 0 };
-  const latest = candles[candles.length - 1];
-  const prev = candles[candles.length - 2];
-  const change = +(latest.close - prev.close).toFixed(2);
-  const changePercent = +((change / prev.close) * 100).toFixed(2);
-  return { price: latest.close, change, changePercent };
+  const price = stock?.basePrice ?? 100;
+  return { price, change: 0, changePercent: 0 };
 }
 
 // ── Extended Indicators ────────────────────────────────────────────────────
