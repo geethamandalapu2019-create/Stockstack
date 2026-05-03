@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useAddToWatchlist, useGetTopPredictions } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Search, X, TrendingUp, TrendingDown, Minus,
-  RefreshCw, BarChart2, CalendarDays, Trophy, Plus
+  RefreshCw, BarChart2, CalendarDays, Trophy, Plus, Check
 } from "lucide-react";
 
 const HORIZONS = [
@@ -80,6 +80,39 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
+function WatchlistButton({ symbol, name, added, pending, onAdd }: {
+  symbol: string;
+  name: string;
+  added: boolean;
+  pending: boolean;
+  onAdd: (symbol: string, name: string) => void;
+}) {
+  if (added) {
+    return (
+      <div className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs rounded bg-bullish/10 border border-bullish/30 text-bullish font-medium cursor-default">
+        <Check className="w-3.5 h-3.5" />
+        Added
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => onAdd(symbol, name)}
+      disabled={pending}
+      className={cn(
+        "flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-primary/30 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors",
+        pending && "opacity-60 cursor-wait"
+      )}
+    >
+      {pending
+        ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+        : <Plus className="w-3.5 h-3.5" />
+      }
+      {pending ? "Adding…" : "Watchlist"}
+    </button>
+  );
+}
+
 export default function PredictionsPage() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery]   = useState("");
@@ -95,7 +128,27 @@ export default function PredictionsPage() {
       : { cap: capTab, limit: 20 },
     { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, capTab, isSearching ? 30 : 20] } }
   );
-  const addToWatchlist = useAddToWatchlist();
+  const [watchlistAdded, setWatchlistAdded] = useState<Set<string>>(new Set());
+  const [watchlistPending, setWatchlistPending] = useState<Set<string>>(new Set());
+  const addToWatchlistMutation = useAddToWatchlist({
+    mutation: {
+      onSuccess: (_data, variables) => {
+        const sym = variables.data.symbol;
+        setWatchlistAdded(prev => new Set([...prev, sym]));
+        setWatchlistPending(prev => { const n = new Set(prev); n.delete(sym); return n; });
+      },
+      onError: (_err, variables) => {
+        const sym = variables.data.symbol;
+        setWatchlistPending(prev => { const n = new Set(prev); n.delete(sym); return n; });
+      },
+    }
+  });
+
+  const handleAddToWatchlist = (symbol: string, name: string) => {
+    if (watchlistAdded.has(symbol) || watchlistPending.has(symbol)) return;
+    setWatchlistPending(prev => new Set([...prev, symbol]));
+    addToWatchlistMutation.mutate({ data: { symbol, name } });
+  };
 
   const handleSearch = () => setCommittedQuery(searchQuery.trim());
   const handleClear  = () => { setSearchQuery(""); setCommittedQuery(""); };
@@ -321,14 +374,13 @@ export default function PredictionsPage() {
                             <BarChart2 className="w-3.5 h-3.5" />
                             Chart
                           </button>
-                          <button
-                            onClick={() => addToWatchlist.mutate({ symbol: stock.symbol })}
-                            disabled={addToWatchlist.isPending}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-primary/30 rounded bg-primary/10 text-primary hover:bg-primary/15 transition-colors disabled:opacity-50"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            Watchlist
-                          </button>
+                          <WatchlistButton
+                            symbol={stock.symbol}
+                            name={stock.name}
+                            added={watchlistAdded.has(stock.symbol)}
+                            pending={watchlistPending.has(stock.symbol)}
+                            onAdd={handleAddToWatchlist}
+                          />
                         </div>
                       </CardContent>
                     </Card>
