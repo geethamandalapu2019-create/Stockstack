@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { SignalBadge } from "./dashboard";
 import { Activity, TrendingUp, TrendingDown, Minus, Building2, BarChart3, X } from "lucide-react";
 
-type SidebarTab = "technical" | "predictions" | "fundamentals";
+type SidebarTab = "technical" | "predictions" | "fundamentals" | "chart";
 type Horizon = "1d" | "1w" | "1mo" | "3mo" | "6mo" | "12mo";
 
 const HORIZONS: { key: Horizon; label: string }[] = [
@@ -228,262 +228,83 @@ export default function ChartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden lg:max-h-[calc(100dvh-11rem)]">
         {/* Main Chart Area */}
         <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto min-h-0 min-h-[280px] pb-24 lg:pb-0">
-          {/* Price Chart */}
+          <div className="bg-secondary/50 rounded-md p-1 flex shrink-0 overflow-x-auto">
+            {([
+              { key: "chart", label: "Chart" },
+              { key: "technical", label: "Technicals" },
+              { key: "predictions", label: "Predictions" },
+              { key: "fundamentals", label: "Fundamentals" },
+            ] as const).map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setSidebarTab(tab.key)}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap",
+                  sidebarTab === tab.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {sidebarTab === "chart" && (
             <Card className="flex-1 bg-card min-h-[240px] md:min-h-[360px] flex flex-col">
-            <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-sm font-medium">Price Action</CardTitle>
-                <div className="flex gap-1 flex-wrap">
-                  <IndicatorToggle label="SMA20" active={showSMA20} onClick={() => setShowSMA20(!showSMA20)} color="hsl(var(--chart-3))" />
-                  <IndicatorToggle label="SMA50" active={showSMA50} onClick={() => setShowSMA50(!showSMA50)} color="hsl(var(--chart-4))" />
-                  <IndicatorToggle label="EMA12" active={showEMA12} onClick={() => setShowEMA12(!showEMA12)} color="hsl(var(--accent))" />
-                  <IndicatorToggle label="EMA26" active={showEMA26} onClick={() => setShowEMA26(!showEMA26)} color="#f59e0b" />
-                  <IndicatorToggle label="BB" active={showBB} onClick={() => setShowBB(!showBB)} color="hsl(var(--muted-foreground))" />
+              <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CardTitle className="text-sm font-medium">Price Action</CardTitle>
+                  <div className="flex gap-1 flex-wrap">
+                    <IndicatorToggle label="SMA20" active={showSMA20} onClick={() => setShowSMA20(!showSMA20)} color="hsl(var(--chart-3))" />
+                    <IndicatorToggle label="SMA50" active={showSMA50} onClick={() => setShowSMA50(!showSMA50)} color="hsl(var(--chart-4))" />
+                    <IndicatorToggle label="EMA12" active={showEMA12} onClick={() => setShowEMA12(!showEMA12)} color="hsl(var(--accent))" />
+                    <IndicatorToggle label="EMA26" active={showEMA26} onClick={() => setShowEMA26(!showEMA26)} color="#f59e0b" />
+                    <IndicatorToggle label="BB" active={showBB} onClick={() => setShowBB(!showBB)} color="hsl(var(--muted-foreground))" />
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0 flex-1 relative min-h-[220px]">
-              {(isHistoryLoading || isIndicatorsLoading) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                  <Activity className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              )}
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={chartData} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} tickFormatter={(v) => v.substring(5)} />
-                  <YAxis domain={["auto", "auto"]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right"
-                    tickFormatter={v => currency === "INR" ? `₹${v >= 1000 ? (v/1000).toFixed(1)+"k" : v.toFixed(0)}` : `$${v.toFixed(0)}`} />
-                  <Tooltip {...tooltipStyle}
-                    formatter={(v: any, name: string) => {
+              </CardHeader>
+              <CardContent className="p-0 flex-1 relative min-h-[220px]">
+                {(isHistoryLoading || isIndicatorsLoading) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                    <Activity className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                )}
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={chartData} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} tickFormatter={(v) => v.substring(5)} />
+                    <YAxis domain={["auto", "auto"]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" tickFormatter={v => currency === "INR" ? `₹${v >= 1000 ? (v/1000).toFixed(1)+"k" : v.toFixed(0)}` : `$${v.toFixed(0)}`} />
+                    <Tooltip {...tooltipStyle} formatter={(v: any, name: string) => {
                       if (name === "wickRange" || name === "candleRange" || name === "bbRange") return null;
                       return [formatPrice(Number(v), currency), name];
-                    }}
-                  />
-                  {showBB && <Area type="monotone" dataKey="bbRange" stroke="none" fill="hsl(var(--muted))" fillOpacity={0.15} isAnimationActive={false} />}
-                  <Bar dataKey="wickRange" barSize={1} fill="hsl(var(--muted-foreground))" isAnimationActive={false} />
-                  <Bar dataKey="candleRange" barSize={8} fill="hsl(var(--muted-foreground))" isAnimationActive={false}
-                    shape={(props: any) => {
-                      const { x, y, width, height, payload } = props;
-                      return <rect x={x} y={y} width={width} height={Math.max(1, height)}
-                        fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} />;
-                    }}
-                  />
-                  {showSMA20 && <Line type="monotone" dataKey="sma20" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
-                  {showSMA50 && <Line type="monotone" dataKey="sma50" stroke="hsl(var(--chart-4))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
-                  {showEMA12 && <Line type="monotone" dataKey="ema12" stroke="hsl(var(--accent))" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
-                  {showEMA26 && <Line type="monotone" dataKey="ema26" stroke="#f59e0b" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
-                  {showBB && <Line type="monotone" dataKey="bbUpper" stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" dot={false} strokeWidth={1} isAnimationActive={false} />}
-                  {showBB && <Line type="monotone" dataKey="bbLower" stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" dot={false} strokeWidth={1} isAnimationActive={false} />}
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* RSI Panel */}
-          {showRSI && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground font-data">RSI (14)</CardTitle>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowRSI(false)}>
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rsiData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis domain={[0, 100]} ticks={[30, 50, 70]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "RSI"]} />
-                    <ReferenceLine y={70} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} />
-                    <ReferenceLine y={30} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} />
-                    <Line type="monotone" dataKey="value" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* MACD Panel */}
-          {showMACD && (
-            <Card className="bg-card h-32 sm:h-36 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground font-data">MACD (12,26,9)</CardTitle>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowMACD(false)}>
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={macdData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} />
-                    <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
-                    <Bar dataKey="histogram" isAnimationActive={false}
-                      shape={(props: any) => {
-                        const { x, y, width, height, payload } = props;
-                        return <rect x={x} y={payload.histogram > 0 ? y : y + height} width={width} height={Math.abs(height)}
-                          fill={payload.isPositive ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} opacity={0.6} />;
-                      }}
-                    />
-                    <Line type="monotone" dataKey="macd" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="signal" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Stochastic Panel */}
-          {showStoch && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-xs text-muted-foreground font-data">Stochastic (14,3)</CardTitle>
-                  <div className="flex items-center gap-2 text-[10px]">
-                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-blue-400" /> %K</span>
-                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-orange-400" /> %D</span>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowStoch(false)}>
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={stochData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis domain={[0, 100]} ticks={[20, 50, 80]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "k" ? "%K" : "%D"]} />
-                    <ReferenceLine y={80} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} />
-                    <ReferenceLine y={20} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} />
-                    <Line type="monotone" dataKey="k" stroke="#60a5fa" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="d" stroke="#fb923c" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* CCI Panel */}
-          {showCCI && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground font-data">CCI (20) — Commodity Channel Index</CardTitle>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowCCI(false)}>Hide</Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={cciData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "CCI"]} />
-                    <ReferenceLine y={100} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "+100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                    <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
-                    <ReferenceLine y={-100} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                    <Line type="monotone" dataKey="value" stroke="#a78bfa" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Williams %R Panel */}
-          {showWilliamsR && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground font-data">Williams %R (14)</CardTitle>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowWilliamsR(false)}>Hide</Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={wrData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis domain={[-100, 0]} ticks={[-80, -50, -20]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "%R"]} />
-                    <ReferenceLine y={-20} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-20", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                    <ReferenceLine y={-80} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-80", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                    <Line type="monotone" dataKey="value" stroke="#34d399" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Volume + OBV Panel */}
-          {showVolume && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-xs text-muted-foreground font-data">Volume / OBV</CardTitle>
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <span className="inline-block w-2.5 h-0.5 bg-yellow-400" /> OBV overlay
-                  </span>
-                </div>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowVolume(false)}>Hide</Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={volumeData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis yAxisId="vol" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right"
-                      tickFormatter={v => v >= 1e7 ? `${(v/1e7).toFixed(0)}Cr` : v >= 1e5 ? `${(v/1e5).toFixed(0)}L` : `${(v/1e3).toFixed(0)}K`} />
-                    <YAxis yAxisId="obv" orientation="left" hide />
-                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => {
-                      if (name === "volume") return [`${(Number(v)/1e5).toFixed(1)}L`, "Volume"];
-                      if (name === "obv") return [(Number(v)/1e6).toFixed(2) + "M", "OBV"];
-                      return null;
                     }} />
-                    <Bar yAxisId="vol" dataKey="volume" isAnimationActive={false}
+                    {showBB && <Area type="monotone" dataKey="bbRange" stroke="none" fill="hsl(var(--muted))" fillOpacity={0.15} isAnimationActive={false} />}
+                    <Bar dataKey="wickRange" barSize={1} fill="hsl(var(--muted-foreground))" isAnimationActive={false} />
+                    <Bar dataKey="candleRange" barSize={8} fill="hsl(var(--muted-foreground))" isAnimationActive={false}
                       shape={(props: any) => {
                         const { x, y, width, height, payload } = props;
-                        return <rect x={x} y={y} width={width} height={Math.max(1, height)}
-                          fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} opacity={0.5} />;
+                        return <rect x={x} y={y} width={width} height={Math.max(1, height)} fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} />;
                       }}
                     />
-                    <Line yAxisId="obv" type="monotone" dataKey="obv" stroke="#facc15" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                    {showSMA20 && <Line type="monotone" dataKey="sma20" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
+                    {showSMA50 && <Line type="monotone" dataKey="sma50" stroke="hsl(var(--chart-4))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
+                    {showEMA12 && <Line type="monotone" dataKey="ema12" stroke="hsl(var(--accent))" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
+                    {showEMA26 && <Line type="monotone" dataKey="ema26" stroke="#f59e0b" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
+                    {showBB && <Line type="monotone" dataKey="bbUpper" stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" dot={false} strokeWidth={1} isAnimationActive={false} />}
+                    {showBB && <Line type="monotone" dataKey="bbLower" stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" dot={false} strokeWidth={1} isAnimationActive={false} />}
                   </ComposedChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
-
-          {/* ADX Panel */}
-          {showADX && (
-            <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0">
-              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-xs text-muted-foreground font-data">ADX (14)</CardTitle>
-                  <div className="flex items-center gap-2 text-[10px]">
-                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-white" /> ADX</span>
-                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-green-400" /> +DI</span>
-                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-red-400" /> -DI</span>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowADX(false)}>Hide</Button>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={adxData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                    <XAxis dataKey="date" hide />
-                    <YAxis domain={[0, 60]} ticks={[0, 25, 50]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "adx" ? "ADX" : name === "plusDI" ? "+DI" : "-DI"]} />
-                    <ReferenceLine y={25} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "25", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                    <Line type="monotone" dataKey="adx" stroke="hsl(var(--foreground))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="plusDI" stroke="#4ade80" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="minusDI" stroke="#f87171" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+          {sidebarTab === "technical" && (
+            <div className="flex flex-col gap-3">
+              {showRSI && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><CardTitle className="text-xs text-muted-foreground font-data">RSI (14)</CardTitle><Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowRSI(false)}><X className="w-3.5 h-3.5" /></Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><LineChart data={rsiData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis domain={[0, 100]} ticks={[30, 50, 70]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "RSI"]} /><ReferenceLine y={70} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} /><ReferenceLine y={30} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} /><Line type="monotone" dataKey="value" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} /></LineChart></ResponsiveContainer></CardContent></Card>}
+              {showMACD && <Card className="bg-card h-32 sm:h-36 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><CardTitle className="text-xs text-muted-foreground font-data">MACD (12,26,9)</CardTitle><Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowMACD(false)}><X className="w-3.5 h-3.5" /></Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={macdData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} /><ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} /><Bar dataKey="histogram" isAnimationActive={false} shape={(props: any) => { const { x, y, width, height, payload } = props; return <rect x={x} y={payload.histogram > 0 ? y : y + height} width={width} height={Math.abs(height)} fill={payload.isPositive ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} opacity={0.6} />; }} /><Line type="monotone" dataKey="macd" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line type="monotone" dataKey="signal" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} /></ComposedChart></ResponsiveContainer></CardContent></Card>}
+              {showStoch && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><div className="flex items-center gap-3"><CardTitle className="text-xs text-muted-foreground font-data">Stochastic (14,3)</CardTitle><div className="flex items-center gap-2 text-[10px]"><span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-blue-400" /> %K</span><span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-orange-400" /> %D</span></div></div><Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setShowStoch(false)}><X className="w-3.5 h-3.5" /></Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><LineChart data={stochData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis domain={[0, 100]} ticks={[20, 50, 80]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "k" ? "%K" : "%D"]} /><ReferenceLine y={80} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} /><ReferenceLine y={20} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} /><Line type="monotone" dataKey="k" stroke="#60a5fa" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line type="monotone" dataKey="d" stroke="#fb923c" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} /></LineChart></ResponsiveContainer></CardContent></Card>}
+              {showCCI && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><CardTitle className="text-xs text-muted-foreground font-data">CCI (20) — Commodity Channel Index</CardTitle><Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowCCI(false)}>Hide</Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><LineChart data={cciData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "CCI"]} /><ReferenceLine y={100} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "+100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} /><ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} /><ReferenceLine y={-100} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} /><Line type="monotone" dataKey="value" stroke="#a78bfa" dot={false} strokeWidth={1.5} isAnimationActive={false} /></LineChart></ResponsiveContainer></CardContent></Card>}
+              {showWilliamsR && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><CardTitle className="text-xs text-muted-foreground font-data">Williams %R (14)</CardTitle><Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowWilliamsR(false)}>Hide</Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><LineChart data={wrData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis domain={[-100, 0]} ticks={[-80, -50, -20]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "%R"]} /><ReferenceLine y={-20} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-20", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} /><ReferenceLine y={-80} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-80", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} /><Line type="monotone" dataKey="value" stroke="#34d399" dot={false} strokeWidth={1.5} isAnimationActive={false} /></LineChart></ResponsiveContainer></CardContent></Card>}
+              {showVolume && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><div className="flex items-center gap-3"><CardTitle className="text-xs text-muted-foreground font-data">Volume / OBV</CardTitle><span className="text-[10px] text-muted-foreground flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-yellow-400" /> OBV overlay</span></div><Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowVolume(false)}>Hide</Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={volumeData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis yAxisId="vol" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" tickFormatter={v => v >= 1e7 ? `${(v/1e7).toFixed(0)}Cr` : v >= 1e5 ? `${(v/1e5).toFixed(0)}L` : `${(v/1e3).toFixed(0)}K`} /><YAxis yAxisId="obv" orientation="left" hide /><Tooltip {...tooltipStyle} formatter={(v: any, name) => { if (name === "volume") return [`${(Number(v)/1e5).toFixed(1)}L`, "Volume"]; if (name === "obv") return [(Number(v)/1e6).toFixed(2) + "M", "OBV"]; return null; }} /><Bar yAxisId="vol" dataKey="volume" isAnimationActive={false} shape={(props: any) => { const { x, y, width, height, payload } = props; return <rect x={x} y={y} width={width} height={Math.max(1, height)} fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} opacity={0.5} />; }} /><Line yAxisId="obv" type="monotone" dataKey="obv" stroke="#facc15" dot={false} strokeWidth={1.5} isAnimationActive={false} /></ComposedChart></ResponsiveContainer></CardContent></Card>}
+              {showADX && <Card className="bg-card h-28 sm:h-32 flex flex-col shrink-0"><CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between"><div className="flex items-center gap-3"><CardTitle className="text-xs text-muted-foreground font-data">ADX (14)</CardTitle><div className="flex items-center gap-2 text-[10px]"><span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-white" /> ADX</span><span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-green-400" /> +DI</span><span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-red-400" /> -DI</span></div></div><Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowADX(false)}>Hide</Button></CardHeader><CardContent className="p-0 flex-1"><ResponsiveContainer width="100%" height="100%"><LineChart data={adxData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} /><XAxis dataKey="date" hide /><YAxis domain={[0, 60]} ticks={[0, 25, 50]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" /><Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "adx" ? "ADX" : name === "plusDI" ? "+DI" : "-DI"]} /><ReferenceLine y={25} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "25", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} /><Line type="monotone" dataKey="adx" stroke="hsl(var(--foreground))" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line type="monotone" dataKey="plusDI" stroke="#4ade80" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line type="monotone" dataKey="minusDI" stroke="#f87171" dot={false} strokeWidth={1.5} isAnimationActive={false} /></LineChart></ResponsiveContainer></CardContent></Card>}
+            </div>
           )}
         </div>
 
