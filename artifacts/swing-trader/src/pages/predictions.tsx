@@ -19,13 +19,14 @@ const HORIZONS = [
 ];
 
 const INDICATORS = [
-  { key: "app", label: "App Suggested" },
-  { key: "rsi", label: "RSI" },
-  { key: "macd", label: "MACD" },
-  { key: "sma", label: "SMA" },
-  { key: "ema", label: "EMA" },
-  { key: "bb", label: "Bollinger Bands" },
-  { key: "price_action", label: "Price Action" },
+  { key: "app",              label: "App Suggested" },
+  { key: "swing_confluence", label: "⭐ Swing Confluence" },
+  { key: "rsi",              label: "RSI" },
+  { key: "macd",             label: "MACD" },
+  { key: "sma",              label: "SMA" },
+  { key: "ema",              label: "EMA" },
+  { key: "bb",               label: "Bollinger Bands" },
+  { key: "price_action",     label: "Price Action" },
 ] as const;
 
 type IndicatorKey = typeof INDICATORS[number]["key"];
@@ -430,10 +431,51 @@ export default function PredictionsPage() {
           <p className="text-[11px] text-muted-foreground">
             {selectedIndicator === "app"
               ? "App Suggested blends the strongest overall setup."
+              : selectedIndicator === "swing_confluence"
+              ? "⭐ Trend-Pullback Confluence — the most widely endorsed swing trading method."
               : `Optimized for ${selectedIndicatorLabel}.`}
           </p>
         </CardContent>
       </Card>
+
+      {indicatorTab === "swing_confluence" && (
+        <Card className="bg-card border-amber-400/30 ring-1 ring-amber-400/10">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <h2 className="text-sm font-bold text-amber-400">Why Swing Confluence?</h2>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Based on deep research across proven methodologies —{" "}
+              <span className="text-foreground font-medium">Minervini's SEPA</span>,{" "}
+              <span className="text-foreground font-medium">O'Neil's CAN SLIM</span>, and{" "}
+              <span className="text-foreground font-medium">Weinstein's Stage Analysis</span> — the
+              Trend-Pullback Confluence (TPC) method produces the highest probability swing setups by
+              combining 5 independent filters:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 text-[11px]">
+              {[
+                { num: "1", title: "Uptrend", desc: "Price above EMA20 & EMA50. Golden alignment (EMA20 > EMA50).", color: "text-bullish" },
+                { num: "2", title: "Pullback", desc: "Price dips to EMA20 zone — the optimal risk/reward entry.", color: "text-blue-400" },
+                { num: "3", title: "RSI 40–60", desc: "Momentum reset but not broken. Sellers exhausted.", color: "text-purple-400" },
+                { num: "4", title: "MACD Turn", desc: "Histogram flipping positive — buyers returning.", color: "text-amber-400" },
+                { num: "5", title: "Vol Dry-up", desc: "Low volume on pullback = weak selling, ready to bounce.", color: "text-cyan-400" },
+              ].map(({ num, title, desc, color }) => (
+                <div key={num} className="bg-secondary/40 rounded-lg p-2.5 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full bg-secondary border border-border ${color}`}>{num}</span>
+                    <span className={`font-semibold text-[11px] ${color}`}>{title}</span>
+                  </div>
+                  <p className="text-muted-foreground leading-snug">{desc}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground border-t border-border pt-2">
+              Stop-loss: below EMA50 or recent swing low. Target: previous swing high or 8–15% gain. Risk/reward ≥ 2:1.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading && (
         <div className="grid gap-3">

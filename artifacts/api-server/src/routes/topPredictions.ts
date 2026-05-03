@@ -41,10 +41,12 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
   }> = {};
 
   const last = closes[closes.length - 1] ?? currentPrice;
-  const prev5 = closes[Math.max(0, closes.length - 6)] ?? last;
+  const prev5  = closes[Math.max(0, closes.length - 6)]  ?? last;
+  const prev10 = closes[Math.max(0, closes.length - 11)] ?? last;
   const prev20 = closes[Math.max(0, closes.length - 21)] ?? last;
   const prev60 = closes[Math.max(0, closes.length - 61)] ?? last;
-  const momentum5 = prev5 ? (last - prev5) / prev5 : 0;
+  const momentum5  = prev5  ? (last - prev5)  / prev5  : 0;
+  const momentum10 = prev10 ? (last - prev10) / prev10 : 0;
   const momentum20 = prev20 ? (last - prev20) / prev20 : 0;
   const momentum60 = prev60 ? (last - prev60) / prev60 : 0;
 
@@ -64,6 +66,13 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     if (indicator === "ema") {
       return Math.max(5, Math.min(95, Math.round(50 + momentum5 * 1000 + momentum20 * 700)));
     }
+    if (indicator === "price_action") {
+      return Math.max(5, Math.min(95, Math.round(50 + momentum5 * 800 + momentum10 * 600)));
+    }
+    if (indicator === "swing_confluence") {
+      // TPC uses the composite score directly — it already encodes quality
+      return Math.max(5, Math.min(95, Math.round(analysis.score)));
+    }
     return Math.max(5, Math.min(95, Math.round((analysis.overallSignal === "strong_buy" ? 72 : analysis.overallSignal === "strong_sell" ? 28 : analysis.score))));
   })();
 
@@ -78,7 +87,8 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     indicator === "macd" ? "MACD" :
     indicator === "sma" ? "SMA" :
     indicator === "ema" ? "EMA" :
-    indicator === "bb" ? "Bollinger Bands" : "Price Action";
+    indicator === "bb" ? "Bollinger Bands" :
+    indicator === "price_action" ? "Price Action" : "Swing Confluence";
 
   return {
     symbol: stock.symbol,

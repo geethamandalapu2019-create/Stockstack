@@ -819,7 +819,7 @@ export function computeComprehensiveScore(
   return { score, direction, overallSignal, signals: signals.slice(0, 5), currentRsi: rsi };
 }
 
-export type IndicatorMode = "app" | "rsi" | "macd" | "sma" | "ema" | "bb" | "price_action";
+export type IndicatorMode = "app" | "rsi" | "macd" | "sma" | "ema" | "bb" | "price_action" | "swing_confluence";
 
 export function computeIndicatorModeScore(
   mode: IndicatorMode,
@@ -984,6 +984,116 @@ export function computeIndicatorModeScore(
 
     const squeeze = range20High > 0 && range20Low > 0 && (range20High - range20Low) / range20High < 0.08;
     if (squeeze && bullishCandle) signals.push("Tight range breakout setup");
+
+  } else if (mode === "swing_confluence") {
+    // ── Trend-Pullback Confluence (TPC) ────────────────────────────────────
+    // Best swing trading method: uptrend → healthy pullback → momentum resuming
+    // Based on Minervini SEPA, O'Neil CAN SLIM, and Stan Weinstein Stage Analysis
+    let pts = 50;
+
+    // 1. UPTREND FILTER — price must be above both EMAs, EMA20 above EMA50
+    const inUptrend = latestEma12 != null && latestEma26 != null && latestClose > latestEma12 && latestEma12 > latestEma26;
+    const aboveEma50 = latestSma50 != null && latestClose > latestSma50;
+    const ema20AboveEma50 = latestEma12 != null && latestSma50 != null && latestEma12 > latestSma50;
+
+    if (inUptrend && aboveEma50 && ema20AboveEma50) {
+      pts += 18;
+      signals.push("Uptrend: price above EMA20 & EMA50 with golden alignment");
+    } else if (inUptrend || (aboveEma50 && ema20AboveEma50)) {
+      pts += 8;
+      signals.push("Partial uptrend structure — awaiting full alignment");
+    } else if (latestClose < (latestSma50 ?? latestClose)) {
+      pts -= 18;
+      signals.push("Downtrend: price below EMA50 — avoid long entries");
+    }
+
+    // 2. PULLBACK QUALITY — ideal entry is price near EMA20 (within 3%)
+    const distFromEma20 = latestEma12 != null ? (latestClose - latestEma12) / latestEma12 : null;
+    if (distFromEma20 != null) {
+      if (distFromEma20 >= -0.03 && distFromEma20 <= 0.04) {
+        pts += 15;
+        signals.push("Pullback to EMA20 — ideal swing entry zone");
+      } else if (distFromEma20 > 0.04 && distFromEma20 < 0.10) {
+        pts += 5;
+        signals.push("Slight extension above EMA20 — still tradeable");
+      } else if (distFromEma20 > 0.10) {
+        pts -= 10;
+        signals.push("Price stretched >10% above EMA20 — high entry risk");
+      } else if (distFromEma20 < -0.08) {
+        pts -= 12;
+        signals.push("Price deeply below EMA20 — trend may be broken");
+      }
+    }
+
+    // 3. RSI PULLBACK ZONE — ideal RSI for swing re-entry is 40–60
+    if (latestRsi != null) {
+      if (latestRsi >= 40 && latestRsi <= 60) {
+        pts += 12;
+        signals.push(`RSI ${latestRsi.toFixed(0)} in ideal swing entry zone (40–60)`);
+      } else if (latestRsi > 60 && latestRsi < 70) {
+        pts += 4;
+        signals.push(`RSI ${latestRsi.toFixed(0)} slightly elevated — momentum still present`);
+      } else if (latestRsi >= 70) {
+        pts -= 12;
+        signals.push(`RSI ${latestRsi.toFixed(0)} overbought — poor swing entry timing`);
+      } else if (latestRsi < 30) {
+        pts -= 8;
+        signals.push(`RSI ${latestRsi.toFixed(0)} deeply oversold — trend may be breaking`);
+      }
+    }
+
+    // 4. MACD MOMENTUM RESUMING — histogram turning positive = buyers returning
+    if (latestMacd.macd != null && latestMacd.histogram != null && latestMacd.signal != null) {
+      const prevMacd = macdArr.length > 2 ? macdArr[macdArr.length - 2] : null;
+      const histTurning = prevMacd?.histogram != null && prevMacd.histogram < 0 && latestMacd.histogram > 0;
+      const histImproving = prevMacd?.histogram != null && latestMacd.histogram > prevMacd.histogram && latestMacd.histogram > -0.5;
+
+      if (histTurning && latestMacd.macd > 0) {
+        pts += 14;
+        signals.push("MACD histogram bullish crossover — momentum resuming");
+      } else if (histTurning || histImproving) {
+        pts += 8;
+        signals.push("MACD histogram improving — sellers weakening");
+      } else if (latestMacd.histogram < 0 && latestMacd.macd < 0) {
+        pts -= 10;
+        signals.push("MACD bearish — momentum not yet recovered");
+      }
+    }
+
+    // 5. VOLUME DRY-UP on pullback (key sign sellers are exhausted)
+    const avgVol20 = volumes.length >= 20 ? volumes.slice(-20).reduce((a, b) => a + b, 0) / 20 : null;
+    const avgVol5 = volumes.length >= 5 ? volumes.slice(-5).reduce((a, b) => a + b, 0) / 5 : null;
+    if (avgVol20 && avgVol5) {
+      const volRatio = avgVol5 / avgVol20;
+      if (volRatio < 0.75) {
+        pts += 10;
+        signals.push("Volume drying up on pullback — sellers exhausting");
+      } else if (volRatio > 1.5) {
+        pts -= 6;
+        signals.push("High volume on pullback — distribution risk");
+      }
+    }
+
+    // 6. TIGHT BASE / LOW VOLATILITY SQUEEZE before next move
+    const bbWidth = latestBb.upper != null && latestBb.lower != null && latestBb.middle != null
+      ? (latestBb.upper - latestBb.lower) / latestBb.middle
+      : null;
+    if (bbWidth != null && bbWidth < 0.06 && inUptrend) {
+      pts += 8;
+      signals.push("Tight Bollinger squeeze in uptrend — breakout setup forming");
+    }
+
+    // 7. HIGHER HIGHS + HIGHER LOWS structure
+    const hhhl = highs.length >= 4 &&
+      highs[highs.length - 1] > highs[highs.length - 3] &&
+      lows[lows.length - 1] > lows[lows.length - 3];
+    if (hhhl && inUptrend) {
+      pts += 6;
+      signals.push("Higher highs & higher lows — strong trend structure");
+    }
+
+    score = Math.max(5, Math.min(95, Math.round(pts)));
+    if (!signals.length) signals.push("Swing confluence neutral — no clear setup");
   }
 
   const momentumBoost =
