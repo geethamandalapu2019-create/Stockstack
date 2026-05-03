@@ -21,6 +21,7 @@ export interface StockMeta {
   bookValue?: number;
   description?: string;
   capCategory?: "large" | "mid" | "small";
+  trendBias?: number; // drift added to daily candle return: positive = bullish trend, negative = bearish
 }
 
 export const STOCKS: StockMeta[] = [
@@ -252,7 +253,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "BPCL", name: "Bharat Petroleum Corp Ltd.", sector: "Energy", exchange: "NSE",
     basePrice: 320, volatility: 0.021, currency: "INR", marketCapB: 1390,
-    capCategory: "mid",
+    capCategory: "mid", trendBias: -0.015,
     pe: 8.4, pb: 1.8, eps: 38.1, roe: 22.4, debtToEquity: 1.2, dividendYield: 5.6,
     revenueB: 4982, netProfitB: 165, promoterHolding: 52.9, fiiHolding: 11.2, diiHolding: 22.4, bookValue: 177,
     description: "India's second-largest oil refining and marketing company. Network of 20,000+ fuel stations.",
@@ -260,7 +261,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "ZOMATO", name: "Zomato Ltd.", sector: "Internet & Technology", exchange: "NSE",
     basePrice: 248, volatility: 0.035, currency: "INR", marketCapB: 2200,
-    capCategory: "mid",
+    capCategory: "mid", trendBias: -0.018,
     pe: 412.0, pb: 10.8, eps: 0.6, roe: 2.8, debtToEquity: 0.0, dividendYield: 0.0,
     revenueB: 127, netProfitB: 4, promoterHolding: 0, fiiHolding: 58.2, diiHolding: 16.8, bookValue: 23,
     description: "India's leading food delivery platform. Expanding into quick commerce (Blinkit) and dining.",
@@ -300,7 +301,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "RVNL", name: "Rail Vikas Nigam Ltd.", sector: "Infrastructure", exchange: "NSE",
     basePrice: 382, volatility: 0.029, currency: "INR", marketCapB: 185,
-    capCategory: "small",
+    capCategory: "small", trendBias: -0.016,
     pe: 24.8, pb: 3.4, eps: 15.4, roe: 14.2, debtToEquity: 0.3, dividendYield: 0.9,
     revenueB: 2.1, netProfitB: 0.44, promoterHolding: 72.8, fiiHolding: 5.8, diiHolding: 9.3, bookValue: 113,
     description: "Indian railway infrastructure execution company.",
@@ -312,6 +313,102 @@ export const STOCKS: StockMeta[] = [
     pe: 18.9, pb: 4.7, eps: 36.2, roe: 24.1, debtToEquity: 0.1, dividendYield: 2.1,
     revenueB: 0.9, netProfitB: 0.18, promoterHolding: 79.2, fiiHolding: 4.3, diiHolding: 6.5, bookValue: 145,
     description: "Retail brokerage and financial services company.",
+  },
+  {
+    symbol: "TATAPOWER", name: "Tata Power Company Ltd.", sector: "Power", exchange: "NSE",
+    basePrice: 428, volatility: 0.028, currency: "INR", marketCapB: 1370,
+    capCategory: "mid", trendBias: -0.016,
+    pe: 34.6, pb: 4.2, eps: 12.4, roe: 12.8, debtToEquity: 1.6, dividendYield: 0.5,
+    revenueB: 587, netProfitB: 43, promoterHolding: 46.9, fiiHolding: 19.4, diiHolding: 17.8, bookValue: 102,
+    description: "India's leading integrated power company with generation, transmission and distribution businesses.",
+  },
+  {
+    symbol: "IRFC", name: "Indian Railway Finance Corp Ltd.", sector: "Financial Services", exchange: "NSE",
+    basePrice: 195, volatility: 0.031, currency: "INR", marketCapB: 2540,
+    capCategory: "mid", trendBias: -0.014,
+    pe: 28.2, pb: 3.8, eps: 6.9, roe: 13.6, debtToEquity: 9.4, dividendYield: 1.1,
+    revenueB: 262, netProfitB: 64, promoterHolding: 86.4, fiiHolding: 3.2, diiHolding: 4.8, bookValue: 51,
+    description: "Dedicated market borrowing arm of Indian Railways. Funds rolling stock and infrastructure assets.",
+  },
+  {
+    symbol: "POLYCAB", name: "Polycab India Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 6180, volatility: 0.022, currency: "INR", marketCapB: 922,
+    capCategory: "mid", trendBias: -0.017,
+    pe: 44.2, pb: 9.8, eps: 139.8, roe: 23.4, debtToEquity: 0.1, dividendYield: 0.5,
+    revenueB: 203, netProfitB: 17, promoterHolding: 67.6, fiiHolding: 14.2, diiHolding: 9.6, bookValue: 631,
+    description: "India's largest manufacturer of cables and wires. Fast-growing FMEG brand with fans and lights.",
+  },
+  {
+    symbol: "PERSISTENT", name: "Persistent Systems Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 5240, volatility: 0.024, currency: "INR", marketCapB: 808,
+    capCategory: "mid", trendBias: -0.019,
+    pe: 62.8, pb: 16.4, eps: 83.4, roe: 27.2, debtToEquity: 0.0, dividendYield: 0.4,
+    revenueB: 99, netProfitB: 12, promoterHolding: 31.2, fiiHolding: 32.4, diiHolding: 24.6, bookValue: 319,
+    description: "Fast-growing IT services company focused on BFSI and technology verticals globally.",
+  },
+  {
+    symbol: "COFORGE", name: "Coforge Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 7820, volatility: 0.027, currency: "INR", marketCapB: 486,
+    capCategory: "mid", trendBias: -0.021,
+    pe: 70.4, pb: 14.2, eps: 111.1, roe: 21.8, debtToEquity: 0.2, dividendYield: 0.4,
+    revenueB: 79, netProfitB: 7, promoterHolding: 0, fiiHolding: 38.4, diiHolding: 22.8, bookValue: 550,
+    description: "Mid-tier IT services company. Strong in BFSI and travel verticals with AI-driven solutions.",
+  },
+  {
+    symbol: "INDHOTEL", name: "The Indian Hotels Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 692, volatility: 0.026, currency: "INR", marketCapB: 986,
+    capCategory: "mid", trendBias: -0.013,
+    pe: 64.8, pb: 9.2, eps: 10.7, roe: 15.4, debtToEquity: 0.4, dividendYield: 0.4,
+    revenueB: 79, netProfitB: 15, promoterHolding: 38.1, fiiHolding: 22.6, diiHolding: 26.4, bookValue: 75,
+    description: "Flagship hospitality company of Tata Group. Operates Taj, Vivanta and Ginger hotel brands.",
+  },
+  {
+    symbol: "MUTHOOTFIN", name: "Muthoot Finance Ltd.", sector: "Financial Services", exchange: "NSE",
+    basePrice: 1980, volatility: 0.023, currency: "INR", marketCapB: 795,
+    capCategory: "mid", trendBias: -0.012,
+    pe: 16.8, pb: 3.2, eps: 117.9, roe: 20.8, debtToEquity: 3.4, dividendYield: 1.0,
+    revenueB: 142, netProfitB: 43, promoterHolding: 73.4, fiiHolding: 9.2, diiHolding: 12.8, bookValue: 619,
+    description: "India's largest gold loan NBFC. Strong presence in South India with growing pan-India operations.",
+  },
+  {
+    symbol: "VOLTAS", name: "Voltas Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 1620, volatility: 0.025, currency: "INR", marketCapB: 536,
+    capCategory: "small",
+    pe: 82.4, pb: 8.6, eps: 19.7, roe: 11.2, debtToEquity: 0.0, dividendYield: 0.5,
+    revenueB: 106, netProfitB: 7, promoterHolding: 30.3, fiiHolding: 20.8, diiHolding: 26.4, bookValue: 188,
+    description: "India's leading air conditioner brand. Tata Group company with engineering projects division.",
+  },
+  {
+    symbol: "DIXON", name: "Dixon Technologies Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 16800, volatility: 0.038, currency: "INR", marketCapB: 1010,
+    capCategory: "mid",
+    pe: 148.2, pb: 28.4, eps: 113.4, roe: 21.6, debtToEquity: 0.3, dividendYield: 0.1,
+    revenueB: 337, netProfitB: 7, promoterHolding: 34.2, fiiHolding: 26.8, diiHolding: 22.4, bookValue: 591,
+    description: "India's largest EMS (electronics manufacturing services) company. Manufactures TVs, mobiles, and appliances.",
+  },
+  {
+    symbol: "CUMMINSIND", name: "Cummins India Ltd.", sector: "Capital Goods", exchange: "NSE",
+    basePrice: 3490, volatility: 0.022, currency: "INR", marketCapB: 484,
+    capCategory: "small",
+    pe: 42.6, pb: 12.2, eps: 81.9, roe: 29.6, debtToEquity: 0.0, dividendYield: 1.4,
+    revenueB: 73, netProfitB: 11, promoterHolding: 51.0, fiiHolding: 19.4, diiHolding: 18.6, bookValue: 286,
+    description: "Leading manufacturer of diesel and natural gas engines in India. Subsidiary of US-based Cummins Inc.",
+  },
+  {
+    symbol: "ABFRL", name: "Aditya Birla Fashion and Retail Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 294, volatility: 0.034, currency: "INR", marketCapB: 284,
+    capCategory: "small",
+    pe: undefined, pb: 6.8, eps: -4.2, roe: -8.4, debtToEquity: 2.1, dividendYield: 0.0,
+    revenueB: 147, netProfitB: -4, promoterHolding: 55.2, fiiHolding: 14.6, diiHolding: 22.4, bookValue: 43,
+    description: "India's leading fashion retailer. Owns Pantaloons, Louis Philippe, Van Heusen, and Allen Solly brands.",
+  },
+  {
+    symbol: "ASTRAL", name: "Astral Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 2140, volatility: 0.026, currency: "INR", marketCapB: 360,
+    capCategory: "small", trendBias: -0.014,
+    pe: 72.8, pb: 14.2, eps: 29.4, roe: 20.8, debtToEquity: 0.06, dividendYield: 0.2,
+    revenueB: 66, netProfitB: 5, promoterHolding: 56.4, fiiHolding: 16.8, diiHolding: 16.2, bookValue: 151,
+    description: "Leading pipes and adhesive products manufacturer in India with pan-India distribution.",
   },
 
   // ── US stocks ─────────────────────────────────────────────────────────────
@@ -351,6 +448,7 @@ export function generateCandles(symbol: string, periodDays: number, interval: "1
   const volatility = stock?.volatility ?? 0.02;
 
   const rng = seededRng(symbol.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + periodDays);
+  const trendBias = stock?.trendBias ?? 0;
   const candles: Candle[] = [];
 
   const end = new Date();
@@ -366,7 +464,7 @@ export function generateCandles(symbol: string, periodDays: number, interval: "1
 
     if (interval === "1d" && (date.getDay() === 0 || date.getDay() === 6)) continue;
 
-    const dailyReturn = (rng() - 0.48) * volatility * 2;
+    const dailyReturn = (rng() - 0.48 + trendBias) * volatility * 2;
     const open = price;
     const close = open * (1 + dailyReturn);
     const highMult = 1 + rng() * volatility;
@@ -727,12 +825,12 @@ export function generateHorizonPrediction(
   let s = symbol.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + horizonDays * 31 + Math.floor(Date.now() / 86400000);
   const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
 
-  const biasPct = ((score - 50) / 50) * 0.12 * Math.min(horizonDays / 30, 2.5);
+  const biasPct = ((score - 50) / 50) * 0.28 * Math.min(horizonDays / 30, 2.5);
   const horizonVol = volatility * Math.sqrt(horizonDays / 252);
   const changePercent = +((biasPct + (rng() - 0.48) * horizonVol * 0.4) * 100).toFixed(2);
   const targetPrice = +(currentPrice * (1 + changePercent / 100)).toFixed(2);
   const changeAmount = +(targetPrice - currentPrice).toFixed(2);
-  const direction = changePercent > 0.5 ? "bullish" : changePercent < -0.5 ? "bearish" : "neutral";
+  const direction = changePercent > 0.25 ? "bullish" : changePercent < -0.25 ? "bearish" : "neutral";
   const baseConf = score >= 68 ? 76 : score >= 58 ? 68 : score >= 42 ? 56 : 48;
   const confidence = Math.max(30, Math.min(88, Math.round(baseConf - Math.min(horizonDays * 0.2, 18) + (rng() - 0.5) * 8)));
   return { targetPrice, changeAmount, direction, confidence };

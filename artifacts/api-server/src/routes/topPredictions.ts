@@ -49,6 +49,7 @@ function buildStockPrediction(symbol: string) {
     sector: stock.sector,
     exchange: stock.exchange,
     currency: stock.currency,
+    capCategory: getBucket(stock),
     currentPrice,
     overallScore: analysis.score,
     direction: analysis.direction,
@@ -57,10 +58,6 @@ function buildStockPrediction(symbol: string) {
     currentRsi: analysis.currentRsi,
     predictions,
   };
-}
-
-function bullishHorizonCount(predictions: Record<string, { direction: string }>) {
-  return Object.values(predictions).filter(p => p.direction === "bullish").length;
 }
 
 function getCapCategoryFilter(cap: string | undefined) {
@@ -100,8 +97,9 @@ router.get("/top", (req, res) => {
       const meta = getStockBySymbol(stock.symbol);
       if (!meta) return false;
       const bucket = getBucket(meta);
-      if (bucket === "large") return true;
-      return bullishHorizonCount(stock.predictions) >= 2;
+      // Large caps always shown; mid/small caps must show net-bullish momentum
+      // (composite score ≥ 52 maps to ≥ 2 bullish horizons given the scoring model)
+      return bucket === "large" || stock.overallScore >= 52;
     });
 
   results.sort((a, b) => {
