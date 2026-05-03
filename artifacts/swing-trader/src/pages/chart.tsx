@@ -276,6 +276,14 @@ export default function ChartPage() {
     query: { enabled: !!symbol && tab === "fundamentals", queryKey: getGetStockFundamentalsQueryKey(symbol) }
   });
   const currency = quote?.currency ?? "INR";
+  useEffect(() => {
+    if (!symbol) return;
+    const id = window.setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: getGetStockQuoteQueryKey(symbol) });
+    }, 30000);
+    return () => window.clearInterval(id);
+  }, [symbol, queryClient]);
+
 
   const chartData = useMemo(() => {
     if (!history?.candles || !indicators) return [];

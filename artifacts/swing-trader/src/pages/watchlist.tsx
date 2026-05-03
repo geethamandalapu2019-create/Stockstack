@@ -50,6 +50,13 @@ export default function Watchlist() {
   const queryClient = useQueryClient();
 
   const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
+    }, 30000);
+    return () => window.clearInterval(id);
+  }, [queryClient]);
+
   const { data: searchResults, isLoading: isSearchLoading } = useSearchStocks({ q: searchQuery }, {
     query: { enabled: searchQuery.length >= 1 }
   });
