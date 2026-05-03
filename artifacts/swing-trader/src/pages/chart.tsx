@@ -43,6 +43,7 @@ type PredictionItem = {
   overallScore?: number;
 };
 type TechOption = { key: string; label: string; color: string };
+type StockImpact = { national?: string[]; global?: string[]; verdict?: string; note?: string };
 
 const HORIZONS: { key: Horizon; label: string }[] = [
   { key: "1d", label: "1D" },
@@ -108,6 +109,56 @@ const SWING_FALLBACK = {
 
 function formatImpactList(items?: string[]) {
   return items?.slice(0, 3) ?? [];
+}
+
+function deriveStockImpact(quote?: any, fundamentals?: any): StockImpact {
+  const symbol = (quote?.symbol ?? "").toUpperCase();
+  const sector = String(quote?.sector ?? fundamentals?.sector ?? "").toLowerCase();
+  const pe = fundamentals?.pe ?? quote?.pe ?? null;
+  const marketCap = fundamentals?.marketCap ?? quote?.marketCap ?? null;
+  const changePercent = quote?.changePercent ?? 0;
+  const price = quote?.price ?? 0;
+  const near52WHigh = quote?.week52High ? price >= quote.week52High * 0.94 : false;
+  const near52WLow = quote?.week52Low ? price <= quote.week52Low * 1.06 : false;
+  const national: string[] = [];
+  const global: string[] = [];
+  let verdict = "Neutral / wait";
+
+  if (sector.includes("bank")) {
+    national.push("RBI policy, credit growth, and deposit costs matter most.");
+    national.push("Loan growth and asset quality can re-rate the stock fast.");
+    global.push("FII flows and global rates can impact bank valuation.");
+  } else if (sector.includes("it") || sector.includes("tech")) {
+    national.push("Rupee moves and deal wins affect earnings.");
+    national.push("Hiring demand and margin pressure matter near term.");
+    global.push("US spending and recession risk are the key swing factors.");
+  } else if (sector.includes("energy") || sector.includes("oil")) {
+    national.push("Domestic fuel policy and demand trends matter.");
+    national.push("Refining margins and subsidy headlines can move it quickly.");
+    global.push("Crude prices and OPEC actions are the main catalysts.");
+  } else if (sector.includes("pharma")) {
+    national.push("Approvals, compliance, and export demand drive momentum.");
+    national.push("Any domestic pricing change can affect sentiment.");
+    global.push("FDA actions and US demand can swing results.");
+  } else if (sector.includes("auto")) {
+    national.push("Festive demand, EMI rates, and inventory levels matter.");
+    national.push("EV/ICE mix and launch cycles are important now.");
+    global.push("Commodity costs and global growth affect margins.");
+  } else {
+    national.push("Company news, earnings revisions, and sector policy matter.");
+    global.push("Global risk appetite and foreign flows can change direction.");
+  }
+
+  if (changePercent > 1.5 && (pe == null || pe < 35)) verdict = "Momentum strong — watch for continuation";
+  else if (changePercent > 0.4 && pe != null && pe < 30) verdict = "Healthy setup — possible buy";
+  else if (changePercent < -1.5 && (pe == null || pe > 35)) verdict = "Weak now — avoid chasing";
+  else if (changePercent < -2.5 || near52WLow) verdict = "High risk — wait for recovery";
+  else if (near52WHigh) verdict = "Near highs — be selective";
+
+  if (symbol === "TCS" || symbol === "INFY" || symbol === "HCLTECH") global.unshift("US tech spending and recession risk are key.");
+  if (symbol === "HDFCBANK" || symbol === "ICICIBANK" || symbol === "SBIN") national.unshift("Credit growth and RBI liquidity are the main domestic drivers.");
+
+  return { national: national.slice(0, 3), global: global.slice(0, 3), verdict, note: `${symbol} is reacting to live price change and valuation context.` };
 }
 
 function getCurrentVerdict(quote?: any, fundamentals?: any) {
@@ -197,7 +248,7 @@ export default function ChartPage() {
   const volumeData = useMemo(() => history?.candles?.map((c, i) => ({ date: c.date.split("T")[0], volume: c.volume, obv: indicators?.obv[i]?.value, isBullish: c.close >= c.open })) ?? [], [history, indicators]);
   const adxData = useMemo(() => indicators?.adx?.map(p => ({ date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI })) ?? [], [indicators]);
   const predictionsData = (quote as unknown as { predictions?: PredictionItem[]; swingConfluence?: PredictionItem[] } | undefined);
-  const impactNotes = (quote as unknown as { impactNotes?: { national?: string[]; global?: string[] } } | undefined)?.impactNotes;
+  const impactNotes = deriveStockImpact(quote, fundamentals);
 
   const selectedPrediction = useMemo(() => {
     const response = predictionsData?.swingConfluence ?? predictionsData?.predictions;
@@ -205,7 +256,9 @@ export default function ChartPage() {
     const match = response?.find(p => p.horizon === horizon);
     if (match && match.targetPrice > 0) return match;
     if (current > 0) {
-      const targetPrice = +(current * 1.06).toFixed(2);
+      const baseMove = Math.max(0.015, Math.min(0.12, ((quote?.changePercent ?? 0) + 6) / 100));
+      const scoreShift = (quote?.price ? (quote.changePercent ?? 0) / 20 : 0);
+      const targetPrice = +(current * (1 + baseMove + scoreShift)).toFixed(2);
       return {
         horizon,
         label: HORIZONS.find(h => h.key === horizon)?.label ?? "1M",
@@ -213,7 +266,7 @@ export default function ChartPage() {
         targetPrice,
         confidenceLow: +(targetPrice * 0.97).toFixed(2),
         confidenceHigh: +(targetPrice * 1.03).toFixed(2),
-        confidenceScore: 58,
+        confidenceScore: Math.max(45, Math.min(82, 55 + Math.round((quote?.changePercent ?? 0) * 2))),
         upside: +(((targetPrice - current) / current) * 100).toFixed(1),
         methodology: SWING_FALLBACK.methodology,
         supportLevel: current * 0.97,
@@ -225,7 +278,7 @@ export default function ChartPage() {
           predicted: +(c.close * (1 + (i + 1) / 100)).toFixed(2),
         })) ?? [],
         signals: SWING_FALLBACK.signals,
-        overallScore: 58,
+        overallScore: Math.max(45, Math.min(82, 55 + Math.round((quote?.changePercent ?? 0) * 2))),
       };
     }
     return {
@@ -411,7 +464,7 @@ export default function ChartPage() {
                       {showSMA50 && <Line type="monotone" dataKey="sma50" stroke="hsl(var(--chart-4))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
                       {showEMA12 && <Line type="monotone" dataKey="ema12" stroke="hsl(var(--accent))" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
                       {showEMA26 && <Line type="monotone" dataKey="ema26" stroke="#f59e0b" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
-                      {showRSI && <Line yAxisId="right" type="monotone" dataKey="value" data={rsiData} stroke="#8b5cf6" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showRSI && <Line yAxisId="right" type="monotone" dataKey="rsi" data={rsiData} stroke="#8b5cf6" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
                       {showMACD && <Line yAxisId="right" type="monotone" dataKey="macd" data={macdData} stroke="#06b6d4" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
                       {showStoch && <Line yAxisId="right" type="monotone" dataKey="k" data={stochData} stroke="#10b981" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
                       {showCCI && <Line yAxisId="right" type="monotone" dataKey="value" data={cciData} stroke="#f97316" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
@@ -539,18 +592,18 @@ export default function ChartPage() {
                 </div>
                 <div className="rounded-lg border border-border bg-primary/5 p-3 space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground">Current stock verdict</div>
-                  <div className="text-sm font-semibold">{getCurrentVerdict(quote, fundamentals)}</div>
+                  <div className="text-sm font-semibold">{impactNotes.verdict ?? getCurrentVerdict(quote, fundamentals)}</div>
                   <div className="text-xs text-muted-foreground leading-relaxed">
-                    Based on live price change, valuation, and the selected stock’s current conditions.
+                    {impactNotes.note ?? "Based on live price change, valuation, and the selected stock’s current conditions."}
                   </div>
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground">Current national impact</div>
-                  {formatImpactList(impactNotes?.national).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
+                  {formatImpactList(impactNotes.national).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground">Current global impact</div>
-                  {formatImpactList(impactNotes?.global).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
+                  {formatImpactList(impactNotes.global).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
                   <div className="text-xs font-semibold text-muted-foreground">What to watch now</div>
