@@ -29,6 +29,7 @@ router.get("/search", (req, res) => {
     name: s.name,
     sector: s.sector,
     exchange: s.exchange,
+    currency: s.currency,
   }));
   res.json(results);
 });
@@ -59,12 +60,13 @@ router.get("/:symbol/quote", (req, res) => {
     high: latest.high,
     low: latest.low,
     volume: latest.volume,
-    marketCap: +(stock.basePrice * 1e9 * (0.5 + Math.random() * 1.5)).toFixed(0),
+    marketCap: stock.marketCapB ?? null,
     week52High: +Math.max(...week52.map(c => c.high)).toFixed(2),
     week52Low: +Math.min(...week52.map(c => c.low)).toFixed(2),
-    pe: +(15 + Math.random() * 30).toFixed(1),
+    pe: stock.pe ?? null,
     sector: stock.sector,
     exchange: stock.exchange,
+    currency: stock.currency,
   });
 });
 
@@ -82,7 +84,7 @@ router.get("/:symbol/history", (req, res) => {
   const days = periodToDays(period);
   const candles = generateCandles(symbol, days, interval as "1d" | "1w");
 
-  res.json({ symbol, period, interval, candles });
+  res.json({ symbol, period, interval, currency: stock.currency, candles });
 });
 
 // GET /stocks/:symbol/indicators
@@ -108,12 +110,6 @@ router.get("/:symbol/indicators", (req, res) => {
   const macd = calcMACD(closes);
   const bb = calcBollingerBands(closes);
   const signals = computeSignals(closes);
-
-  const rsiRationale: Record<string, string> = {
-    oversold: "RSI below 35 — potential reversal zone",
-    neutral: "RSI in neutral territory",
-    overbought: "RSI above 65 — may be extended",
-  };
 
   res.json({
     symbol,

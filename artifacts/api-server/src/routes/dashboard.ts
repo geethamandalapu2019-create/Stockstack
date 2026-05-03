@@ -4,12 +4,14 @@ import {
   getCurrentPrice,
   generateCandles,
   computeSignals,
+  getStockBySymbol,
   STOCKS,
 } from "../lib/stockData.js";
 
 const router = Router();
 
 function getWatchlistItemWithSignal(entry: { id: number; symbol: string; name: string; addedAt: Date }) {
+  const stock = getStockBySymbol(entry.symbol);
   const { price, change, changePercent } = getCurrentPrice(entry.symbol);
   const candles = generateCandles(entry.symbol, 90, "1d");
   const closes = candles.map(c => c.close);
@@ -22,6 +24,7 @@ function getWatchlistItemWithSignal(entry: { id: number; symbol: string; name: s
     change,
     changePercent,
     overallSignal: signals.overallSignal,
+    currency: stock?.currency ?? "USD",
     addedAt: entry.addedAt.toISOString(),
   };
 }
@@ -34,7 +37,6 @@ router.get("/summary", async (req, res) => {
     const openTrades = trades.filter(t => t.status === "open");
     const closedTrades = trades.filter(t => t.status === "closed" && t.exitPrice != null);
 
-    // Compute PnL from closed trades
     const pnls = closedTrades.map(t => {
       const diff = t.side === "long"
         ? (t.exitPrice! - t.entryPrice)
@@ -45,7 +47,6 @@ router.get("/summary", async (req, res) => {
     const wins = pnls.filter(p => p > 0).length;
     const winRate = closedTrades.length === 0 ? 0 : +((wins / closedTrades.length) * 100).toFixed(1);
 
-    // Top gainer / loser from watchlist
     let topGainer = null;
     let topLoser = null;
 
@@ -56,7 +57,6 @@ router.get("/summary", async (req, res) => {
       topLoser = withPrices[withPrices.length - 1];
     }
 
-    // Market mood: based on signals of all watchlist items
     const signals = watchlist.map(entry => {
       const candles = generateCandles(entry.symbol, 30, "1d");
       const closes = candles.map(c => c.close);
@@ -88,20 +88,20 @@ router.get("/summary", async (req, res) => {
   }
 });
 
-// GET /dashboard/signals — top swing signals from watchlist or default stocks
+// GET /dashboard/signals
 router.get("/signals", async (req, res) => {
   try {
     const watchlist = await db.select().from(watchlistTable);
 
-    // Use watchlist or fall back to first 8 default stocks
     const stocks = watchlist.length > 0
       ? watchlist.map(e => ({ symbol: e.symbol, name: e.name }))
       : STOCKS.slice(0, 8).map(s => ({ symbol: s.symbol, name: s.name }));
 
     const signals = stocks.map(({ symbol, name }) => {
+      const stock = getStockBySymbol(symbol);
       const candles = generateCandles(symbol, 90, "1d");
       const closes = candles.map(c => c.close);
-      const { price, change, changePercent } = getCurrentPrice(symbol);
+      const { price, changePercent } = getCurrentPrice(symbol);
       const s = computeSignals(closes);
 
       const rationale = [
@@ -124,10 +124,10 @@ router.get("/signals", async (req, res) => {
         bbSignal: s.bbSignal,
         currentRsi: s.currentRsi ?? null,
         rationale,
+        currency: stock?.currency ?? "USD",
       };
     });
 
-    // Sort by signal strength
     const order = ["strong_buy", "buy", "neutral", "sell", "strong_sell"];
     signals.sort((a, b) => order.indexOf(a.overallSignal) - order.indexOf(b.overallSignal));
 

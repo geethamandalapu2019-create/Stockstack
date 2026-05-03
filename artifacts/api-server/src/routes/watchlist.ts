@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, watchlistTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { getCurrentPrice, getStockBySymbol, generateCandles, periodToDays, computeSignals } from "../lib/stockData.js";
+import { getCurrentPrice, getStockBySymbol, generateCandles, computeSignals } from "../lib/stockData.js";
 
 const router = Router();
 
@@ -16,6 +16,7 @@ router.get("/", async (req, res) => {
   try {
     const entries = await db.select().from(watchlistTable).orderBy(watchlistTable.addedAt);
     const items = entries.map(entry => {
+      const stock = getStockBySymbol(entry.symbol);
       const { price, change, changePercent } = getCurrentPrice(entry.symbol);
       const signals = computeWatchlistSignal(entry.symbol);
       return {
@@ -26,6 +27,7 @@ router.get("/", async (req, res) => {
         change,
         changePercent,
         overallSignal: signals.overallSignal,
+        currency: stock?.currency ?? "USD",
         addedAt: entry.addedAt.toISOString(),
       };
     });
@@ -56,6 +58,7 @@ router.post("/", async (req, res) => {
       name,
     }).returning();
 
+    const stock = getStockBySymbol(created.symbol);
     const { price, change, changePercent } = getCurrentPrice(created.symbol);
     const signals = computeWatchlistSignal(created.symbol);
 
@@ -67,6 +70,7 @@ router.post("/", async (req, res) => {
       change,
       changePercent,
       overallSignal: signals.overallSignal,
+      currency: stock?.currency ?? "USD",
       addedAt: created.addedAt.toISOString(),
     });
   } catch (err) {

@@ -14,9 +14,6 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
 
-/**
- * @summary Search stocks by symbol or name
- */
 export const SearchStocksQueryParams = zod.object({
   q: zod.coerce.string(),
 });
@@ -26,12 +23,10 @@ export const SearchStocksResponseItem = zod.object({
   name: zod.string(),
   sector: zod.string(),
   exchange: zod.string(),
+  currency: zod.string(),
 });
 export const SearchStocksResponse = zod.array(SearchStocksResponseItem);
 
-/**
- * @summary Get current stock quote
- */
 export const GetStockQuoteParams = zod.object({
   symbol: zod.coerce.string(),
 });
@@ -52,11 +47,9 @@ export const GetStockQuoteResponse = zod.object({
   pe: zod.number().nullable(),
   sector: zod.string(),
   exchange: zod.string(),
+  currency: zod.string(),
 });
 
-/**
- * @summary Get OHLCV historical data
- */
 export const GetStockHistoryParams = zod.object({
   symbol: zod.coerce.string(),
 });
@@ -75,6 +68,7 @@ export const GetStockHistoryResponse = zod.object({
   symbol: zod.string(),
   period: zod.string(),
   interval: zod.string(),
+  currency: zod.string(),
   candles: zod.array(
     zod.object({
       date: zod.string(),
@@ -87,9 +81,6 @@ export const GetStockHistoryResponse = zod.object({
   ),
 });
 
-/**
- * @summary Get technical indicators for a stock
- */
 export const GetStockIndicatorsParams = zod.object({
   symbol: zod.coerce.string(),
 });
@@ -165,8 +156,74 @@ export const GetStockIndicatorsResponse = zod.object({
 });
 
 /**
- * @summary Get watchlist with current quotes and signals
+ * @summary Get price predictions for multiple horizons
  */
+export const GetStockPredictionsParams = zod.object({
+  symbol: zod.coerce.string(),
+});
+
+export const GetStockPredictionsResponse = zod.object({
+  symbol: zod.string(),
+  currency: zod.string(),
+  currentPrice: zod.number(),
+  predictions: zod.array(
+    zod.object({
+      horizon: zod.string(),
+      label: zod.string(),
+      targetPrice: zod.number(),
+      confidenceLow: zod.number(),
+      confidenceHigh: zod.number(),
+      direction: zod.enum(["bullish", "bearish", "neutral"]),
+      confidenceScore: zod.number(),
+      upside: zod.number(),
+      methodology: zod.string(),
+      supportLevel: zod.number(),
+      resistanceLevel: zod.number(),
+      forecast: zod.array(
+        zod.object({
+          date: zod.string(),
+          predicted: zod.number(),
+          low: zod.number(),
+          high: zod.number(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * @summary Get fundamental analysis data
+ */
+export const GetStockFundamentalsParams = zod.object({
+  symbol: zod.coerce.string(),
+});
+
+export const GetStockFundamentalsResponse = zod.object({
+  symbol: zod.string(),
+  name: zod.string(),
+  sector: zod.string(),
+  exchange: zod.string(),
+  currency: zod.string(),
+  marketCap: zod.number().nullable(),
+  pe: zod.number().nullable(),
+  pb: zod.number().nullable(),
+  eps: zod.number().nullable(),
+  roe: zod.number().nullable(),
+  debtToEquity: zod.number().nullable(),
+  dividendYield: zod.number().nullable(),
+  revenueB: zod.number().nullable(),
+  netProfitB: zod.number().nullable(),
+  promoterHolding: zod.number().nullable(),
+  fiiHolding: zod.number().nullable(),
+  diiHolding: zod.number().nullable(),
+  week52High: zod.number(),
+  week52Low: zod.number(),
+  bookValue: zod.number().nullable(),
+  description: zod.string(),
+  valuationVerdict: zod.enum(["undervalued", "fairly_valued", "overvalued"]),
+  fundamentalScore: zod.number(),
+});
+
 export const GetWatchlistResponseItem = zod.object({
   id: zod.number(),
   symbol: zod.string(),
@@ -181,28 +238,20 @@ export const GetWatchlistResponseItem = zod.object({
     "sell",
     "strong_sell",
   ]),
+  currency: zod.string(),
   addedAt: zod.string(),
 });
 export const GetWatchlistResponse = zod.array(GetWatchlistResponseItem);
 
-/**
- * @summary Add stock to watchlist
- */
 export const AddToWatchlistBody = zod.object({
   symbol: zod.string(),
   name: zod.string(),
 });
 
-/**
- * @summary Remove stock from watchlist
- */
 export const RemoveFromWatchlistParams = zod.object({
   symbol: zod.coerce.string(),
 });
 
-/**
- * @summary Get trade journal entries
- */
 export const GetTradesQueryParams = zod.object({
   status: zod.enum(["open", "closed"]).optional(),
   symbol: zod.coerce.string().optional(),
@@ -230,9 +279,6 @@ export const GetTradesResponseItem = zod.object({
 });
 export const GetTradesResponse = zod.array(GetTradesResponseItem);
 
-/**
- * @summary Log a new trade
- */
 export const CreateTradeBody = zod.object({
   symbol: zod.string(),
   name: zod.string(),
@@ -246,9 +292,6 @@ export const CreateTradeBody = zod.object({
   strategy: zod.string().nullish(),
 });
 
-/**
- * @summary Get a single trade
- */
 export const GetTradeParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -274,9 +317,6 @@ export const GetTradeResponse = zod.object({
   updatedAt: zod.string(),
 });
 
-/**
- * @summary Update a trade (close, add notes, etc.)
- */
 export const UpdateTradeParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -312,16 +352,10 @@ export const UpdateTradeResponse = zod.object({
   updatedAt: zod.string(),
 });
 
-/**
- * @summary Delete a trade
- */
 export const DeleteTradeParams = zod.object({
   id: zod.coerce.number(),
 });
 
-/**
- * @summary Get trade statistics
- */
 export const GetTradeStatsResponse = zod.object({
   totalTrades: zod.number(),
   openTrades: zod.number(),
@@ -336,9 +370,6 @@ export const GetTradeStatsResponse = zod.object({
   avgHoldingDays: zod.number().nullable(),
 });
 
-/**
- * @summary Get dashboard overview summary
- */
 export const GetDashboardSummaryResponse = zod.object({
   watchlistCount: zod.number(),
   openTradesCount: zod.number(),
@@ -359,6 +390,7 @@ export const GetDashboardSummaryResponse = zod.object({
         "sell",
         "strong_sell",
       ]),
+      currency: zod.string(),
       addedAt: zod.string(),
     })
     .optional(),
@@ -377,15 +409,13 @@ export const GetDashboardSummaryResponse = zod.object({
         "sell",
         "strong_sell",
       ]),
+      currency: zod.string(),
       addedAt: zod.string(),
     })
     .optional(),
   marketMood: zod.enum(["bullish", "neutral", "bearish"]),
 });
 
-/**
- * @summary Get top swing trading signals from watchlist
- */
 export const GetDashboardSignalsResponseItem = zod.object({
   symbol: zod.string(),
   name: zod.string(),
@@ -403,6 +433,7 @@ export const GetDashboardSignalsResponseItem = zod.object({
   bbSignal: zod.enum(["near_upper", "neutral", "near_lower"]),
   currentRsi: zod.number().nullable(),
   rationale: zod.string(),
+  currency: zod.string(),
 });
 export const GetDashboardSignalsResponse = zod.array(
   GetDashboardSignalsResponseItem,

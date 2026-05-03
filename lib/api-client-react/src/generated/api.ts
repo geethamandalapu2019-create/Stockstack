@@ -26,7 +26,9 @@ import type {
   GetTradesParams,
   HealthStatus,
   SearchStocksParams,
+  StockFundamentals,
   StockHistory,
+  StockPredictions,
   StockQuote,
   StockSearchResult,
   SwingSignal,
@@ -121,9 +123,6 @@ export function useHealthCheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Search stocks by symbol or name
- */
 export const getSearchStocksUrl = (params: SearchStocksParams) => {
   const normalizedParams = new URLSearchParams();
 
@@ -188,10 +187,6 @@ export type SearchStocksQueryResult = NonNullable<
 >;
 export type SearchStocksQueryError = ErrorType<unknown>;
 
-/**
- * @summary Search stocks by symbol or name
- */
-
 export function useSearchStocks<
   TData = Awaited<ReturnType<typeof searchStocks>>,
   TError = ErrorType<unknown>,
@@ -215,9 +210,6 @@ export function useSearchStocks<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get current stock quote
- */
 export const getGetStockQuoteUrl = (symbol: string) => {
   return `/api/stocks/${symbol}/quote`;
 };
@@ -275,10 +267,6 @@ export type GetStockQuoteQueryResult = NonNullable<
 >;
 export type GetStockQuoteQueryError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Get current stock quote
- */
-
 export function useGetStockQuote<
   TData = Awaited<ReturnType<typeof getStockQuote>>,
   TError = ErrorType<ErrorResponse>,
@@ -302,9 +290,6 @@ export function useGetStockQuote<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get OHLCV historical data
- */
 export const getGetStockHistoryUrl = (
   symbol: string,
   params?: GetStockHistoryParams,
@@ -386,10 +371,6 @@ export type GetStockHistoryQueryResult = NonNullable<
 >;
 export type GetStockHistoryQueryError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Get OHLCV historical data
- */
-
 export function useGetStockHistory<
   TData = Awaited<ReturnType<typeof getStockHistory>>,
   TError = ErrorType<ErrorResponse>,
@@ -414,9 +395,6 @@ export function useGetStockHistory<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get technical indicators for a stock
- */
 export const getGetStockIndicatorsUrl = (
   symbol: string,
   params?: GetStockIndicatorsParams,
@@ -502,10 +480,6 @@ export type GetStockIndicatorsQueryResult = NonNullable<
 >;
 export type GetStockIndicatorsQueryError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Get technical indicators for a stock
- */
-
 export function useGetStockIndicators<
   TData = Awaited<ReturnType<typeof getStockIndicators>>,
   TError = ErrorType<ErrorResponse>,
@@ -535,8 +509,183 @@ export function useGetStockIndicators<
 }
 
 /**
- * @summary Get watchlist with current quotes and signals
+ * @summary Get price predictions for multiple horizons
  */
+export const getGetStockPredictionsUrl = (symbol: string) => {
+  return `/api/stocks/${symbol}/predictions`;
+};
+
+export const getStockPredictions = async (
+  symbol: string,
+  options?: RequestInit,
+): Promise<StockPredictions> => {
+  return customFetch<StockPredictions>(getGetStockPredictionsUrl(symbol), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStockPredictionsQueryKey = (symbol: string) => {
+  return [`/api/stocks/${symbol}/predictions`] as const;
+};
+
+export const getGetStockPredictionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStockPredictions>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  symbol: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStockPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStockPredictionsQueryKey(symbol);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStockPredictions>>
+  > = ({ signal }) =>
+    getStockPredictions(symbol, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!symbol,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStockPredictions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStockPredictionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStockPredictions>>
+>;
+export type GetStockPredictionsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get price predictions for multiple horizons
+ */
+
+export function useGetStockPredictions<
+  TData = Awaited<ReturnType<typeof getStockPredictions>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  symbol: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStockPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStockPredictionsQueryOptions(symbol, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get fundamental analysis data
+ */
+export const getGetStockFundamentalsUrl = (symbol: string) => {
+  return `/api/stocks/${symbol}/fundamentals`;
+};
+
+export const getStockFundamentals = async (
+  symbol: string,
+  options?: RequestInit,
+): Promise<StockFundamentals> => {
+  return customFetch<StockFundamentals>(getGetStockFundamentalsUrl(symbol), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStockFundamentalsQueryKey = (symbol: string) => {
+  return [`/api/stocks/${symbol}/fundamentals`] as const;
+};
+
+export const getGetStockFundamentalsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStockFundamentals>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  symbol: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStockFundamentals>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStockFundamentalsQueryKey(symbol);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStockFundamentals>>
+  > = ({ signal }) =>
+    getStockFundamentals(symbol, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!symbol,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStockFundamentals>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStockFundamentalsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStockFundamentals>>
+>;
+export type GetStockFundamentalsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get fundamental analysis data
+ */
+
+export function useGetStockFundamentals<
+  TData = Awaited<ReturnType<typeof getStockFundamentals>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  symbol: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStockFundamentals>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStockFundamentalsQueryOptions(symbol, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 export const getGetWatchlistUrl = () => {
   return `/api/watchlist`;
 };
@@ -585,10 +734,6 @@ export type GetWatchlistQueryResult = NonNullable<
 >;
 export type GetWatchlistQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get watchlist with current quotes and signals
- */
-
 export function useGetWatchlist<
   TData = Awaited<ReturnType<typeof getWatchlist>>,
   TError = ErrorType<unknown>,
@@ -609,9 +754,6 @@ export function useGetWatchlist<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Add stock to watchlist
- */
 export const getAddToWatchlistUrl = () => {
   return `/api/watchlist`;
 };
@@ -672,9 +814,6 @@ export type AddToWatchlistMutationResult = NonNullable<
 export type AddToWatchlistMutationBody = BodyType<AddToWatchlistBody>;
 export type AddToWatchlistMutationError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Add stock to watchlist
- */
 export const useAddToWatchlist = <
   TError = ErrorType<ErrorResponse>,
   TContext = unknown,
@@ -695,9 +834,6 @@ export const useAddToWatchlist = <
   return useMutation(getAddToWatchlistMutationOptions(options));
 };
 
-/**
- * @summary Remove stock from watchlist
- */
 export const getRemoveFromWatchlistUrl = (symbol: string) => {
   return `/api/watchlist/${symbol}`;
 };
@@ -756,9 +892,6 @@ export type RemoveFromWatchlistMutationResult = NonNullable<
 
 export type RemoveFromWatchlistMutationError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Remove stock from watchlist
- */
 export const useRemoveFromWatchlist = <
   TError = ErrorType<ErrorResponse>,
   TContext = unknown,
@@ -779,9 +912,6 @@ export const useRemoveFromWatchlist = <
   return useMutation(getRemoveFromWatchlistMutationOptions(options));
 };
 
-/**
- * @summary Get trade journal entries
- */
 export const getGetTradesUrl = (params?: GetTradesParams) => {
   const normalizedParams = new URLSearchParams();
 
@@ -846,10 +976,6 @@ export type GetTradesQueryResult = NonNullable<
 >;
 export type GetTradesQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get trade journal entries
- */
-
 export function useGetTrades<
   TData = Awaited<ReturnType<typeof getTrades>>,
   TError = ErrorType<unknown>,
@@ -873,9 +999,6 @@ export function useGetTrades<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Log a new trade
- */
 export const getCreateTradeUrl = () => {
   return `/api/trades`;
 };
@@ -936,9 +1059,6 @@ export type CreateTradeMutationResult = NonNullable<
 export type CreateTradeMutationBody = BodyType<CreateTradeBody>;
 export type CreateTradeMutationError = ErrorType<unknown>;
 
-/**
- * @summary Log a new trade
- */
 export const useCreateTrade = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -959,9 +1079,6 @@ export const useCreateTrade = <
   return useMutation(getCreateTradeMutationOptions(options));
 };
 
-/**
- * @summary Get a single trade
- */
 export const getGetTradeUrl = (id: number) => {
   return `/api/trades/${id}`;
 };
@@ -1017,10 +1134,6 @@ export type GetTradeQueryResult = NonNullable<
 >;
 export type GetTradeQueryError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Get a single trade
- */
-
 export function useGetTrade<
   TData = Awaited<ReturnType<typeof getTrade>>,
   TError = ErrorType<ErrorResponse>,
@@ -1044,9 +1157,6 @@ export function useGetTrade<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Update a trade (close, add notes, etc.)
- */
 export const getUpdateTradeUrl = (id: number) => {
   return `/api/trades/${id}`;
 };
@@ -1108,9 +1218,6 @@ export type UpdateTradeMutationResult = NonNullable<
 export type UpdateTradeMutationBody = BodyType<UpdateTradeBody>;
 export type UpdateTradeMutationError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Update a trade (close, add notes, etc.)
- */
 export const useUpdateTrade = <
   TError = ErrorType<ErrorResponse>,
   TContext = unknown,
@@ -1131,9 +1238,6 @@ export const useUpdateTrade = <
   return useMutation(getUpdateTradeMutationOptions(options));
 };
 
-/**
- * @summary Delete a trade
- */
 export const getDeleteTradeUrl = (id: number) => {
   return `/api/trades/${id}`;
 };
@@ -1192,9 +1296,6 @@ export type DeleteTradeMutationResult = NonNullable<
 
 export type DeleteTradeMutationError = ErrorType<ErrorResponse>;
 
-/**
- * @summary Delete a trade
- */
 export const useDeleteTrade = <
   TError = ErrorType<ErrorResponse>,
   TContext = unknown,
@@ -1215,9 +1316,6 @@ export const useDeleteTrade = <
   return useMutation(getDeleteTradeMutationOptions(options));
 };
 
-/**
- * @summary Get trade statistics
- */
 export const getGetTradeStatsUrl = () => {
   return `/api/trades/stats`;
 };
@@ -1266,10 +1364,6 @@ export type GetTradeStatsQueryResult = NonNullable<
 >;
 export type GetTradeStatsQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get trade statistics
- */
-
 export function useGetTradeStats<
   TData = Awaited<ReturnType<typeof getTradeStats>>,
   TError = ErrorType<unknown>,
@@ -1290,9 +1384,6 @@ export function useGetTradeStats<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get dashboard overview summary
- */
 export const getGetDashboardSummaryUrl = () => {
   return `/api/dashboard/summary`;
 };
@@ -1341,10 +1432,6 @@ export type GetDashboardSummaryQueryResult = NonNullable<
 >;
 export type GetDashboardSummaryQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get dashboard overview summary
- */
-
 export function useGetDashboardSummary<
   TData = Awaited<ReturnType<typeof getDashboardSummary>>,
   TError = ErrorType<unknown>,
@@ -1365,9 +1452,6 @@ export function useGetDashboardSummary<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get top swing trading signals from watchlist
- */
 export const getGetDashboardSignalsUrl = () => {
   return `/api/dashboard/signals`;
 };
@@ -1415,10 +1499,6 @@ export type GetDashboardSignalsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getDashboardSignals>>
 >;
 export type GetDashboardSignalsQueryError = ErrorType<unknown>;
-
-/**
- * @summary Get top swing trading signals from watchlist
- */
 
 export function useGetDashboardSignals<
   TData = Awaited<ReturnType<typeof getDashboardSignals>>,

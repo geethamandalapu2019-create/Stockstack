@@ -18,6 +18,7 @@ export interface StockSearchResult {
   name: string;
   sector: string;
   exchange: string;
+  currency: string;
 }
 
 export interface StockQuote {
@@ -38,6 +39,7 @@ export interface StockQuote {
   pe: number | null;
   sector: string;
   exchange: string;
+  currency: string;
 }
 
 export interface Candle {
@@ -53,6 +55,7 @@ export interface StockHistory {
   symbol: string;
   period: string;
   interval: string;
+  currency: string;
   candles: Candle[];
 }
 
@@ -138,6 +141,92 @@ export interface TechnicalIndicators {
   overallSignal: TechnicalIndicatorsOverallSignal;
 }
 
+export interface PredictionPoint {
+  date: string;
+  predicted: number;
+  low: number;
+  high: number;
+}
+
+export type HorizonPredictionDirection =
+  (typeof HorizonPredictionDirection)[keyof typeof HorizonPredictionDirection];
+
+export const HorizonPredictionDirection = {
+  bullish: "bullish",
+  bearish: "bearish",
+  neutral: "neutral",
+} as const;
+
+export interface HorizonPrediction {
+  horizon: string;
+  label: string;
+  targetPrice: number;
+  confidenceLow: number;
+  confidenceHigh: number;
+  direction: HorizonPredictionDirection;
+  confidenceScore: number;
+  upside: number;
+  methodology: string;
+  supportLevel: number;
+  resistanceLevel: number;
+  forecast: PredictionPoint[];
+}
+
+export interface StockPredictions {
+  symbol: string;
+  currency: string;
+  currentPrice: number;
+  predictions: HorizonPrediction[];
+}
+
+export type StockFundamentalsValuationVerdict =
+  (typeof StockFundamentalsValuationVerdict)[keyof typeof StockFundamentalsValuationVerdict];
+
+export const StockFundamentalsValuationVerdict = {
+  undervalued: "undervalued",
+  fairly_valued: "fairly_valued",
+  overvalued: "overvalued",
+} as const;
+
+export interface StockFundamentals {
+  symbol: string;
+  name: string;
+  sector: string;
+  exchange: string;
+  currency: string;
+  /** @nullable */
+  marketCap: number | null;
+  /** @nullable */
+  pe: number | null;
+  /** @nullable */
+  pb: number | null;
+  /** @nullable */
+  eps: number | null;
+  /** @nullable */
+  roe: number | null;
+  /** @nullable */
+  debtToEquity: number | null;
+  /** @nullable */
+  dividendYield: number | null;
+  /** @nullable */
+  revenueB: number | null;
+  /** @nullable */
+  netProfitB: number | null;
+  /** @nullable */
+  promoterHolding: number | null;
+  /** @nullable */
+  fiiHolding: number | null;
+  /** @nullable */
+  diiHolding: number | null;
+  week52High: number;
+  week52Low: number;
+  /** @nullable */
+  bookValue: number | null;
+  description: string;
+  valuationVerdict: StockFundamentalsValuationVerdict;
+  fundamentalScore: number;
+}
+
 export type WatchlistItemOverallSignal =
   (typeof WatchlistItemOverallSignal)[keyof typeof WatchlistItemOverallSignal];
 
@@ -157,6 +246,7 @@ export interface WatchlistItem {
   change: number;
   changePercent: number;
   overallSignal: WatchlistItemOverallSignal;
+  currency: string;
   addedAt: string;
 }
 
@@ -344,6 +434,7 @@ export interface SwingSignal {
   /** @nullable */
   currentRsi: number | null;
   rationale: string;
+  currency: string;
 }
 
 export type SearchStocksParams = {

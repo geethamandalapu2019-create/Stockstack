@@ -12,24 +12,27 @@ import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetWatchlistQueryKey } from "@workspace/api-client-react";
 
+function formatPrice(price: number, currency: string) {
+  const sym = currency === "INR" ? "₹" : "$";
+  return `${sym}${price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export default function Watchlist() {
   const { data: watchlist, isLoading } = useGetWatchlist();
   const removeFromWatchlist = useRemoveFromWatchlist();
   const addToWatchlist = useAddToWatchlist();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const { data: searchResults, isLoading: isSearchLoading } = useSearchStocks({ q: searchQuery }, {
-    query: {
-      enabled: searchQuery.length > 1
-    }
+    query: { enabled: searchQuery.length > 1 }
   });
 
   const handleRemove = (symbol: string) => {
     removeFromWatchlist.mutate({ symbol }, {
       onSuccess: () => {
-        toast({ title: "Removed from watchlist", description: `${symbol} has been removed.` });
+        toast({ title: "Removed", description: `${symbol} removed from watchlist.` });
         queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
       },
       onError: () => {
@@ -41,7 +44,7 @@ export default function Watchlist() {
   const handleAdd = (symbol: string, name: string) => {
     addToWatchlist.mutate({ data: { symbol, name } }, {
       onSuccess: () => {
-        toast({ title: "Added to watchlist", description: `${symbol} has been added.` });
+        toast({ title: "Added", description: `${symbol} added to watchlist.` });
         setSearchQuery("");
         queryClient.invalidateQueries({ queryKey: getGetWatchlistQueryKey() });
       },
@@ -52,37 +55,40 @@ export default function Watchlist() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col">
-      <div className="flex justify-between items-center shrink-0">
+    <div className="space-y-4 max-w-6xl mx-auto h-full flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Watchlist</h1>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight">Watchlist</h1>
           <p className="text-muted-foreground text-sm">Monitor signals for selected instruments.</p>
         </div>
-        <div className="relative w-64 md:w-80">
+        <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input 
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Add to watchlist..." 
+            placeholder="Search to add (RELIANCE, TCS…)"
             className="pl-9"
           />
           {searchQuery.length > 1 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-50 max-h-64 overflow-y-auto">
               {isSearchLoading ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
+                <div className="p-4 text-center text-sm text-muted-foreground">Searching…</div>
               ) : searchResults?.length ? (
                 <div className="flex flex-col">
                   {searchResults.map(res => (
-                    <button 
+                    <button
                       key={res.symbol}
-                      className="flex justify-between items-center p-3 hover:bg-secondary transition-colors text-left"
+                      className="flex justify-between items-center p-3 hover:bg-secondary transition-colors text-left border-b border-border/50 last:border-0"
                       onClick={() => handleAdd(res.symbol, res.name)}
                     >
-                      <div>
-                        <div className="font-bold">{res.symbol}</div>
-                        <div className="text-xs text-muted-foreground">{res.name}</div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm">{res.currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
+                        <div className="min-w-0">
+                          <div className="font-bold text-sm">{res.symbol}</div>
+                          <div className="text-xs text-muted-foreground truncate">{res.name}</div>
+                        </div>
                       </div>
-                      <Plus className="w-4 h-4 text-muted-foreground" />
+                      <Plus className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
                     </button>
                   ))}
                 </div>
@@ -94,7 +100,65 @@ export default function Watchlist() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-card border border-border rounded-lg">
+      {/* Mobile card view */}
+      <div className="flex-1 overflow-auto md:hidden space-y-2">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="bg-card">
+              <CardContent className="p-4 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-32" />
+              </CardContent>
+            </Card>
+          ))
+        ) : watchlist?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <Activity className="w-12 h-12 text-muted/50 mb-4" />
+            <div>Watchlist is empty. Search for a symbol to add it.</div>
+          </div>
+        ) : watchlist?.map(item => (
+          <Card key={item.symbol} className="bg-card">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-sm">{item.currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
+                    <Link href={`/chart/${item.symbol}`} className="font-bold text-base hover:text-primary transition-colors">
+                      {item.symbol}
+                    </Link>
+                    <SignalBadge signal={item.overallSignal} />
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate mb-2">{item.name}</div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-data font-semibold">{formatPrice(item.price, item.currency)}</span>
+                    <span className={cn("font-data text-sm", item.changePercent > 0 ? "text-bullish" : "text-bearish")}>
+                      {item.changePercent > 0 ? "+" : ""}{item.changePercent.toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <Link href={`/chart/${item.symbol}`}><ExternalLink className="w-4 h-4" /></Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleRemove(item.symbol)}
+                    disabled={removeFromWatchlist.isPending}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden md:block flex-1 overflow-auto bg-card border border-border rounded-lg">
         <table className="w-full text-sm text-left">
           <thead className="bg-secondary/50 text-muted-foreground font-data text-xs border-b border-border sticky top-0 backdrop-blur">
             <tr>
@@ -111,13 +175,9 @@ export default function Watchlist() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i}>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-12" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-24" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-12 ml-auto" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-6 w-20" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-4 w-16" /></td>
-                  <td className="px-4 py-4"><Skeleton className="h-8 w-8 ml-auto" /></td>
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <td key={j} className="px-4 py-4"><Skeleton className="h-4 w-16" /></td>
+                  ))}
                 </tr>
               ))
             ) : watchlist?.length === 0 ? (
@@ -130,12 +190,13 @@ export default function Watchlist() {
             ) : watchlist?.map((item) => (
               <tr key={item.symbol} className="hover:bg-secondary/20 transition-colors group">
                 <td className="px-4 py-3 font-bold">
-                  <Link href={`/chart/${item.symbol}`} className="hover:text-primary transition-colors flex items-center gap-1">
+                  <Link href={`/chart/${item.symbol}`} className="hover:text-primary transition-colors flex items-center gap-1.5">
+                    <span className="text-sm">{item.currency === "INR" ? "🇮🇳" : "🇺🇸"}</span>
                     {item.symbol}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">{item.name}</td>
-                <td className="px-4 py-3 text-right font-data">${item.price.toFixed(2)}</td>
+                <td className="px-4 py-3 text-muted-foreground truncate max-w-[180px]">{item.name}</td>
+                <td className="px-4 py-3 text-right font-data">{formatPrice(item.price, item.currency)}</td>
                 <td className={cn(
                   "px-4 py-3 text-right font-data",
                   item.changePercent > 0 ? "text-bullish" : "text-bearish"
@@ -153,9 +214,9 @@ export default function Watchlist() {
                     <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-muted-foreground hover:text-foreground">
                       <Link href={`/chart/${item.symbol}`}><ExternalLink className="w-4 h-4" /></Link>
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleRemove(item.symbol)}
                       disabled={removeFromWatchlist.isPending}

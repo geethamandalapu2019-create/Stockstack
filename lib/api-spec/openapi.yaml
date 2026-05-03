@@ -8,15 +8,10 @@ servers:
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: stocks
-    description: Stock data and indicators
   - name: watchlist
-    description: Watchlist management
   - name: trades
-    description: Trade journal
   - name: dashboard
-    description: Dashboard summaries
 
 paths:
   /healthz:
@@ -36,7 +31,6 @@ paths:
     get:
       operationId: searchStocks
       tags: [stocks]
-      summary: Search stocks by symbol or name
       parameters:
         - name: q
           in: query
@@ -57,7 +51,6 @@ paths:
     get:
       operationId: getStockQuote
       tags: [stocks]
-      summary: Get current stock quote
       parameters:
         - name: symbol
           in: path
@@ -72,7 +65,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/StockQuote"
         "404":
-          description: Symbol not found
+          description: Not found
           content:
             application/json:
               schema:
@@ -82,7 +75,6 @@ paths:
     get:
       operationId: getStockHistory
       tags: [stocks]
-      summary: Get OHLCV historical data
       parameters:
         - name: symbol
           in: path
@@ -91,14 +83,12 @@ paths:
             type: string
         - name: period
           in: query
-          required: false
           schema:
             type: string
             enum: [1mo, 3mo, 6mo, 1y, 2y]
             default: 3mo
         - name: interval
           in: query
-          required: false
           schema:
             type: string
             enum: [1d, 1w]
@@ -111,7 +101,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/StockHistory"
         "404":
-          description: Symbol not found
+          description: Not found
           content:
             application/json:
               schema:
@@ -121,7 +111,6 @@ paths:
     get:
       operationId: getStockIndicators
       tags: [stocks]
-      summary: Get technical indicators for a stock
       parameters:
         - name: symbol
           in: path
@@ -130,7 +119,6 @@ paths:
             type: string
         - name: period
           in: query
-          required: false
           schema:
             type: string
             enum: [1mo, 3mo, 6mo, 1y, 2y]
@@ -143,7 +131,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/TechnicalIndicators"
         "404":
-          description: Symbol not found
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stocks/{symbol}/predictions:
+    get:
+      operationId: getStockPredictions
+      tags: [stocks]
+      summary: Get price predictions for multiple horizons
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Price predictions for all horizons
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockPredictions"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stocks/{symbol}/fundamentals:
+    get:
+      operationId: getStockFundamentals
+      tags: [stocks]
+      summary: Get fundamental analysis data
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Fundamental data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockFundamentals"
+        "404":
+          description: Not found
           content:
             application/json:
               schema:
@@ -153,7 +191,6 @@ paths:
     get:
       operationId: getWatchlist
       tags: [watchlist]
-      summary: Get watchlist with current quotes and signals
       responses:
         "200":
           description: Watchlist
@@ -166,7 +203,6 @@ paths:
     post:
       operationId: addToWatchlist
       tags: [watchlist]
-      summary: Add stock to watchlist
       requestBody:
         required: true
         content:
@@ -191,7 +227,6 @@ paths:
     delete:
       operationId: removeFromWatchlist
       tags: [watchlist]
-      summary: Remove stock from watchlist
       parameters:
         - name: symbol
           in: path
@@ -212,17 +247,14 @@ paths:
     get:
       operationId: getTrades
       tags: [trades]
-      summary: Get trade journal entries
       parameters:
         - name: status
           in: query
-          required: false
           schema:
             type: string
             enum: [open, closed]
         - name: symbol
           in: query
-          required: false
           schema:
             type: string
       responses:
@@ -237,7 +269,6 @@ paths:
     post:
       operationId: createTrade
       tags: [trades]
-      summary: Log a new trade
       requestBody:
         required: true
         content:
@@ -256,7 +287,6 @@ paths:
     get:
       operationId: getTrade
       tags: [trades]
-      summary: Get a single trade
       parameters:
         - name: id
           in: path
@@ -279,7 +309,6 @@ paths:
     patch:
       operationId: updateTrade
       tags: [trades]
-      summary: Update a trade (close, add notes, etc.)
       parameters:
         - name: id
           in: path
@@ -308,7 +337,6 @@ paths:
     delete:
       operationId: deleteTrade
       tags: [trades]
-      summary: Delete a trade
       parameters:
         - name: id
           in: path
@@ -329,7 +357,6 @@ paths:
     get:
       operationId: getTradeStats
       tags: [trades]
-      summary: Get trade statistics
       responses:
         "200":
           description: Trade statistics
@@ -342,7 +369,6 @@ paths:
     get:
       operationId: getDashboardSummary
       tags: [dashboard]
-      summary: Get dashboard overview summary
       responses:
         "200":
           description: Dashboard summary
@@ -355,7 +381,6 @@ paths:
     get:
       operationId: getDashboardSignals
       tags: [dashboard]
-      summary: Get top swing trading signals from watchlist
       responses:
         "200":
           description: Trading signals
@@ -393,7 +418,9 @@ components:
           type: string
         exchange:
           type: string
-      required: [symbol, name, sector, exchange]
+        currency:
+          type: string
+      required: [symbol, name, sector, exchange, currency]
 
     StockQuote:
       type: object
@@ -428,7 +455,9 @@ components:
           type: string
         exchange:
           type: string
-      required: [symbol, name, price, change, changePercent, open, high, low, volume, marketCap, week52High, week52Low, pe, sector, exchange]
+        currency:
+          type: string
+      required: [symbol, name, price, change, changePercent, open, high, low, volume, marketCap, week52High, week52Low, pe, sector, exchange, currency]
 
     Candle:
       type: object
@@ -456,11 +485,13 @@ components:
           type: string
         interval:
           type: string
+        currency:
+          type: string
         candles:
           type: array
           items:
             $ref: "#/components/schemas/Candle"
-      required: [symbol, period, interval, candles]
+      required: [symbol, period, interval, currency, candles]
 
     IndicatorPoint:
       type: object
@@ -548,6 +579,118 @@ components:
           enum: [strong_buy, buy, neutral, sell, strong_sell]
       required: [symbol, period, rsi, sma20, sma50, ema12, ema26, macd, bollingerBands, currentRsi, rsiSignal, macdSignal, bbSignal, overallSignal]
 
+    PredictionPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        predicted:
+          type: number
+        low:
+          type: number
+        high:
+          type: number
+      required: [date, predicted, low, high]
+
+    HorizonPrediction:
+      type: object
+      properties:
+        horizon:
+          type: string
+        label:
+          type: string
+        targetPrice:
+          type: number
+        confidenceLow:
+          type: number
+        confidenceHigh:
+          type: number
+        direction:
+          type: string
+          enum: [bullish, bearish, neutral]
+        confidenceScore:
+          type: integer
+        upside:
+          type: number
+        methodology:
+          type: string
+        supportLevel:
+          type: number
+        resistanceLevel:
+          type: number
+        forecast:
+          type: array
+          items:
+            $ref: "#/components/schemas/PredictionPoint"
+      required: [horizon, label, targetPrice, confidenceLow, confidenceHigh, direction, confidenceScore, upside, methodology, supportLevel, resistanceLevel, forecast]
+
+    StockPredictions:
+      type: object
+      properties:
+        symbol:
+          type: string
+        currency:
+          type: string
+        currentPrice:
+          type: number
+        predictions:
+          type: array
+          items:
+            $ref: "#/components/schemas/HorizonPrediction"
+      required: [symbol, currency, currentPrice, predictions]
+
+    StockFundamentals:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        sector:
+          type: string
+        exchange:
+          type: string
+        currency:
+          type: string
+        marketCap:
+          type: ["number", "null"]
+        pe:
+          type: ["number", "null"]
+        pb:
+          type: ["number", "null"]
+        eps:
+          type: ["number", "null"]
+        roe:
+          type: ["number", "null"]
+        debtToEquity:
+          type: ["number", "null"]
+        dividendYield:
+          type: ["number", "null"]
+        revenueB:
+          type: ["number", "null"]
+        netProfitB:
+          type: ["number", "null"]
+        promoterHolding:
+          type: ["number", "null"]
+        fiiHolding:
+          type: ["number", "null"]
+        diiHolding:
+          type: ["number", "null"]
+        week52High:
+          type: number
+        week52Low:
+          type: number
+        bookValue:
+          type: ["number", "null"]
+        description:
+          type: string
+        valuationVerdict:
+          type: string
+          enum: [undervalued, fairly_valued, overvalued]
+        fundamentalScore:
+          type: integer
+      required: [symbol, name, sector, exchange, currency, marketCap, pe, pb, eps, roe, debtToEquity, dividendYield, revenueB, netProfitB, promoterHolding, fiiHolding, diiHolding, week52High, week52Low, bookValue, description, valuationVerdict, fundamentalScore]
+
     WatchlistItem:
       type: object
       properties:
@@ -566,9 +709,11 @@ components:
         overallSignal:
           type: string
           enum: [strong_buy, buy, neutral, sell, strong_sell]
+        currency:
+          type: string
         addedAt:
           type: string
-      required: [id, symbol, name, price, change, changePercent, overallSignal, addedAt]
+      required: [id, symbol, name, price, change, changePercent, overallSignal, currency, addedAt]
 
     AddToWatchlistBody:
       type: object
@@ -741,4 +886,6 @@ components:
           type: ["number", "null"]
         rationale:
           type: string
-      required: [symbol, name, price, changePercent, overallSignal, rsiSignal, macdSignal, bbSignal, currentRsi, rationale]
+        currency:
+          type: string
+      required: [symbol, name, price, changePercent, overallSignal, rsiSignal, macdSignal, bbSignal, currentRsi, rationale, currency]

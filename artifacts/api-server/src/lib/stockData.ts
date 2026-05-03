@@ -5,29 +5,247 @@ export interface StockMeta {
   exchange: string;
   basePrice: number;
   volatility: number;
+  currency: string; // "INR" | "USD"
+  marketCapB: number; // in billions of local currency
+  pe?: number;
+  pb?: number;
+  eps?: number;
+  roe?: number;
+  debtToEquity?: number;
+  dividendYield?: number;
+  revenueB?: number;
+  netProfitB?: number;
+  promoterHolding?: number;
+  fiiHolding?: number;
+  diiHolding?: number;
+  bookValue?: number;
+  description?: string;
 }
 
 export const STOCKS: StockMeta[] = [
-  { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", exchange: "NASDAQ", basePrice: 189.5, volatility: 0.018 },
-  { symbol: "MSFT", name: "Microsoft Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 415.2, volatility: 0.016 },
-  { symbol: "NVDA", name: "NVIDIA Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 875.0, volatility: 0.032 },
-  { symbol: "TSLA", name: "Tesla Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 248.0, volatility: 0.042 },
-  { symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 185.0, volatility: 0.022 },
-  { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 176.0, volatility: 0.019 },
-  { symbol: "META", name: "Meta Platforms Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 510.0, volatility: 0.025 },
-  { symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financials", exchange: "NYSE", basePrice: 198.0, volatility: 0.014 },
-  { symbol: "BAC", name: "Bank of America Corp.", sector: "Financials", exchange: "NYSE", basePrice: 38.5, volatility: 0.018 },
-  { symbol: "XOM", name: "Exxon Mobil Corp.", sector: "Energy", exchange: "NYSE", basePrice: 108.0, volatility: 0.016 },
-  { symbol: "JNJ", name: "Johnson & Johnson", sector: "Healthcare", exchange: "NYSE", basePrice: 152.0, volatility: 0.012 },
-  { symbol: "V", name: "Visa Inc.", sector: "Financials", exchange: "NYSE", basePrice: 275.0, volatility: 0.013 },
-  { symbol: "WMT", name: "Walmart Inc.", sector: "Consumer Staples", exchange: "NYSE", basePrice: 68.0, volatility: 0.011 },
-  { symbol: "UNH", name: "UnitedHealth Group Inc.", sector: "Healthcare", exchange: "NYSE", basePrice: 512.0, volatility: 0.015 },
-  { symbol: "AMD", name: "Advanced Micro Devices", sector: "Technology", exchange: "NASDAQ", basePrice: 178.0, volatility: 0.038 },
-  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 225.0, volatility: 0.055 },
-  { symbol: "SOFI", name: "SoFi Technologies Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 8.2, volatility: 0.048 },
-  { symbol: "PLTR", name: "Palantir Technologies", sector: "Technology", exchange: "NYSE", basePrice: 22.0, volatility: 0.045 },
-  { symbol: "RBLX", name: "Roblox Corp.", sector: "Communication Services", exchange: "NYSE", basePrice: 42.0, volatility: 0.05 },
-  { symbol: "RIVN", name: "Rivian Automotive Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 12.5, volatility: 0.06 },
+  // ── Indian NSE stocks ──────────────────────────────────────────────────────
+  {
+    symbol: "RELIANCE", name: "Reliance Industries Ltd.", sector: "Energy", exchange: "NSE",
+    basePrice: 2950, volatility: 0.015, currency: "INR", marketCapB: 19900,
+    pe: 28.4, pb: 2.1, eps: 103.8, roe: 8.7, debtToEquity: 0.35, dividendYield: 0.35,
+    revenueB: 9017, netProfitB: 670, promoterHolding: 50.3, fiiHolding: 21.5, diiHolding: 17.2, bookValue: 1410,
+    description: "India's largest company by revenue. Operates in energy, petrochemicals, retail, and digital services (Jio).",
+  },
+  {
+    symbol: "TCS", name: "Tata Consultancy Services Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 3980, volatility: 0.013, currency: "INR", marketCapB: 14500,
+    pe: 31.2, pb: 14.8, eps: 127.6, roe: 47.6, debtToEquity: 0.02, dividendYield: 1.5,
+    revenueB: 2380, netProfitB: 466, promoterHolding: 72.3, fiiHolding: 12.8, diiHolding: 9.4, bookValue: 268,
+    description: "India's largest IT services company. Serves global clients across banking, retail, manufacturing and more.",
+  },
+  {
+    symbol: "HDFCBANK", name: "HDFC Bank Ltd.", sector: "Banking", exchange: "NSE",
+    basePrice: 1620, volatility: 0.014, currency: "INR", marketCapB: 12300,
+    pe: 19.8, pb: 2.8, eps: 81.8, roe: 15.2, debtToEquity: 6.8, dividendYield: 1.2,
+    revenueB: 2174, netProfitB: 645, promoterHolding: 0, fiiHolding: 52.1, diiHolding: 26.4, bookValue: 579,
+    description: "India's largest private sector bank by assets. Known for strong retail banking and quality loan book.",
+  },
+  {
+    symbol: "INFY", name: "Infosys Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 1780, volatility: 0.016, currency: "INR", marketCapB: 7400,
+    pe: 25.4, pb: 7.6, eps: 70.1, roe: 30.7, debtToEquity: 0.04, dividendYield: 2.4,
+    revenueB: 1535, netProfitB: 262, promoterHolding: 14.7, fiiHolding: 33.5, diiHolding: 34.2, bookValue: 234,
+    description: "India's second-largest IT services company. Strong presence in North America with digital transformation services.",
+  },
+  {
+    symbol: "ICICIBANK", name: "ICICI Bank Ltd.", sector: "Banking", exchange: "NSE",
+    basePrice: 1230, volatility: 0.016, currency: "INR", marketCapB: 8650,
+    pe: 18.3, pb: 3.0, eps: 67.2, roe: 17.4, debtToEquity: 7.1, dividendYield: 0.9,
+    revenueB: 1680, netProfitB: 440, promoterHolding: 0, fiiHolding: 46.8, diiHolding: 32.5, bookValue: 410,
+    description: "India's second-largest private sector bank. Diversified across retail, corporate, and SME segments.",
+  },
+  {
+    symbol: "HINDUNILVR", name: "Hindustan Unilever Ltd.", sector: "FMCG", exchange: "NSE",
+    basePrice: 2350, volatility: 0.011, currency: "INR", marketCapB: 5520,
+    pe: 53.4, pb: 11.8, eps: 44.0, roe: 21.7, debtToEquity: 0.0, dividendYield: 1.8,
+    revenueB: 601, netProfitB: 102, promoterHolding: 61.9, fiiHolding: 14.6, diiHolding: 14.5, bookValue: 199,
+    description: "India's leading FMCG company. Portfolio spans food, home care, personal care and beauty segments.",
+  },
+  {
+    symbol: "SBIN", name: "State Bank of India", sector: "Banking", exchange: "NSE",
+    basePrice: 820, volatility: 0.018, currency: "INR", marketCapB: 7320,
+    pe: 10.4, pb: 1.7, eps: 78.8, roe: 16.6, debtToEquity: 12.1, dividendYield: 1.8,
+    revenueB: 3940, netProfitB: 618, promoterHolding: 57.5, fiiHolding: 10.4, diiHolding: 24.6, bookValue: 482,
+    description: "India's largest public sector bank. Extensive rural and urban network across the country.",
+  },
+  {
+    symbol: "BAJFINANCE", name: "Bajaj Finance Ltd.", sector: "NBFC", exchange: "NSE",
+    basePrice: 7200, volatility: 0.024, currency: "INR", marketCapB: 4350,
+    pe: 33.8, pb: 6.2, eps: 213.0, roe: 19.2, debtToEquity: 3.9, dividendYield: 0.3,
+    revenueB: 528, netProfitB: 144, promoterHolding: 54.8, fiiHolding: 22.5, diiHolding: 12.4, bookValue: 1160,
+    description: "India's largest non-banking financial company. Specializes in consumer lending, SME finance and deposits.",
+  },
+  {
+    symbol: "BHARTIARTL", name: "Bharti Airtel Ltd.", sector: "Telecom", exchange: "NSE",
+    basePrice: 1680, volatility: 0.019, currency: "INR", marketCapB: 9820,
+    pe: 78.2, pb: 8.5, eps: 21.5, roe: 11.3, debtToEquity: 2.4, dividendYield: 0.4,
+    revenueB: 1514, netProfitB: 88, promoterHolding: 55.9, fiiHolding: 18.1, diiHolding: 14.6, bookValue: 197,
+    description: "India's largest telecom operator. Rapidly expanding 5G network across 500+ cities.",
+  },
+  {
+    symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Ltd.", sector: "Banking", exchange: "NSE",
+    basePrice: 1870, volatility: 0.015, currency: "INR", marketCapB: 3720,
+    pe: 22.1, pb: 3.5, eps: 84.6, roe: 16.3, debtToEquity: 6.2, dividendYield: 0.1,
+    revenueB: 862, netProfitB: 160, promoterHolding: 25.9, fiiHolding: 38.4, diiHolding: 23.5, bookValue: 534,
+    description: "India's premium private sector bank known for quality assets and strong capital adequacy.",
+  },
+  {
+    symbol: "WIPRO", name: "Wipro Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 480, volatility: 0.017, currency: "INR", marketCapB: 2500,
+    pe: 22.6, pb: 3.7, eps: 21.2, roe: 16.8, debtToEquity: 0.12, dividendYield: 0.2,
+    revenueB: 897, netProfitB: 111, promoterHolding: 72.9, fiiHolding: 10.4, diiHolding: 9.1, bookValue: 130,
+    description: "Global IT services and consulting firm. Strong footprint in North America and Europe.",
+  },
+  {
+    symbol: "LT", name: "Larsen & Toubro Ltd.", sector: "Infrastructure", exchange: "NSE",
+    basePrice: 3620, volatility: 0.016, currency: "INR", marketCapB: 5080,
+    pe: 34.5, pb: 4.8, eps: 104.8, roe: 14.6, debtToEquity: 1.8, dividendYield: 0.8,
+    revenueB: 2209, netProfitB: 148, promoterHolding: 0, fiiHolding: 22.4, diiHolding: 36.8, bookValue: 754,
+    description: "India's largest engineering & construction conglomerate. Active in defense, IT, and heavy engineering.",
+  },
+  {
+    symbol: "AXISBANK", name: "Axis Bank Ltd.", sector: "Banking", exchange: "NSE",
+    basePrice: 1120, volatility: 0.018, currency: "INR", marketCapB: 3460,
+    pe: 15.8, pb: 2.1, eps: 70.9, roe: 14.2, debtToEquity: 7.5, dividendYield: 0.1,
+    revenueB: 1120, netProfitB: 220, promoterHolding: 8.2, fiiHolding: 50.2, diiHolding: 26.4, bookValue: 534,
+    description: "India's third largest private sector bank. Growing retail and digital banking franchise.",
+  },
+  {
+    symbol: "HCLTECH", name: "HCL Technologies Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 1680, volatility: 0.014, currency: "INR", marketCapB: 4560,
+    pe: 27.2, pb: 7.1, eps: 61.8, roe: 26.2, debtToEquity: 0.06, dividendYield: 3.1,
+    revenueB: 1094, netProfitB: 165, promoterHolding: 60.8, fiiHolding: 18.2, diiHolding: 13.5, bookValue: 236,
+    description: "Third-largest Indian IT company. Known for software and infrastructure services to global enterprises.",
+  },
+  {
+    symbol: "MARUTI", name: "Maruti Suzuki India Ltd.", sector: "Automobile", exchange: "NSE",
+    basePrice: 12400, volatility: 0.018, currency: "INR", marketCapB: 3860,
+    pe: 25.8, pb: 4.2, eps: 481.0, roe: 17.3, debtToEquity: 0.0, dividendYield: 1.0,
+    revenueB: 1340, netProfitB: 149, promoterHolding: 58.2, fiiHolding: 18.3, diiHolding: 13.2, bookValue: 2950,
+    description: "India's leading passenger vehicle manufacturer. Dominant market share in entry-level and mid-size segments.",
+  },
+  {
+    symbol: "TITAN", name: "Titan Company Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 3450, volatility: 0.019, currency: "INR", marketCapB: 3060,
+    pe: 89.4, pb: 17.2, eps: 38.6, roe: 20.1, debtToEquity: 0.04, dividendYield: 0.3,
+    revenueB: 424, netProfitB: 34, promoterHolding: 52.9, fiiHolding: 17.6, diiHolding: 17.9, bookValue: 200,
+    description: "Leading jewelry, watches, and eyewear company in India. Tanishq is India's most trusted jewelry brand.",
+  },
+  {
+    symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries", sector: "Pharmaceuticals", exchange: "NSE",
+    basePrice: 1820, volatility: 0.016, currency: "INR", marketCapB: 4360,
+    pe: 38.4, pb: 5.4, eps: 47.4, roe: 14.8, debtToEquity: 0.03, dividendYield: 0.6,
+    revenueB: 486, netProfitB: 99, promoterHolding: 54.5, fiiHolding: 19.2, diiHolding: 16.4, bookValue: 338,
+    description: "India's largest pharmaceutical company. Strong generic drug presence in the US and emerging markets.",
+  },
+  {
+    symbol: "TATAMOTORS", name: "Tata Motors Ltd.", sector: "Automobile", exchange: "NSE",
+    basePrice: 940, volatility: 0.028, currency: "INR", marketCapB: 3450,
+    pe: 10.6, pb: 3.8, eps: 88.7, roe: 41.5, debtToEquity: 1.4, dividendYield: 0.4,
+    revenueB: 4384, netProfitB: 310, promoterHolding: 46.4, fiiHolding: 17.8, diiHolding: 19.5, bookValue: 247,
+    description: "India's leading automobile manufacturer. Owns Jaguar Land Rover and growing EV business.",
+  },
+  {
+    symbol: "TATASTEEL", name: "Tata Steel Ltd.", sector: "Metals", exchange: "NSE",
+    basePrice: 162, volatility: 0.026, currency: "INR", marketCapB: 2020,
+    pe: 15.4, pb: 1.6, eps: 10.5, roe: 10.8, debtToEquity: 1.9, dividendYield: 1.2,
+    revenueB: 2297, netProfitB: 131, promoterHolding: 33.8, fiiHolding: 18.4, diiHolding: 26.4, bookValue: 101,
+    description: "One of the world's top steel producers. Operations in India and Europe with high-grade steel products.",
+  },
+  {
+    symbol: "ADANIENT", name: "Adani Enterprises Ltd.", sector: "Conglomerate", exchange: "NSE",
+    basePrice: 2650, volatility: 0.038, currency: "INR", marketCapB: 3020,
+    pe: 62.5, pb: 8.2, eps: 42.4, roe: 13.5, debtToEquity: 1.1, dividendYield: 0.1,
+    revenueB: 988, netProfitB: 40, promoterHolding: 72.6, fiiHolding: 10.2, diiHolding: 7.4, bookValue: 323,
+    description: "Flagship company of the Adani Group. Incubates new businesses across airports, green energy, defense.",
+  },
+  {
+    symbol: "ITC", name: "ITC Ltd.", sector: "FMCG", exchange: "NSE",
+    basePrice: 468, volatility: 0.014, currency: "INR", marketCapB: 5830,
+    pe: 27.6, pb: 7.5, eps: 16.9, roe: 27.8, debtToEquity: 0.0, dividendYield: 3.3,
+    revenueB: 753, netProfitB: 199, promoterHolding: 0, fiiHolding: 41.7, diiHolding: 37.6, bookValue: 62,
+    description: "Leading Indian conglomerate with cigarettes, FMCG, agri-business, paper, and hotels.",
+  },
+  {
+    symbol: "TECHM", name: "Tech Mahindra Ltd.", sector: "Information Technology", exchange: "NSE",
+    basePrice: 1520, volatility: 0.022, currency: "INR", marketCapB: 1860,
+    pe: 28.4, pb: 3.9, eps: 53.5, roe: 14.1, debtToEquity: 0.07, dividendYield: 1.6,
+    revenueB: 538, netProfitB: 59, promoterHolding: 35.2, fiiHolding: 25.8, diiHolding: 18.4, bookValue: 390,
+    description: "IT and BPO services company. Strong in telecom vertical. Part of Mahindra Group.",
+  },
+  {
+    symbol: "JSWSTEEL", name: "JSW Steel Ltd.", sector: "Metals", exchange: "NSE",
+    basePrice: 940, volatility: 0.024, currency: "INR", marketCapB: 2290,
+    pe: 20.4, pb: 2.8, eps: 46.1, roe: 14.5, debtToEquity: 1.3, dividendYield: 0.6,
+    revenueB: 1730, netProfitB: 96, promoterHolding: 44.8, fiiHolding: 26.2, diiHolding: 16.8, bookValue: 335,
+    description: "India's largest private steel producer. Expanding capacity aggressively to serve domestic demand.",
+  },
+  {
+    symbol: "NESTLEIND", name: "Nestle India Ltd.", sector: "FMCG", exchange: "NSE",
+    basePrice: 2280, volatility: 0.012, currency: "INR", marketCapB: 2200,
+    pe: 72.1, pb: 68.5, eps: 31.6, roe: 97.2, debtToEquity: 0.0, dividendYield: 1.5,
+    revenueB: 191, netProfitB: 31, promoterHolding: 62.8, fiiHolding: 13.6, diiHolding: 10.8, bookValue: 33,
+    description: "India's leading FMCG company. Maggi noodles, KitKat, Munch and Nescafe are iconic brands.",
+  },
+  {
+    symbol: "ASIANPAINT", name: "Asian Paints Ltd.", sector: "Consumer Discretionary", exchange: "NSE",
+    basePrice: 2620, volatility: 0.016, currency: "INR", marketCapB: 2510,
+    pe: 52.8, pb: 14.2, eps: 49.6, roe: 27.2, debtToEquity: 0.03, dividendYield: 1.0,
+    revenueB: 348, netProfitB: 47, promoterHolding: 52.6, fiiHolding: 17.8, diiHolding: 17.4, bookValue: 184,
+    description: "India's #1 paint company. Operations in 15 countries. Known for quality paints and innovative home decor.",
+  },
+  {
+    symbol: "ULTRACEMCO", name: "UltraTech Cement Ltd.", sector: "Cement", exchange: "NSE",
+    basePrice: 11200, volatility: 0.017, currency: "INR", marketCapB: 3240,
+    pe: 38.2, pb: 5.8, eps: 293.2, roe: 15.8, debtToEquity: 0.28, dividendYield: 0.4,
+    revenueB: 726, netProfitB: 81, promoterHolding: 59.7, fiiHolding: 14.6, diiHolding: 16.4, bookValue: 1931,
+    description: "India's largest cement company. Significant capacity expansion underway to meet infrastructure demand.",
+  },
+  {
+    symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Energy", exchange: "NSE",
+    basePrice: 268, volatility: 0.019, currency: "INR", marketCapB: 3380,
+    pe: 7.8, pb: 1.1, eps: 34.4, roe: 14.6, debtToEquity: 0.36, dividendYield: 4.5,
+    revenueB: 1700, netProfitB: 434, promoterHolding: 58.9, fiiHolding: 8.4, diiHolding: 26.4, bookValue: 244,
+    description: "India's largest oil & gas exploration company. Government-owned with massive reserves onshore and offshore.",
+  },
+  {
+    symbol: "NTPC", name: "NTPC Ltd.", sector: "Power", exchange: "NSE",
+    basePrice: 370, volatility: 0.016, currency: "INR", marketCapB: 3590,
+    pe: 18.5, pb: 2.4, eps: 20.0, roe: 13.1, debtToEquity: 1.5, dividendYield: 2.4,
+    revenueB: 1812, netProfitB: 202, promoterHolding: 51.1, fiiHolding: 14.6, diiHolding: 25.2, bookValue: 154,
+    description: "India's largest power utility. Expanding into renewable energy with a target of 60GW by 2032.",
+  },
+  {
+    symbol: "BPCL", name: "Bharat Petroleum Corp Ltd.", sector: "Energy", exchange: "NSE",
+    basePrice: 320, volatility: 0.021, currency: "INR", marketCapB: 1390,
+    pe: 8.4, pb: 1.8, eps: 38.1, roe: 22.4, debtToEquity: 1.2, dividendYield: 5.6,
+    revenueB: 4982, netProfitB: 165, promoterHolding: 52.9, fiiHolding: 11.2, diiHolding: 22.4, bookValue: 177,
+    description: "India's second-largest oil refining and marketing company. Network of 20,000+ fuel stations.",
+  },
+  {
+    symbol: "ZOMATO", name: "Zomato Ltd.", sector: "Internet & Technology", exchange: "NSE",
+    basePrice: 248, volatility: 0.035, currency: "INR", marketCapB: 2200,
+    pe: 412.0, pb: 10.8, eps: 0.6, roe: 2.8, debtToEquity: 0.0, dividendYield: 0.0,
+    revenueB: 127, netProfitB: 4, promoterHolding: 0, fiiHolding: 58.2, diiHolding: 16.8, bookValue: 23,
+    description: "India's leading food delivery platform. Expanding into quick commerce (Blinkit) and dining.",
+  },
+
+  // ── US stocks ─────────────────────────────────────────────────────────────
+  { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", exchange: "NASDAQ", basePrice: 189.5, volatility: 0.018, currency: "USD", marketCapB: 2950, pe: 28.5, pb: 47.2, eps: 6.6, roe: 171.0, dividendYield: 0.5, description: "World's most valuable consumer electronics company. iPhone, Mac, services ecosystem." },
+  { symbol: "MSFT", name: "Microsoft Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 415.2, volatility: 0.016, currency: "USD", marketCapB: 3080, pe: 36.4, pb: 13.2, eps: 11.4, roe: 37.3, dividendYield: 0.7, description: "Enterprise software and cloud leader. Azure, Office 365, and Copilot AI products." },
+  { symbol: "NVDA", name: "NVIDIA Corp.", sector: "Technology", exchange: "NASDAQ", basePrice: 875.0, volatility: 0.032, currency: "USD", marketCapB: 2160, pe: 67.4, pb: 34.0, eps: 13.0, roe: 53.2, dividendYield: 0.04, description: "World's leading GPU maker. Dominant in AI training chips and data center accelerators." },
+  { symbol: "TSLA", name: "Tesla Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 248.0, volatility: 0.042, currency: "USD", marketCapB: 792, pe: 62.1, pb: 12.4, eps: 4.0, roe: 22.5, dividendYield: 0.0, description: "Leading EV manufacturer. Expanding into energy storage and autonomous driving." },
+  { symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer Discretionary", exchange: "NASDAQ", basePrice: 185.0, volatility: 0.022, currency: "USD", marketCapB: 1940, pe: 43.5, pb: 8.2, eps: 4.3, roe: 19.2, dividendYield: 0.0, description: "World's largest e-commerce company. AWS cloud platform and Prime ecosystem." },
+  { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 176.0, volatility: 0.019, currency: "USD", marketCapB: 2190, pe: 23.8, pb: 6.2, eps: 7.4, roe: 26.4, dividendYield: 0.5, description: "Google search, YouTube, cloud, and Waymo autonomous vehicles." },
+  { symbol: "META", name: "Meta Platforms Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 510.0, volatility: 0.025, currency: "USD", marketCapB: 1310, pe: 26.3, pb: 8.1, eps: 19.4, roe: 32.8, dividendYield: 0.4, description: "Facebook, Instagram, WhatsApp. Investing heavily in AI and metaverse." },
+  { symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financials", exchange: "NYSE", basePrice: 198.0, volatility: 0.014, currency: "USD", marketCapB: 571, pe: 11.8, pb: 1.9, eps: 16.8, roe: 16.2, dividendYield: 2.4, description: "America's largest bank. Investment banking, consumer banking, and asset management." },
+  { symbol: "AMD", name: "Advanced Micro Devices", sector: "Technology", exchange: "NASDAQ", basePrice: 178.0, volatility: 0.038, currency: "USD", marketCapB: 288, pe: 148.0, pb: 3.8, eps: 1.2, roe: 2.6, dividendYield: 0.0, description: "CPU and GPU maker competing with Intel and NVIDIA. EPYC data center chips gaining share." },
+  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 225.0, volatility: 0.055, currency: "USD", marketCapB: 54, pe: null, pb: 6.2, eps: null, roe: 35.4, dividendYield: 0.0, description: "Largest US crypto exchange. Revenue tied to crypto trading volumes and institutional adoption." },
 ];
 
 // Seeded random number generator for deterministic data
@@ -67,7 +285,6 @@ export function generateCandles(symbol: string, periodDays: number, interval: "1
     const date = new Date(end);
     date.setDate(date.getDate() - i * step);
 
-    // Skip weekends for daily
     if (interval === "1d" && (date.getDay() === 0 || date.getDay() === 6)) continue;
 
     const dailyReturn = (rng() - 0.48) * volatility * 2;
@@ -77,7 +294,7 @@ export function generateCandles(symbol: string, periodDays: number, interval: "1
     const lowMult = 1 - rng() * volatility;
     const high = Math.max(open, close) * highMult;
     const low = Math.min(open, close) * lowMult;
-    const volume = Math.floor(1_000_000 + rng() * 50_000_000);
+    const volume = Math.floor(500_000 + rng() * 80_000_000);
 
     candles.push({
       date: date.toISOString().split("T")[0],
@@ -211,8 +428,8 @@ export function getStockBySymbol(symbol: string): StockMeta | undefined {
 }
 
 export function getCurrentPrice(symbol: string): { price: number; change: number; changePercent: number } {
-  const stock = getStockBySymbol(symbol);
   const candles = generateCandles(symbol.toUpperCase(), 5, "1d");
+  const stock = getStockBySymbol(symbol);
   if (candles.length < 2) return { price: stock?.basePrice ?? 100, change: 0, changePercent: 0 };
   const latest = candles[candles.length - 1];
   const prev = candles[candles.length - 2];
@@ -246,7 +463,6 @@ export function computeSignals(closes: number[]) {
     : latest < latestBB.lower! * 1.01 ? "near_lower"
     : "neutral";
 
-  // Overall signal scoring
   let score = 0;
   if (rsiSignal === "oversold") score += 2;
   if (rsiSignal === "overbought") score -= 2;
