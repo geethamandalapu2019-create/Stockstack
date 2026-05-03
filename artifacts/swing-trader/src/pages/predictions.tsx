@@ -42,6 +42,7 @@ type TopPredictionResponse = {
     signals: string[];
     currentRsi: number | null;
     indicator: IndicatorKey;
+    indicatorLabel: string;
     predictions: Record<string, {
       targetPrice: number;
       changeAmount: number;
@@ -160,6 +161,29 @@ function ModeDropdown({ value, onChange }: { value: IndicatorKey; onChange: (v: 
   );
 }
 
+function SelectDropdown({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="appearance-none bg-background border border-border rounded-xl px-3 py-2 pr-9 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+      >
+        {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+      </select>
+      <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+    </div>
+  );
+}
+
 export default function PredictionsPage() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -234,6 +258,7 @@ export default function PredictionsPage() {
   }, [stocks]);
 
   const selectedIndicator = data?.indicator ?? indicatorTab;
+  const selectedIndicatorLabel = stocks[0]?.indicatorLabel ?? INDICATORS.find(i => i.key === selectedIndicator)?.label ?? "App Suggested";
 
   const filteredStocks = useMemo(() => {
     const base = sectorTab === "all" ? stocks : stocks.filter(stock => stock.sector === sectorTab);
@@ -256,7 +281,6 @@ export default function PredictionsPage() {
   }, [filteredStocks, sortBy]);
 
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const topThree = rankedStocks.slice(0, 3);
   const restStocks = rankedStocks.slice(3);
 
   return (
@@ -277,8 +301,8 @@ export default function PredictionsPage() {
             <div className="flex items-center gap-2">
               <ModeDropdown value={indicatorTab} onChange={setIndicatorTab} />
               <button
-          onClick={() => refetch()}
-          disabled={isFetching}
+                onClick={() => refetch()}
+                disabled={isFetching}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-xl bg-secondary/50 border border-border hover:bg-secondary shrink-0"
               >
                 <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
@@ -372,20 +396,38 @@ export default function PredictionsPage() {
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            {sectors.slice(0, 8).map(sector => (
-              <button
-                key={sector}
-                onClick={() => setSectorTab(sector)}
-                className={cn("px-3 py-2 rounded-xl border text-xs transition-colors", sectorTab === sector ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50")}
-              >
-                {sector === "all" ? "All sectors" : sector}
-              </button>
-            ))}
+            <SelectDropdown
+              value={sortBy}
+              onChange={v => setSortBy(v as typeof sortBy)}
+              options={[
+                { value: "score", label: "Sort: Score" },
+                { value: "rsi", label: "Sort: RSI" },
+                { value: "upside", label: "Sort: Upside" },
+              ]}
+            />
+            <SelectDropdown
+              value={capTab}
+              onChange={v => setCapTab(v as typeof capTab)}
+              options={[
+                { value: "all", label: "All Caps" },
+                { value: "large", label: "Large Cap" },
+                { value: "mid", label: "Mid Cap" },
+                { value: "small", label: "Small Cap" },
+              ]}
+            />
+            <SelectDropdown
+              value={sectorTab}
+              onChange={setSectorTab}
+              options={[
+                { value: "all", label: "All Sectors" },
+                ...sectors.filter(s => s !== "all").map(sector => ({ value: sector, label: sector })),
+              ]}
+            />
           </div>
           <p className="text-[11px] text-muted-foreground">
             {selectedIndicator === "app"
               ? "App Suggested blends the strongest overall setup."
-              : `Optimized for ${INDICATORS.find(i => i.key === selectedIndicator)?.label}.`}
+              : `Optimized for ${selectedIndicatorLabel}.`}
           </p>
         </CardContent>
       </Card>
@@ -410,14 +452,14 @@ export default function PredictionsPage() {
 
       {!isLoading && stocks.length > 0 && (
         <>
-          {!isSearching && topThree.length > 0 && (
+          {!isSearching && rankedStocks.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Trophy className="w-4 h-4 text-amber-400" />
-                <h2 className="text-sm font-semibold">Today's Top Picks</h2>
+                <h2 className="text-sm font-semibold">{selectedIndicatorLabel} Picks</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {topThree.map((stock, idx) => {
+                {rankedStocks.slice(0, 3).map((stock, idx) => {
                   const pred1d = stock.predictions["1d"];
                   const pred1w = stock.predictions["1w"];
                   const pred2w = stock.predictions["2w"];
@@ -466,9 +508,9 @@ export default function PredictionsPage() {
                           <span className="font-data">RSI {stock.currentRsi?.toFixed(1) ?? "—"}</span>
                           <span className="truncate max-w-[100px] text-right">{stock.sector}</span>
                         </div>
-                        {stock.signals.length > 0 && (
-                          <p className="text-[10px] text-muted-foreground italic leading-relaxed border-t border-border pt-2">{stock.signals[0]}</p>
-                        )}
+                        <p className="text-[10px] text-muted-foreground italic leading-relaxed border-t border-border pt-2">
+                          {stock.indicatorLabel}: {stock.signals[0] ?? "Indicator mode neutral"}
+                        </p>
                         <div className="flex gap-2">
                           <button onClick={() => navigate(`/chart/${stock.symbol}`)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded hover:bg-secondary/50 transition-colors text-muted-foreground">
                             <BarChart2 className="w-3.5 h-3.5" />
@@ -547,17 +589,15 @@ export default function PredictionsPage() {
                             <div className="font-bold text-sm">{stock.symbol}</div>
                             <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
                             <div className="font-data text-xs mt-0.5">{formatPrice(stock.currentPrice, stock.currency)}</div>
-                            {stock.signals.length > 0 && (
-                              <div className="text-[10px] text-muted-foreground italic mt-0.5 truncate">{stock.signals[0]}</div>
-                            )}
+                            <div className="text-[10px] text-muted-foreground italic mt-0.5 truncate">
+                              {stock.indicatorLabel}: {stock.signals[0] ?? "Indicator mode neutral"}
+                            </div>
                           </div>
                         </div>
                         <div className="space-y-1.5">
                           <ScoreBar score={stock.overallScore} />
                           <SignalPill signal={stock.overallSignal} />
-                          {stock.currentRsi != null && (
-                            <div className="text-[10px] text-muted-foreground font-data">RSI {stock.currentRsi.toFixed(1)}</div>
-                          )}
+                          <div className="text-[10px] text-muted-foreground font-data">{stock.indicatorLabel}</div>
                         </div>
                         {HORIZONS.map(h => {
                           const pred = stock.predictions[h.key];

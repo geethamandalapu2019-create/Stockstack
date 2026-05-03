@@ -53,6 +53,13 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     predictions[h.key] = { ...pred, label: h.label };
   }
 
+  const indicatorLabel =
+    indicator === "app" ? "App Suggested" :
+    indicator === "rsi" ? "RSI" :
+    indicator === "macd" ? "MACD" :
+    indicator === "sma" ? "SMA" :
+    indicator === "ema" ? "EMA" : "Bollinger Bands";
+
   return {
     symbol: stock.symbol,
     name: stock.name,
@@ -67,6 +74,7 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     signals: analysis.signals,
     currentRsi: analysis.currentRsi,
     indicator,
+    indicatorLabel,
     predictions,
   };
 }
