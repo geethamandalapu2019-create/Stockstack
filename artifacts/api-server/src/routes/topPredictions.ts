@@ -40,15 +40,7 @@ function buildStockPrediction(symbol: string) {
 
   for (const h of HORIZONS) {
     const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, analysis.score, h.days);
-    const adjusted = stock.capCategory === "small"
-      ? {
-          ...pred,
-          targetPrice: Math.min(pred.targetPrice, currentPrice),
-          changeAmount: Math.min(pred.changeAmount, 0),
-          direction: pred.changeAmount >= 0 ? "neutral" : pred.direction,
-        }
-      : pred;
-    predictions[h.key] = { ...adjusted, label: h.label };
+    predictions[h.key] = { ...pred, label: h.label };
   }
 
   return {
