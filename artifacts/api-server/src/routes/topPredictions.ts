@@ -77,7 +77,8 @@ function buildStockPrediction(symbol: string, indicator: IndicatorMode) {
     indicator === "rsi" ? "RSI" :
     indicator === "macd" ? "MACD" :
     indicator === "sma" ? "SMA" :
-    indicator === "ema" ? "EMA" : "Bollinger Bands";
+    indicator === "ema" ? "EMA" :
+    indicator === "bb" ? "Bollinger Bands" : "Price Action";
 
   return {
     symbol: stock.symbol,

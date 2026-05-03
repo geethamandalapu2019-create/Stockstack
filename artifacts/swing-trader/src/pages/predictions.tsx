@@ -25,6 +25,7 @@ const INDICATORS = [
   { key: "sma", label: "SMA" },
   { key: "ema", label: "EMA" },
   { key: "bb", label: "Bollinger Bands" },
+  { key: "price_action", label: "Price Action" },
 ] as const;
 
 type IndicatorKey = typeof INDICATORS[number]["key"];

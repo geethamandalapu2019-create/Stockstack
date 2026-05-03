@@ -819,7 +819,7 @@ export function computeComprehensiveScore(
   return { score, direction, overallSignal, signals: signals.slice(0, 5), currentRsi: rsi };
 }
 
-export type IndicatorMode = "app" | "rsi" | "macd" | "sma" | "ema" | "bb";
+export type IndicatorMode = "app" | "rsi" | "macd" | "sma" | "ema" | "bb" | "price_action";
 
 export function computeIndicatorModeScore(
   mode: IndicatorMode,
@@ -852,6 +852,17 @@ export function computeIndicatorModeScore(
   const latestCci = cciArr[cciArr.length - 1];
   const latestWr = wrArr[wrArr.length - 1];
   const obvChange = obvArr.length > 10 ? obvArr[obvArr.length - 1] - obvArr[obvArr.length - 11] : 0;
+  const last = closes[closes.length - 1];
+  const prev5 = closes[Math.max(0, closes.length - 6)];
+  const prev10 = closes[Math.max(0, closes.length - 11)];
+  const prev20 = closes[Math.max(0, closes.length - 21)];
+  const range20High = Math.max(...highs.slice(-20));
+  const range20Low = Math.min(...lows.slice(-20));
+  const body = last - (closes[closes.length - 2] ?? last);
+  const bodyPct = last ? body / last : 0;
+  const trend5 = prev5 ? (last - prev5) / prev5 : 0;
+  const trend10 = prev10 ? (last - prev10) / prev10 : 0;
+  const trend20 = prev20 ? (last - prev20) / prev20 : 0;
 
   const useApp = () => computeComprehensiveScore(closes, highs, lows, volumes);
 
@@ -943,6 +954,36 @@ export function computeIndicatorModeScore(
         signals.push("Bollinger Bands neutral");
       }
     }
+  } else if (mode === "price_action") {
+    const higherHighs = highs.length >= 3 && highs[highs.length - 1] > highs[highs.length - 2] && highs[highs.length - 2] > highs[highs.length - 3];
+    const higherLows = lows.length >= 3 && lows[lows.length - 1] > lows[lows.length - 2] && lows[lows.length - 2] > lows[lows.length - 3];
+    const breakout = last >= range20High * 0.995;
+    const supportHold = last > range20Low * 1.03;
+    const bullishCandle = bodyPct > 0.005;
+    const bearishCandle = bodyPct < -0.005;
+
+    if (breakout && bullishCandle) {
+      score = 80;
+      signals.push("Price action breakout above 20-day range");
+    } else if (higherHighs && higherLows && supportHold) {
+      score = 74;
+      signals.push("Price action uptrend with higher highs and higher lows");
+    } else if (trend10 > 0.03 && trend20 > 0.01) {
+      score = 68;
+      signals.push("Price action trending higher");
+    } else if (bearishCandle && trend5 < -0.02) {
+      score = 32;
+      signals.push("Bearish price action pressure");
+    } else if (trend20 < -0.03) {
+      score = 40;
+      signals.push("Price action weak below recent trend");
+    } else {
+      score = 52;
+      signals.push("Price action mixed");
+    }
+
+    const squeeze = range20High > 0 && range20Low > 0 && (range20High - range20Low) / range20High < 0.08;
+    if (squeeze && bullishCandle) signals.push("Tight range breakout setup");
   }
 
   const momentumBoost =
