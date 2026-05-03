@@ -5,10 +5,12 @@ import {
   useGetStockIndicators,
   useGetStockQuote,
   useGetStockFundamentals,
+  useGetStockPredictions,
   getGetStockHistoryQueryKey,
   getGetStockIndicatorsQueryKey,
   getGetStockQuoteQueryKey,
   getGetStockFundamentalsQueryKey,
+  getGetStockPredictionsQueryKey,
 } from "@workspace/api-client-react";
 import {
   ComposedChart, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -44,6 +46,7 @@ type PredictionItem = {
 };
 type TechOption = { key: string; label: string; color: string };
 type StockImpact = { national?: string[]; global?: string[]; verdict?: string; note?: string };
+type IndicatorKey = "app" | "swing_confluence" | "rsi" | "macd" | "sma" | "ema" | "bb" | "price_action";
 
 const HORIZONS: { key: Horizon; label: string }[] = [
   { key: "1d", label: "1D" },
@@ -188,11 +191,23 @@ const TECH_OPTIONS: TechOption[] = [
   { key: "adx", label: "ADX / DI", color: "#22c55e" },
 ];
 
+const PREDICTION_INDICATORS: { key: IndicatorKey; label: string }[] = [
+  { key: "app", label: "App Suggested" },
+  { key: "swing_confluence", label: "⭐ Swing Confluence" },
+  { key: "rsi", label: "RSI" },
+  { key: "macd", label: "MACD" },
+  { key: "sma", label: "SMA" },
+  { key: "ema", label: "EMA" },
+  { key: "bb", label: "Bollinger Bands" },
+  { key: "price_action", label: "Price Action" },
+];
+
 export default function ChartPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const [period, setPeriod] = useState<"1mo" | "3mo" | "6mo" | "1y">("3mo");
   const [tab, setTab] = useState<Tab>("chart");
   const [horizon, setHorizon] = useState<Horizon>("1mo");
+  const [predictionMode, setPredictionMode] = useState<IndicatorKey>("app");
 
   const [showSMA20, setShowSMA20] = useState(true);
   const [showSMA50, setShowSMA50] = useState(true);
@@ -219,6 +234,9 @@ export default function ChartPage() {
   });
   const { data: fundamentals, isLoading: fl } = useGetStockFundamentals(symbol, {
     query: { enabled: !!symbol && tab === "fundamentals", queryKey: getGetStockFundamentalsQueryKey(symbol) }
+  });
+  const { data: stockPredictions } = useGetStockPredictions(symbol, {
+    query: { enabled: !!symbol, queryKey: getGetStockPredictionsQueryKey(symbol) }
   });
 
   const currency = quote?.currency ?? "INR";
@@ -247,57 +265,13 @@ export default function ChartPage() {
   const wrData = useMemo(() => indicators?.williamsR?.map(p => ({ date: p.date.split("T")[0], value: p.value })) ?? [], [indicators]);
   const volumeData = useMemo(() => history?.candles?.map((c, i) => ({ date: c.date.split("T")[0], volume: c.volume, obv: indicators?.obv[i]?.value, isBullish: c.close >= c.open })) ?? [], [history, indicators]);
   const adxData = useMemo(() => indicators?.adx?.map(p => ({ date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI })) ?? [], [indicators]);
-  const predictionsData = (quote as unknown as { predictions?: PredictionItem[]; swingConfluence?: PredictionItem[] } | undefined);
+  const predictionsData = stockPredictions as unknown as { predictions?: PredictionItem[]; swingConfluence?: PredictionItem[] } | undefined;
   const impactNotes = deriveStockImpact(quote, fundamentals);
 
   const selectedPrediction = useMemo(() => {
-    const response = predictionsData?.swingConfluence ?? predictionsData?.predictions;
-    const current = quote?.price ?? 0;
-    const match = response?.find(p => p.horizon === horizon);
-    if (match && match.targetPrice > 0) return match;
-    if (current > 0) {
-      const baseMove = Math.max(0.015, Math.min(0.12, ((quote?.changePercent ?? 0) + 6) / 100));
-      const scoreShift = (quote?.price ? (quote.changePercent ?? 0) / 20 : 0);
-      const targetPrice = +(current * (1 + baseMove + scoreShift)).toFixed(2);
-      return {
-        horizon,
-        label: HORIZONS.find(h => h.key === horizon)?.label ?? "1M",
-        direction: "bullish",
-        targetPrice,
-        confidenceLow: +(targetPrice * 0.97).toFixed(2),
-        confidenceHigh: +(targetPrice * 1.03).toFixed(2),
-        confidenceScore: Math.max(45, Math.min(82, 55 + Math.round((quote?.changePercent ?? 0) * 2))),
-        upside: +(((targetPrice - current) / current) * 100).toFixed(1),
-        methodology: SWING_FALLBACK.methodology,
-        supportLevel: current * 0.97,
-        resistanceLevel: current * 1.05,
-        forecast: history?.candles?.slice(-30).map((c, i) => ({
-          date: c.date,
-          high: c.high,
-          low: c.low,
-          predicted: +(c.close * (1 + (i + 1) / 100)).toFixed(2),
-        })) ?? [],
-        signals: SWING_FALLBACK.signals,
-        overallScore: Math.max(45, Math.min(82, 55 + Math.round((quote?.changePercent ?? 0) * 2))),
-      };
-    }
-    return {
-      horizon,
-      label: HORIZONS.find(h => h.key === horizon)?.label ?? "1M",
-      direction: "neutral",
-      targetPrice: 0,
-      confidenceLow: current,
-      confidenceHigh: current,
-      confidenceScore: 50,
-      upside: 0,
-      methodology: SWING_FALLBACK.methodology,
-      supportLevel: current,
-      resistanceLevel: current,
-      forecast: [],
-      signals: SWING_FALLBACK.signals,
-      overallScore: 50,
-    };
-  }, [quote, horizon, history, predictionsData]);
+    const response = predictionMode === "swing_confluence" ? predictionsData?.swingConfluence : predictionsData?.predictions;
+    return response?.find(p => p.horizon === horizon) ?? null;
+  }, [predictionMode, predictionsData, horizon]);
 
   const activeTechs = useMemo(() => {
     const list = [];
