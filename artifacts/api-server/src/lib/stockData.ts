@@ -268,7 +268,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "IRCTC", name: "Indian Railway Catering and Tourism Corp Ltd.", sector: "Services", exchange: "NSE",
     basePrice: 935, volatility: 0.02, currency: "INR", marketCapB: 750,
-    capCategory: "small",
+    capCategory: "large",
     pe: 58.4, pb: 16.2, eps: 16.0, roe: 27.1, debtToEquity: 0.0, dividendYield: 1.2,
     revenueB: 4.2, netProfitB: 1.3, promoterHolding: 62.4, fiiHolding: 9.2, diiHolding: 15.8, bookValue: 58,
     description: "Indian Railways ticketing, catering, and tourism services company.",
@@ -276,7 +276,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "HUDCO", name: "Housing and Urban Development Corp Ltd.", sector: "Financials", exchange: "NSE",
     basePrice: 285, volatility: 0.021, currency: "INR", marketCapB: 520,
-    capCategory: "small",
+    capCategory: "mid",
     pe: 16.8, pb: 2.3, eps: 16.9, roe: 13.7, debtToEquity: 6.4, dividendYield: 1.9,
     revenueB: 2.9, netProfitB: 0.6, promoterHolding: 89.8, fiiHolding: 2.1, diiHolding: 3.4, bookValue: 124,
     description: "Government-owned housing finance and infrastructure lender.",
@@ -284,7 +284,7 @@ export const STOCKS: StockMeta[] = [
   {
     symbol: "NHPC", name: "NHPC Ltd.", sector: "Power", exchange: "NSE",
     basePrice: 112, volatility: 0.019, currency: "INR", marketCapB: 410,
-    capCategory: "small",
+    capCategory: "mid",
     pe: 18.2, pb: 1.6, eps: 6.2, roe: 8.9, debtToEquity: 0.9, dividendYield: 2.8,
     revenueB: 1.8, netProfitB: 0.3, promoterHolding: 67.4, fiiHolding: 4.8, diiHolding: 11.2, bookValue: 70,
     description: "Hydropower generation company focused on renewable energy.",
