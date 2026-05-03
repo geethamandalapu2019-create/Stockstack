@@ -607,7 +607,10 @@ export function getStockBySymbol(symbol: string): StockMeta | undefined {
 export function getCurrentPrice(symbol: string): { price: number; change: number; changePercent: number } {
   const stock = getStockBySymbol(symbol);
   const price = stock?.basePrice ?? 100;
-  return { price, change: 0, changePercent: 0 };
+  const prevPrice = stock?.prevClose ?? price;
+  const change = +(price - prevPrice).toFixed(2);
+  const changePercent = prevPrice === 0 ? 0 : +((change / prevPrice) * 100).toFixed(2);
+  return { price, change, changePercent };
 }
 
 // ── Extended Indicators ────────────────────────────────────────────────────
