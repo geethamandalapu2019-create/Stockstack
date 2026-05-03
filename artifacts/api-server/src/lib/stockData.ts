@@ -245,7 +245,7 @@ export const STOCKS: StockMeta[] = [
   { symbol: "META", name: "Meta Platforms Inc.", sector: "Communication Services", exchange: "NASDAQ", basePrice: 510.0, volatility: 0.025, currency: "USD", marketCapB: 1310, pe: 26.3, pb: 8.1, eps: 19.4, roe: 32.8, dividendYield: 0.4, description: "Facebook, Instagram, WhatsApp. Investing heavily in AI and metaverse." },
   { symbol: "JPM", name: "JPMorgan Chase & Co.", sector: "Financials", exchange: "NYSE", basePrice: 198.0, volatility: 0.014, currency: "USD", marketCapB: 571, pe: 11.8, pb: 1.9, eps: 16.8, roe: 16.2, dividendYield: 2.4, description: "America's largest bank. Investment banking, consumer banking, and asset management." },
   { symbol: "AMD", name: "Advanced Micro Devices", sector: "Technology", exchange: "NASDAQ", basePrice: 178.0, volatility: 0.038, currency: "USD", marketCapB: 288, pe: 148.0, pb: 3.8, eps: 1.2, roe: 2.6, dividendYield: 0.0, description: "CPU and GPU maker competing with Intel and NVIDIA. EPYC data center chips gaining share." },
-  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 225.0, volatility: 0.055, currency: "USD", marketCapB: 54, pe: null, pb: 6.2, eps: null, roe: 35.4, dividendYield: 0.0, description: "Largest US crypto exchange. Revenue tied to crypto trading volumes and institutional adoption." },
+  { symbol: "COIN", name: "Coinbase Global Inc.", sector: "Financials", exchange: "NASDAQ", basePrice: 225.0, volatility: 0.055, currency: "USD", marketCapB: 54, pe: undefined, pb: 6.2, eps: undefined, roe: 35.4, dividendYield: 0.0, description: "Largest US crypto exchange. Revenue tied to crypto trading volumes and institutional adoption." },
 ];
 
 // Seeded random number generator for deterministic data
@@ -632,10 +632,14 @@ export function computeComprehensiveScore(
   if (wrScore >= 8) signals.push("Williams %R: extreme oversold");
   if (bbScore >= 8) signals.push("Price at lower Bollinger Band support");
   if (obvScore >= 6.5) signals.push("OBV rising — institutional accumulation");
+  if (rsiScore >= 7.5 && macdScore >= 7) signals.push("RSI + MACD bullish momentum confirmation");
+  if (stochScore >= 8 && cciScore >= 7.5) signals.push("Stochastic + CCI oversold reversal setup");
+  if (bbScore >= 8 && obvScore >= 6.5) signals.push("Bollinger + OBV accumulation breakout setup");
+  if (wrScore >= 8 && macdScore >= 6.5) signals.push("Williams %R + MACD mean-reversion bounce");
 
   const direction = score >= 58 ? "bullish" : score <= 42 ? "bearish" : "neutral";
   const overallSignal = score >= 70 ? "strong_buy" : score >= 58 ? "buy" : score <= 30 ? "strong_sell" : score <= 42 ? "sell" : "neutral";
-  return { score, direction, overallSignal, signals: signals.slice(0, 3), currentRsi: rsi };
+  return { score, direction, overallSignal, signals: signals.slice(0, 5), currentRsi: rsi };
 }
 
 export function generateHorizonPrediction(

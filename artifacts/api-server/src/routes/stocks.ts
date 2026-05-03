@@ -140,6 +140,12 @@ router.get("/:symbol/indicators", (req, res) => {
     : lastWr < -80 ? "oversold" : lastWr > -20 ? "overbought" : "neutral";
   const adxTrend = lastAdx.adx == null ? "weak"
     : lastAdx.adx > 25 ? (lastAdx.plusDI! > lastAdx.minusDI! ? "bullish" : "bearish") : "weak";
+  const comboSignals = [
+    signals.rsiSignal === "oversold" && signals.macdSignal === "bullish" ? "RSI + MACD bullish momentum confirmation" : null,
+    stochSignal === "oversold" && cciSignal === "oversold" ? "Stochastic + CCI oversold reversal setup" : null,
+    bb?.[bb.length - 1]?.lower != null && obv[obv.length - 1] != null && obv[obv.length - 1] > obv[Math.max(0, obv.length - 11)] ? "Bollinger + OBV accumulation breakout setup" : null,
+    adxTrend === "bullish" && lastAdx.plusDI! > lastAdx.minusDI! ? "ADX + DI trend confirmation" : null,
+  ].filter((v): v is string => Boolean(v));
 
   res.json({
     symbol,
@@ -183,6 +189,7 @@ router.get("/:symbol/indicators", (req, res) => {
     cciSignal,
     williamsRSignal,
     adxTrend,
+    comboSignals,
     overallSignal: signals.overallSignal,
   });
 });

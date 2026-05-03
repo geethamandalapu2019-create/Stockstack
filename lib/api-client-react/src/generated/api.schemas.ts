@@ -129,6 +129,7 @@ export interface TopStockPrediction {
   direction: TopStockPredictionDirection;
   overallSignal: TopStockPredictionOverallSignal;
   signals: string[];
+  comboSignals: string[];
   /** @nullable */
   currentRsi: number | null;
   predictions: TopStockPredictionPredictions;
@@ -280,6 +281,7 @@ export interface TechnicalIndicators {
   cciSignal: TechnicalIndicatorsCciSignal;
   williamsRSignal: TechnicalIndicatorsWilliamsRSignal;
   adxTrend: TechnicalIndicatorsAdxTrend;
+  comboSignals?: string[];
   overallSignal: TechnicalIndicatorsOverallSignal;
 }
 

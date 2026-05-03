@@ -564,6 +564,16 @@ export default function ChartPage() {
                             <span className={cn("font-medium text-right", row.cls)}>{row.value}</span>
                           </div>
                         ))}
+                        {indicators.comboSignals?.length ? (
+                          <div className="pt-2 space-y-1.5">
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-data">Strong combos</div>
+                            {indicators.comboSignals.slice(0, 4).map((sig: string) => (
+                              <div key={sig} className="text-xs rounded border border-border bg-secondary/30 px-2 py-1 text-foreground">
+                                {sig}
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ) : <div className="p-4 text-center text-muted-foreground text-sm">No data</div>}

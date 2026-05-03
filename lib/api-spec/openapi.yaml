@@ -586,13 +586,17 @@ components:
           type: array
           items:
             type: string
+        comboSignals:
+          type: array
+          items:
+            type: string
         currentRsi:
           type: ["number", "null"]
         predictions:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/TopHorizonPrediction"
-      required: [symbol, name, sector, exchange, currency, currentPrice, overallScore, direction, overallSignal, signals, currentRsi, predictions]
+      required: [symbol, name, sector, exchange, currency, currentPrice, overallScore, direction, overallSignal, signals, comboSignals, currentRsi, predictions]
 
     TopPredictionsResponse:
       type: object
@@ -738,6 +742,10 @@ components:
         adxTrend:
           type: string
           enum: [bullish, bearish, weak]
+        comboSignals:
+          type: array
+          items:
+            type: string
         overallSignal:
           type: string
           enum: [strong_buy, buy, neutral, sell, strong_sell]

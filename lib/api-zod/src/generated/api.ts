@@ -196,6 +196,7 @@ export const GetStockIndicatorsResponse = zod.object({
   cciSignal: zod.enum(["oversold", "neutral", "overbought"]),
   williamsRSignal: zod.enum(["oversold", "neutral", "overbought"]),
   adxTrend: zod.enum(["bullish", "bearish", "weak"]),
+  comboSignals: zod.array(zod.string()).optional(),
   overallSignal: zod.enum([
     "strong_buy",
     "buy",
@@ -520,6 +521,7 @@ export const GetTopPredictionsResponse = zod.object({
         "strong_sell",
       ]),
       signals: zod.array(zod.string()),
+      comboSignals: zod.array(zod.string()),
       currentRsi: zod.number().nullable(),
       predictions: zod.record(
         zod.string(),
