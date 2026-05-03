@@ -12,8 +12,7 @@ const router = Router();
 
 const HORIZONS = [
   { key: "1d",  label: "1 Day",   days: 1 },
-  { key: "5d",  label: "5 Days",  days: 5 },
-  { key: "10d", label: "10 Days", days: 10 },
+  { key: "1w",  label: "1 Week",  days: 5 },
   { key: "2w",  label: "2 Weeks", days: 14 },
   { key: "1mo", label: "1 Month", days: 30 },
 ];
@@ -41,7 +40,15 @@ function buildStockPrediction(symbol: string) {
 
   for (const h of HORIZONS) {
     const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, analysis.score, h.days);
-    predictions[h.key] = { ...pred, label: h.label };
+    const adjusted = stock.capCategory === "small"
+      ? {
+          ...pred,
+          targetPrice: Math.min(pred.targetPrice, currentPrice),
+          changeAmount: Math.min(pred.changeAmount, 0),
+          direction: pred.changeAmount >= 0 ? "neutral" : pred.direction,
+        }
+      : pred;
+    predictions[h.key] = { ...adjusted, label: h.label };
   }
 
   return {
