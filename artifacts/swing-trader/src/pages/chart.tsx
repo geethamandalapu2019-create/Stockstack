@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { SignalBadge } from "./dashboard";
 import {
   Activity, TrendingUp, TrendingDown, Minus,
-  Building2, BarChart3, X, LineChart as LineChartIcon
+  Building2, BarChart3, X, LineChart as LineChartIcon, ChevronDown, Check
 } from "lucide-react";
 
 type Tab = "chart" | "technical" | "predictions" | "fundamentals";
@@ -42,6 +42,7 @@ type PredictionItem = {
   signals?: string[];
   overallScore?: number;
 };
+type TechOption = { key: string; label: string; color: string };
 
 const HORIZONS: { key: Horizon; label: string }[] = [
   { key: "1d", label: "1D" },
@@ -121,6 +122,21 @@ function getCurrentVerdict(quote?: any, fundamentals?: any) {
   return verdict;
 }
 
+const TECH_OPTIONS: TechOption[] = [
+  { key: "sma20", label: "SMA 20", color: "hsl(var(--chart-3))" },
+  { key: "sma50", label: "SMA 50", color: "hsl(var(--chart-4))" },
+  { key: "ema12", label: "EMA 12", color: "hsl(var(--accent))" },
+  { key: "ema26", label: "EMA 26", color: "#f59e0b" },
+  { key: "bb", label: "Bollinger Bands", color: "hsl(var(--muted-foreground))" },
+  { key: "rsi", label: "RSI", color: "#8b5cf6" },
+  { key: "macd", label: "MACD", color: "#06b6d4" },
+  { key: "stoch", label: "Stochastic", color: "#10b981" },
+  { key: "cci", label: "CCI", color: "#f97316" },
+  { key: "williamsr", label: "Williams %R", color: "#ef4444" },
+  { key: "volume", label: "Volume", color: "#6366f1" },
+  { key: "adx", label: "ADX / DI", color: "#22c55e" },
+];
+
 export default function ChartPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const [period, setPeriod] = useState<"1mo" | "3mo" | "6mo" | "1y">("3mo");
@@ -139,6 +155,7 @@ export default function ChartPage() {
   const [showWilliamsR, setShowWilliamsR] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
   const [showADX, setShowADX] = useState(false);
+  const [technicalMenuOpen, setTechnicalMenuOpen] = useState(false);
 
   const { data: quote, isLoading: ql } = useGetStockQuote(symbol, {
     query: { enabled: !!symbol, queryKey: getGetStockQuoteQueryKey(symbol) }
@@ -229,6 +246,38 @@ export default function ChartPage() {
     };
   }, [quote, horizon, history, predictionsData]);
 
+  const activeTechs = useMemo(() => {
+    const list = [];
+    if (showSMA20) list.push("sma20");
+    if (showSMA50) list.push("sma50");
+    if (showEMA12) list.push("ema12");
+    if (showEMA26) list.push("ema26");
+    if (showBB) list.push("bb");
+    if (showRSI) list.push("rsi");
+    if (showMACD) list.push("macd");
+    if (showStoch) list.push("stoch");
+    if (showCCI) list.push("cci");
+    if (showWilliamsR) list.push("williamsr");
+    if (showVolume) list.push("volume");
+    if (showADX) list.push("adx");
+    return list;
+  }, [showSMA20, showSMA50, showEMA12, showEMA26, showBB, showRSI, showMACD, showStoch, showCCI, showWilliamsR, showVolume, showADX]);
+
+  const toggleTech = (key: string) => {
+    if (key === "sma20") setShowSMA20(v => !v);
+    if (key === "sma50") setShowSMA50(v => !v);
+    if (key === "ema12") setShowEMA12(v => !v);
+    if (key === "ema26") setShowEMA26(v => !v);
+    if (key === "bb") setShowBB(v => !v);
+    if (key === "rsi") setShowRSI(v => !v);
+    if (key === "macd") setShowMACD(v => !v);
+    if (key === "stoch") setShowStoch(v => !v);
+    if (key === "cci") setShowCCI(v => !v);
+    if (key === "williamsr") setShowWilliamsR(v => !v);
+    if (key === "volume") setShowVolume(v => !v);
+    if (key === "adx") setShowADX(v => !v);
+  };
+
   const tt = {
     contentStyle: { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px", fontSize: "12px" },
     itemStyle: { color: "hsl(var(--foreground))" },
@@ -304,6 +353,74 @@ export default function ChartPage() {
                     {showBB && <Line type="monotone" dataKey="bbLower" stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" dot={false} strokeWidth={1} isAnimationActive={false} />}
                   </ComposedChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {tab === "technical" && (
+          <div className="flex flex-col gap-3">
+            <Card className="bg-card">
+              <CardHeader className="py-2 px-3 border-b border-border flex flex-row items-center justify-between gap-2">
+                <CardTitle className="text-sm font-medium">Indicators</CardTitle>
+                <Button size="sm" variant="outline" className="h-8 px-3 text-xs" onClick={() => setTechnicalMenuOpen(v => !v)}>
+                  Choose indicators <ChevronDown className="ml-1 w-3.5 h-3.5" />
+                </Button>
+              </CardHeader>
+              {technicalMenuOpen && (
+                <CardContent className="p-3 border-b border-border">
+                  <div className="grid grid-cols-2 gap-2">
+                    {TECH_OPTIONS.map(opt => {
+                      const active = activeTechs.includes(opt.key);
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => toggleTech(opt.key)}
+                          className={cn("flex items-center justify-between rounded-lg border px-3 py-2 text-xs transition-colors", active ? "bg-secondary border-border text-foreground" : "bg-transparent border-transparent text-muted-foreground")}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: opt.color }} />
+                            {opt.label}
+                          </span>
+                          {active && <Check className="w-3.5 h-3.5" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              )}
+              <CardContent className="p-3 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {activeTechs.length ? activeTechs.map(key => {
+                    const opt = TECH_OPTIONS.find(o => o.key === key)!;
+                    return <button key={key} onClick={() => toggleTech(key)} className="text-[11px] px-2.5 py-1 rounded-full bg-secondary text-foreground">{opt.label} ×</button>;
+                  }) : <div className="text-sm text-muted-foreground">Pick indicators to update the chart.</div>}
+                </div>
+                <div className="relative" style={{ height: 320 }}>
+                  {(hl || il) && <div className="absolute inset-0 flex items-center justify-center z-10 bg-background/40"><Activity className="w-6 h-6 animate-spin text-primary" /></div>}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={chartData} margin={{ top: 10, right: 14, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 9 }} tickFormatter={v => v.substring(5)} />
+                      <YAxis domain={["auto","auto"]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 9 }} orientation="right" tickFormatter={v => currency === "INR" ? `₹${v >= 1000 ? (v/1000).toFixed(1)+"k" : v.toFixed(0)}` : `$${v.toFixed(0)}`} />
+                      <Tooltip {...tt} formatter={(v: any, name: string) => { if (["wickRange","candleRange","bbRange"].includes(name)) return null; return [fmt(Number(v), currency), name]; }} />
+                      {showBB && <Area type="monotone" dataKey="bbRange" stroke="none" fill="hsl(var(--muted))" fillOpacity={0.15} isAnimationActive={false} />}
+                      <Bar dataKey="wickRange" barSize={1} fill="hsl(var(--muted-foreground))" isAnimationActive={false} />
+                      <Bar dataKey="candleRange" barSize={7} fill="hsl(var(--muted-foreground))" isAnimationActive={false} shape={(props: any) => { const { x, y, width, height, payload } = props; return <rect x={x} y={y} width={width} height={Math.max(1, height)} fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} />; }} />
+                      {showSMA20 && <Line type="monotone" dataKey="sma20" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
+                      {showSMA50 && <Line type="monotone" dataKey="sma50" stroke="hsl(var(--chart-4))" dot={false} strokeWidth={1.5} isAnimationActive={false} />}
+                      {showEMA12 && <Line type="monotone" dataKey="ema12" stroke="hsl(var(--accent))" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
+                      {showEMA26 && <Line type="monotone" dataKey="ema26" stroke="#f59e0b" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />}
+                      {showRSI && <Line yAxisId="right" type="monotone" dataKey="value" data={rsiData} stroke="#8b5cf6" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showMACD && <Line yAxisId="right" type="monotone" dataKey="macd" data={macdData} stroke="#06b6d4" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showStoch && <Line yAxisId="right" type="monotone" dataKey="k" data={stochData} stroke="#10b981" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showCCI && <Line yAxisId="right" type="monotone" dataKey="value" data={cciData} stroke="#f97316" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showWilliamsR && <Line yAxisId="right" type="monotone" dataKey="value" data={wrData} stroke="#ef4444" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showADX && <Line yAxisId="right" type="monotone" dataKey="adx" data={adxData} stroke="#22c55e" dot={false} strokeWidth={1.3} isAnimationActive={false} />}
+                      {showVolume && <Bar yAxisId="right" dataKey="volume" barSize={3} fill="#6366f1" isAnimationActive={false} />}
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
