@@ -527,7 +527,7 @@ export const GetTopPredictionsResponse = zod.object({
         zod.string(),
         zod.object({
           targetPrice: zod.number(),
-          changePercent: zod.number(),
+          changeAmount: zod.number(),
           direction: zod.enum(["bullish", "bearish", "neutral"]),
           confidence: zod.number(),
           label: zod.string(),

@@ -548,7 +548,7 @@ components:
       properties:
         targetPrice:
           type: number
-        changePercent:
+        changeAmount:
           type: number
         direction:
           type: string
@@ -557,7 +557,7 @@ components:
           type: integer
         label:
           type: string
-      required: [targetPrice, changePercent, direction, confidence, label]
+      required: [targetPrice, changeAmount, direction, confidence, label]
 
     TopStockPrediction:
       type: object

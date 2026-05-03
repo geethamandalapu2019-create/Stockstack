@@ -88,7 +88,7 @@ export const TopHorizonPredictionDirection = {
 
 export interface TopHorizonPrediction {
   targetPrice: number;
-  changePercent: number;
+  changeAmount: number;
   direction: TopHorizonPredictionDirection;
   confidence: number;
   label: string;

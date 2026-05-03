@@ -40,8 +40,8 @@ function SignalPill({ signal }: { signal: string }) {
   );
 }
 
-function HorizonCell({ changePercent, confidence, direction }: {
-  changePercent: number; confidence: number; direction: string;
+function HorizonCell({ targetPrice, changeAmount, confidence, direction, currency }: {
+  targetPrice: number; changeAmount: number; confidence: number; direction: string; currency: string;
 }) {
   const isUp = direction === "bullish";
   const isDown = direction === "bearish";
@@ -54,9 +54,9 @@ function HorizonCell({ changePercent, confidence, direction }: {
         isUp ? "text-bullish" : isDown ? "text-bearish" : "text-muted-foreground"
       )}>
         {isUp ? <TrendingUp className="w-2.5 h-2.5" /> : isDown ? <TrendingDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
-        {changePercent >= 0 ? "+" : ""}{changePercent.toFixed(1)}%
+        {currency === "INR" ? "₹" : "$"}{targetPrice.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
       </div>
-      <div className="text-[9px] text-muted-foreground">{confidence}% conf</div>
+      <div className="text-[9px] text-muted-foreground">{changeAmount >= 0 ? "+" : ""}{changeAmount.toFixed(1)} · {confidence}% conf</div>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export default function PredictionsPage() {
 
   const { data, isLoading, refetch, isFetching } = useGetTopPredictions(
     isSearching ? { q: committedQuery, limit: 30 } : { limit: 10 },
-    { query: { refetchOnWindowFocus: false } }
+    { query: { refetchOnWindowFocus: false, queryKey: ["top-predictions", committedQuery, isSearching ? 30 : 10] } }
   );
 
   const handleSearch = () => {
@@ -258,7 +258,7 @@ export default function PredictionsPage() {
                         return (
                           <div key={h.key} className="shrink-0">
                             <div className="text-[9px] text-muted-foreground text-center mb-0.5 font-data">{h.key.toUpperCase()}</div>
-                            <HorizonCell {...pred} />
+                            <HorizonCell {...pred} changeAmount={pred.changeAmount ?? (pred.targetPrice - stock.currentPrice)} currency={stock.currency} />
                           </div>
                         );
                       })}
@@ -306,7 +306,7 @@ export default function PredictionsPage() {
                     {HORIZONS.map(h => {
                       const pred = stock.predictions[h.key];
                       if (!pred) return <div key={h.key} className="text-muted-foreground text-xs text-center">—</div>;
-                      return <HorizonCell key={h.key} {...pred} />;
+                      return <HorizonCell key={h.key} {...pred} changeAmount={pred.changeAmount ?? (pred.targetPrice - stock.currentPrice)} currency={stock.currency} />;
                     })}
 
                     {/* Action */}

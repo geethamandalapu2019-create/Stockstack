@@ -652,10 +652,11 @@ export function generateHorizonPrediction(
   const horizonVol = volatility * Math.sqrt(horizonDays / 252);
   const changePercent = +((biasPct + (rng() - 0.48) * horizonVol * 0.4) * 100).toFixed(2);
   const targetPrice = +(currentPrice * (1 + changePercent / 100)).toFixed(2);
+  const changeAmount = +(targetPrice - currentPrice).toFixed(2);
   const direction = changePercent > 0.5 ? "bullish" : changePercent < -0.5 ? "bearish" : "neutral";
   const baseConf = score >= 68 ? 76 : score >= 58 ? 68 : score >= 42 ? 56 : 48;
   const confidence = Math.max(30, Math.min(88, Math.round(baseConf - Math.min(horizonDays * 0.2, 18) + (rng() - 0.5) * 8)));
-  return { targetPrice, changePercent, direction, confidence };
+  return { targetPrice, changeAmount, direction, confidence };
 }
 
 export function computeSignals(closes: number[]) {

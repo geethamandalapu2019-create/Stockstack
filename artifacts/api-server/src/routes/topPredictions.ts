@@ -35,7 +35,7 @@ function buildStockPrediction(symbol: string) {
   const analysis = computeComprehensiveScore(closes, highs, lows, volumes);
 
   const predictions: Record<string, {
-    targetPrice: number; changePercent: number; direction: string; confidence: number; label: string;
+    targetPrice: number; changeAmount: number; direction: string; confidence: number; label: string;
   }> = {};
 
   for (const h of HORIZONS) {
