@@ -76,6 +76,13 @@ function LivePrice({ symbol, fallback }: { symbol: string; fallback: number }) {
   return <>{formatPrice(data?.price ?? fallback, data?.currency ?? "INR")}</>;
 }
 
+function useLivePrice(symbol: string, fallback: number) {
+  const { data } = useGetStockQuote(symbol, {
+    query: { enabled: !!symbol, queryKey: getGetStockQuoteQueryKey(symbol) }
+  });
+  return data?.price ?? fallback;
+}
+
 function SignalPill({ signal }: { signal: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     strong_buy: { label: "STRONG BUY", cls: "bg-bullish/20 text-bullish border-bullish/30" },
@@ -283,8 +290,10 @@ export default function PredictionsPage() {
     }
     if (sortBy === "upside") {
       return list.sort((a, b) => {
-        const bestUpside = (s: typeof a) =>
-          Math.max(...Object.values(s.predictions).map(p => ((p.targetPrice - s.currentPrice) / s.currentPrice) * 100));
+        const bestUpside = (s: typeof a) => {
+          const live = (s as typeof a & { __livePrice?: number }).__livePrice ?? s.currentPrice;
+          return Math.max(...Object.values(s.predictions).map(p => ((p.targetPrice - live) / live) * 100));
+        };
         return bestUpside(b) - bestUpside(a);
       });
     }
