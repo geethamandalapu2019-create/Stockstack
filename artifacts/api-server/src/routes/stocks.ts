@@ -21,6 +21,32 @@ import {
 
 const router = Router();
 
+function buildImpactNotes(stock: { sector: string }) {
+  const sector = stock.sector.toLowerCase();
+  const national = [
+    "RBI rates, inflation, and domestic policy can move the stock quickly.",
+    "Earnings revisions, taxes, and sector regulation are key local drivers.",
+  ];
+  const global = [
+    "US markets, crude prices, and dollar strength can affect sentiment.",
+    "Global risk-off events and foreign flows may change momentum fast.",
+  ];
+  if (sector.includes("bank")) {
+    national.unshift("Credit growth and RBI liquidity are major bank drivers.");
+    global.unshift("Global rate expectations and FII flows can re-rate banks.");
+  } else if (sector.includes("it") || sector.includes("tech")) {
+    national.unshift("Rupee moves and hiring demand matter for IT earnings.");
+    global.unshift("US enterprise spending and recession risk matter most.");
+  } else if (sector.includes("oil") || sector.includes("energy")) {
+    national.unshift("Government fuel policy and domestic demand matter.");
+    global.unshift("Crude prices and OPEC decisions are major catalysts.");
+  } else if (sector.includes("pharma") || sector.includes("health")) {
+    national.unshift("Approvals, compliance, and export demand matter.");
+    global.unshift("FDA actions and US healthcare demand can swing the stock.");
+  }
+  return { national, global };
+}
+
 // GET /stocks/search?q=
 router.get("/search", (req, res) => {
   const q = (req.query.q as string ?? "").toLowerCase().trim();
@@ -73,6 +99,7 @@ router.get("/:symbol/quote", (req, res) => {
     sector: stock.sector,
     exchange: stock.exchange,
     currency: stock.currency,
+    impactNotes: buildImpactNotes(stock),
   });
 });
 

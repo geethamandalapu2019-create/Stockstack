@@ -105,6 +105,10 @@ const SWING_FALLBACK = {
   ],
 };
 
+function formatImpactList(items?: string[]) {
+  return items?.slice(0, 3) ?? [];
+}
+
 export default function ChartPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const [period, setPeriod] = useState<"1mo" | "3mo" | "6mo" | "1y">("3mo");
@@ -164,6 +168,7 @@ export default function ChartPage() {
   const volumeData = useMemo(() => history?.candles?.map((c, i) => ({ date: c.date.split("T")[0], volume: c.volume, obv: indicators?.obv[i]?.value, isBullish: c.close >= c.open })) ?? [], [history, indicators]);
   const adxData = useMemo(() => indicators?.adx?.map(p => ({ date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI })) ?? [], [indicators]);
   const predictionsData = (quote as unknown as { predictions?: PredictionItem[]; swingConfluence?: PredictionItem[] } | undefined);
+  const impactNotes = (quote as unknown as { impactNotes?: { national?: string[]; global?: string[] } } | undefined)?.impactNotes;
 
   const selectedPrediction = useMemo(() => {
     const response = predictionsData?.swingConfluence ?? predictionsData?.predictions;
@@ -394,13 +399,23 @@ export default function ChartPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <Card className="bg-card">
               <CardHeader className="py-2 px-3 border-b border-border">
-                <CardTitle className="text-xs text-muted-foreground font-data">VALUATION</CardTitle>
+                <CardTitle className="text-xs text-muted-foreground font-data">VALUATION + IMPACT NOTES</CardTitle>
               </CardHeader>
-              <CardContent className="p-3 grid grid-cols-2 gap-3 text-sm">
+              <CardContent className="p-3 space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3">
                 <div><div className="text-muted-foreground text-xs mb-1">Market Cap</div><div className="font-data font-semibold">{fmtLarge(fundamentals?.marketCap ?? null, currency)}</div></div>
                 <div><div className="text-muted-foreground text-xs mb-1">P/E Ratio</div><div className="font-data font-semibold">{fundamentals?.pe ?? "N/A"}</div></div>
                 <div><div className="text-muted-foreground text-xs mb-1">52W High</div><div className="font-data font-semibold">{fundamentals?.week52High ? fmt(fundamentals.week52High, currency) : "N/A"}</div></div>
                 <div><div className="text-muted-foreground text-xs mb-1">52W Low</div><div className="font-data font-semibold">{fundamentals?.week52Low ? fmt(fundamentals.week52Low, currency) : "N/A"}</div></div>
+                </div>
+                <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground">National impact</div>
+                  {formatImpactList(impactNotes?.national).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
+                </div>
+                <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground">Global impact</div>
+                  {formatImpactList(impactNotes?.global).map(note => <div key={note} className="text-xs text-muted-foreground leading-relaxed">• {note}</div>)}
+                </div>
               </CardContent>
             </Card>
           </div>
