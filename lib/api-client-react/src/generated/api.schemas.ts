@@ -59,6 +59,88 @@ export interface StockHistory {
   candles: Candle[];
 }
 
+export interface StochasticPoint {
+  date: string;
+  /** @nullable */
+  k: number | null;
+  /** @nullable */
+  d: number | null;
+}
+
+export interface ADXPoint {
+  date: string;
+  /** @nullable */
+  adx: number | null;
+  /** @nullable */
+  plusDI: number | null;
+  /** @nullable */
+  minusDI: number | null;
+}
+
+export type TopHorizonPredictionDirection =
+  (typeof TopHorizonPredictionDirection)[keyof typeof TopHorizonPredictionDirection];
+
+export const TopHorizonPredictionDirection = {
+  bullish: "bullish",
+  bearish: "bearish",
+  neutral: "neutral",
+} as const;
+
+export interface TopHorizonPrediction {
+  targetPrice: number;
+  changePercent: number;
+  direction: TopHorizonPredictionDirection;
+  confidence: number;
+  label: string;
+}
+
+export type TopStockPredictionDirection =
+  (typeof TopStockPredictionDirection)[keyof typeof TopStockPredictionDirection];
+
+export const TopStockPredictionDirection = {
+  bullish: "bullish",
+  bearish: "bearish",
+  neutral: "neutral",
+} as const;
+
+export type TopStockPredictionOverallSignal =
+  (typeof TopStockPredictionOverallSignal)[keyof typeof TopStockPredictionOverallSignal];
+
+export const TopStockPredictionOverallSignal = {
+  strong_buy: "strong_buy",
+  buy: "buy",
+  neutral: "neutral",
+  sell: "sell",
+  strong_sell: "strong_sell",
+} as const;
+
+export type TopStockPredictionPredictions = {
+  [key: string]: TopHorizonPrediction;
+};
+
+export interface TopStockPrediction {
+  symbol: string;
+  name: string;
+  sector: string;
+  exchange: string;
+  currency: string;
+  currentPrice: number;
+  overallScore: number;
+  direction: TopStockPredictionDirection;
+  overallSignal: TopStockPredictionOverallSignal;
+  signals: string[];
+  /** @nullable */
+  currentRsi: number | null;
+  predictions: TopStockPredictionPredictions;
+}
+
+export interface TopPredictionsResponse {
+  /** @nullable */
+  query: string | null;
+  total: number;
+  stocks: TopStockPrediction[];
+}
+
 export interface IndicatorPoint {
   date: string;
   /** @nullable */
@@ -112,6 +194,42 @@ export const TechnicalIndicatorsBbSignal = {
   near_lower: "near_lower",
 } as const;
 
+export type TechnicalIndicatorsStochSignal =
+  (typeof TechnicalIndicatorsStochSignal)[keyof typeof TechnicalIndicatorsStochSignal];
+
+export const TechnicalIndicatorsStochSignal = {
+  oversold: "oversold",
+  neutral: "neutral",
+  overbought: "overbought",
+} as const;
+
+export type TechnicalIndicatorsCciSignal =
+  (typeof TechnicalIndicatorsCciSignal)[keyof typeof TechnicalIndicatorsCciSignal];
+
+export const TechnicalIndicatorsCciSignal = {
+  oversold: "oversold",
+  neutral: "neutral",
+  overbought: "overbought",
+} as const;
+
+export type TechnicalIndicatorsWilliamsRSignal =
+  (typeof TechnicalIndicatorsWilliamsRSignal)[keyof typeof TechnicalIndicatorsWilliamsRSignal];
+
+export const TechnicalIndicatorsWilliamsRSignal = {
+  oversold: "oversold",
+  neutral: "neutral",
+  overbought: "overbought",
+} as const;
+
+export type TechnicalIndicatorsAdxTrend =
+  (typeof TechnicalIndicatorsAdxTrend)[keyof typeof TechnicalIndicatorsAdxTrend];
+
+export const TechnicalIndicatorsAdxTrend = {
+  bullish: "bullish",
+  bearish: "bearish",
+  weak: "weak",
+} as const;
+
 export type TechnicalIndicatorsOverallSignal =
   (typeof TechnicalIndicatorsOverallSignal)[keyof typeof TechnicalIndicatorsOverallSignal];
 
@@ -133,11 +251,35 @@ export interface TechnicalIndicators {
   ema26: IndicatorPoint[];
   macd: MACDPoint[];
   bollingerBands: BollingerPoint[];
+  stochastic: StochasticPoint[];
+  cci: IndicatorPoint[];
+  williamsR: IndicatorPoint[];
+  atr: IndicatorPoint[];
+  obv: IndicatorPoint[];
+  adx: ADXPoint[];
   /** @nullable */
   currentRsi: number | null;
+  /** @nullable */
+  currentStochK: number | null;
+  /** @nullable */
+  currentStochD: number | null;
+  /** @nullable */
+  currentCci: number | null;
+  /** @nullable */
+  currentWilliamsR: number | null;
+  /** @nullable */
+  currentAdx: number | null;
+  /** @nullable */
+  currentPlusDI: number | null;
+  /** @nullable */
+  currentMinusDI: number | null;
   rsiSignal: TechnicalIndicatorsRsiSignal;
   macdSignal: TechnicalIndicatorsMacdSignal;
   bbSignal: TechnicalIndicatorsBbSignal;
+  stochSignal: TechnicalIndicatorsStochSignal;
+  cciSignal: TechnicalIndicatorsCciSignal;
+  williamsRSignal: TechnicalIndicatorsWilliamsRSignal;
+  adxTrend: TechnicalIndicatorsAdxTrend;
   overallSignal: TechnicalIndicatorsOverallSignal;
 }
 
@@ -492,3 +634,8 @@ export const GetTradesStatus = {
   open: "open",
   closed: "closed",
 } as const;
+
+export type GetTopPredictionsParams = {
+  q?: string;
+  limit?: number;
+};

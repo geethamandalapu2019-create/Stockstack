@@ -9,6 +9,7 @@ import {
   X,
   Menu,
   TrendingUp,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchStocks } from "@workspace/api-client-react";
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/watchlist", label: "Watchlist", icon: Activity },
   { path: "/trades", label: "Trades", icon: Briefcase },
+  { path: "/predictions", label: "Predictions", icon: Sparkles },
   { path: "/chart/RELIANCE", label: "Charts", icon: BarChart2 },
 ];
 
@@ -27,7 +29,7 @@ function GlobalSearch({ onClose }: { onClose?: () => void }) {
 
   const { data: results, isLoading } = useSearchStocks(
     { q: query },
-    { query: { enabled: query.length > 1 } }
+    { query: { enabled: query.length >= 1 } }
   );
 
   useEffect(() => {
@@ -74,7 +76,7 @@ function GlobalSearch({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {query.length > 1 && (
+      {query.length >= 1 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-[100] max-h-72 overflow-y-auto">
           {isLoading ? (
             <div className="p-4 text-sm text-muted-foreground text-center">Searching…</div>
@@ -113,7 +115,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground dark">
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      {/* Overlay for mobile */}
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden"
@@ -147,7 +148,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         <nav className="flex-1 py-4 flex flex-col gap-1 px-2">
           {NAV_ITEMS.map((item) => {
-            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path.split("/").slice(0, 2).join("/")));
+            const isActive = location === item.path ||
+              (item.path !== "/" && !item.path.startsWith("/chart") && location.startsWith(item.path)) ||
+              (item.path.startsWith("/chart") && location.startsWith("/chart"));
             return (
               <Link
                 key={item.path}
@@ -179,9 +182,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ── Main Content ─────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden md:ml-0">
-        {/* Top Header */}
         <header className="h-14 border-b border-border bg-background flex items-center px-3 md:px-4 gap-3 shrink-0">
-          {/* Mobile hamburger */}
           <button
             className="md:hidden shrink-0 text-muted-foreground hover:text-foreground"
             onClick={() => setMobileSidebarOpen(true)}
@@ -189,7 +190,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Search — full width on mobile, fixed width on desktop */}
           {mobileSearchOpen ? (
             <div className="flex-1 flex items-center gap-2">
               <div className="flex-1">
@@ -204,7 +204,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           ) : (
             <>
-              {/* Mobile search button */}
               <button
                 className="md:hidden shrink-0 text-muted-foreground hover:text-foreground"
                 onClick={() => setMobileSearchOpen(true)}
@@ -212,12 +211,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Search className="w-5 h-5" />
               </button>
 
-              {/* Desktop search */}
               <div className="hidden md:block w-72 lg:w-96">
                 <GlobalSearch />
               </div>
 
-              {/* Market ticker */}
               <div className="flex items-center gap-3 ml-auto font-data text-xs">
                 <div className="hidden sm:flex items-center gap-1.5">
                   <span className="text-muted-foreground">SENSEX</span>
@@ -238,7 +235,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
 
-              {/* Mobile: show symbol for current chart page */}
               <span className="ml-auto text-xs text-muted-foreground md:hidden font-data">
                 {location.startsWith("/chart/") ? location.split("/")[2] : ""}
               </span>
@@ -253,7 +249,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile Bottom Navigation */}
         <nav className="md:hidden border-t border-border bg-card flex items-center justify-around py-2 shrink-0">
           {NAV_ITEMS.map(item => {
-            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path.split("/").slice(0, 2).join("/")));
+            const isActive = location === item.path ||
+              (item.path !== "/" && !item.path.startsWith("/chart") && location.startsWith(item.path)) ||
+              (item.path.startsWith("/chart") && location.startsWith("/chart"));
             return (
               <Link
                 key={item.path}

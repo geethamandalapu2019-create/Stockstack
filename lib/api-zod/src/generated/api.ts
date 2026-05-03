@@ -142,10 +142,60 @@ export const GetStockIndicatorsResponse = zod.object({
       lower: zod.number().nullable(),
     }),
   ),
+  stochastic: zod.array(
+    zod.object({
+      date: zod.string(),
+      k: zod.number().nullable(),
+      d: zod.number().nullable(),
+    }),
+  ),
+  cci: zod.array(
+    zod.object({
+      date: zod.string(),
+      value: zod.number().nullable(),
+    }),
+  ),
+  williamsR: zod.array(
+    zod.object({
+      date: zod.string(),
+      value: zod.number().nullable(),
+    }),
+  ),
+  atr: zod.array(
+    zod.object({
+      date: zod.string(),
+      value: zod.number().nullable(),
+    }),
+  ),
+  obv: zod.array(
+    zod.object({
+      date: zod.string(),
+      value: zod.number().nullable(),
+    }),
+  ),
+  adx: zod.array(
+    zod.object({
+      date: zod.string(),
+      adx: zod.number().nullable(),
+      plusDI: zod.number().nullable(),
+      minusDI: zod.number().nullable(),
+    }),
+  ),
   currentRsi: zod.number().nullable(),
+  currentStochK: zod.number().nullable(),
+  currentStochD: zod.number().nullable(),
+  currentCci: zod.number().nullable(),
+  currentWilliamsR: zod.number().nullable(),
+  currentAdx: zod.number().nullable(),
+  currentPlusDI: zod.number().nullable(),
+  currentMinusDI: zod.number().nullable(),
   rsiSignal: zod.enum(["oversold", "neutral", "overbought"]),
   macdSignal: zod.enum(["bullish", "neutral", "bearish"]),
   bbSignal: zod.enum(["near_upper", "neutral", "near_lower"]),
+  stochSignal: zod.enum(["oversold", "neutral", "overbought"]),
+  cciSignal: zod.enum(["oversold", "neutral", "overbought"]),
+  williamsRSignal: zod.enum(["oversold", "neutral", "overbought"]),
+  adxTrend: zod.enum(["bullish", "bearish", "weak"]),
   overallSignal: zod.enum([
     "strong_buy",
     "buy",
@@ -438,3 +488,49 @@ export const GetDashboardSignalsResponseItem = zod.object({
 export const GetDashboardSignalsResponse = zod.array(
   GetDashboardSignalsResponseItem,
 );
+
+/**
+ * @summary Top stock predictions ranked by composite multi-indicator score
+ */
+export const getTopPredictionsQueryLimitDefault = 10;
+
+export const GetTopPredictionsQueryParams = zod.object({
+  q: zod.coerce.string().optional(),
+  limit: zod.coerce.number().default(getTopPredictionsQueryLimitDefault),
+});
+
+export const GetTopPredictionsResponse = zod.object({
+  query: zod.string().nullable(),
+  total: zod.number(),
+  stocks: zod.array(
+    zod.object({
+      symbol: zod.string(),
+      name: zod.string(),
+      sector: zod.string(),
+      exchange: zod.string(),
+      currency: zod.string(),
+      currentPrice: zod.number(),
+      overallScore: zod.number(),
+      direction: zod.enum(["bullish", "bearish", "neutral"]),
+      overallSignal: zod.enum([
+        "strong_buy",
+        "buy",
+        "neutral",
+        "sell",
+        "strong_sell",
+      ]),
+      signals: zod.array(zod.string()),
+      currentRsi: zod.number().nullable(),
+      predictions: zod.record(
+        zod.string(),
+        zod.object({
+          targetPrice: zod.number(),
+          changePercent: zod.number(),
+          direction: zod.enum(["bullish", "bearish", "neutral"]),
+          confidence: zod.number(),
+          label: zod.string(),
+        }),
+      ),
+    }),
+  ),
+});

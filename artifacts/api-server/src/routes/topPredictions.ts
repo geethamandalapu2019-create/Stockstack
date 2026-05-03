@@ -1,0 +1,90 @@
+import { Router } from "express";
+import {
+  STOCKS,
+  generateCandles,
+  getCurrentPrice,
+  computeComprehensiveScore,
+  generateHorizonPrediction,
+  getStockBySymbol,
+} from "../lib/stockData.js";
+
+const router = Router();
+
+const HORIZONS = [
+  { key: "1d",  label: "1 Day",   days: 1 },
+  { key: "5d",  label: "5 Days",  days: 5 },
+  { key: "10d", label: "10 Days", days: 10 },
+  { key: "2w",  label: "2 Weeks", days: 14 },
+  { key: "1mo", label: "1 Month", days: 30 },
+];
+
+function buildStockPrediction(symbol: string) {
+  const stock = getStockBySymbol(symbol);
+  if (!stock) return null;
+
+  // Use 6 months of data for comprehensive analysis
+  const candles = generateCandles(symbol, 180, "1d");
+  if (candles.length < 60) return null;
+
+  const closes = candles.map(c => c.close);
+  const highs  = candles.map(c => c.high);
+  const lows   = candles.map(c => c.low);
+  const volumes = candles.map(c => c.volume);
+
+  const { price: currentPrice } = getCurrentPrice(symbol);
+  const analysis = computeComprehensiveScore(closes, highs, lows, volumes);
+
+  const predictions: Record<string, {
+    targetPrice: number; changePercent: number; direction: string; confidence: number; label: string;
+  }> = {};
+
+  for (const h of HORIZONS) {
+    const pred = generateHorizonPrediction(symbol, currentPrice, stock.volatility, analysis.score, h.days);
+    predictions[h.key] = { ...pred, label: h.label };
+  }
+
+  return {
+    symbol: stock.symbol,
+    name: stock.name,
+    sector: stock.sector,
+    exchange: stock.exchange,
+    currency: stock.currency,
+    currentPrice,
+    overallScore: analysis.score,
+    direction: analysis.direction,
+    overallSignal: analysis.overallSignal,
+    signals: analysis.signals,
+    currentRsi: analysis.currentRsi,
+    predictions,
+  };
+}
+
+// GET /predictions/top?q=&limit=10
+router.get("/top", (req, res) => {
+  const q = ((req.query.q as string) ?? "").toLowerCase().trim();
+  const limit = Math.min(parseInt((req.query.limit as string) ?? "10", 10), 30);
+
+  let pool = STOCKS;
+  if (q) {
+    pool = STOCKS.filter(s =>
+      s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+    );
+  }
+
+  const results = pool
+    .map(s => buildStockPrediction(s.symbol))
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  if (!q) {
+    // Sort by score (most bullish first) when no search
+    results.sort((a, b) => b.overallScore - a.overallScore);
+  }
+
+  res.json({
+    query: q || null,
+    total: results.length,
+    stocks: results.slice(0, limit),
+  });
+});
+
+export default router;

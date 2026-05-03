@@ -23,6 +23,7 @@ import type {
   ErrorResponse,
   GetStockHistoryParams,
   GetStockIndicatorsParams,
+  GetTopPredictionsParams,
   GetTradesParams,
   HealthStatus,
   SearchStocksParams,
@@ -33,6 +34,7 @@ import type {
   StockSearchResult,
   SwingSignal,
   TechnicalIndicators,
+  TopPredictionsResponse,
   Trade,
   TradeStats,
   UpdateTradeBody,
@@ -1512,6 +1514,103 @@ export function useGetDashboardSignals<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDashboardSignalsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Top stock predictions ranked by composite multi-indicator score
+ */
+export const getGetTopPredictionsUrl = (params?: GetTopPredictionsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/predictions/top?${stringifiedParams}`
+    : `/api/predictions/top`;
+};
+
+export const getTopPredictions = async (
+  params?: GetTopPredictionsParams,
+  options?: RequestInit,
+): Promise<TopPredictionsResponse> => {
+  return customFetch<TopPredictionsResponse>(getGetTopPredictionsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTopPredictionsQueryKey = (
+  params?: GetTopPredictionsParams,
+) => {
+  return [`/api/predictions/top`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetTopPredictionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTopPredictions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetTopPredictionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTopPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTopPredictionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTopPredictions>>
+  > = ({ signal }) => getTopPredictions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTopPredictions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTopPredictionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTopPredictions>>
+>;
+export type GetTopPredictionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Top stock predictions ranked by composite multi-indicator score
+ */
+
+export function useGetTopPredictions<
+  TData = Awaited<ReturnType<typeof getTopPredictions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetTopPredictionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTopPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTopPredictionsQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

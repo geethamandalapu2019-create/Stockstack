@@ -54,13 +54,19 @@ function formatLargeNum(n: number | null, currency: string): string {
   return `${sym}${(n * 1000).toFixed(2)}M`;
 }
 
+function signalColor(sig: string) {
+  if (sig === "oversold" || sig === "bullish") return "text-bullish";
+  if (sig === "overbought" || sig === "bearish") return "text-bearish";
+  return "text-muted-foreground";
+}
+
 export default function ChartPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const [period, setPeriod] = useState<"1mo" | "3mo" | "6mo" | "1y">("3mo");
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("technical");
   const [horizon, setHorizon] = useState<Horizon>("1mo");
 
-  // Overlay indicator toggles
+  // Overlay toggles
   const [showSMA20, setShowSMA20] = useState(true);
   const [showSMA50, setShowSMA50] = useState(true);
   const [showEMA12, setShowEMA12] = useState(false);
@@ -70,6 +76,11 @@ export default function ChartPage() {
   // Panel toggles
   const [showRSI, setShowRSI] = useState(true);
   const [showMACD, setShowMACD] = useState(true);
+  const [showStoch, setShowStoch] = useState(false);
+  const [showCCI, setShowCCI] = useState(false);
+  const [showWilliamsR, setShowWilliamsR] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
+  const [showADX, setShowADX] = useState(false);
 
   const { data: quote, isLoading: isQuoteLoading } = useGetStockQuote(symbol, {
     query: { enabled: !!symbol, queryKey: getGetStockQuoteQueryKey(symbol) }
@@ -127,6 +138,38 @@ export default function ChartPage() {
     }));
   }, [indicators]);
 
+  const stochData = useMemo(() => {
+    if (!indicators?.stochastic) return [];
+    return indicators.stochastic.map(p => ({ date: p.date.split("T")[0], k: p.k, d: p.d }));
+  }, [indicators]);
+
+  const cciData = useMemo(() => {
+    if (!indicators?.cci) return [];
+    return indicators.cci.map(p => ({ date: p.date.split("T")[0], value: p.value }));
+  }, [indicators]);
+
+  const wrData = useMemo(() => {
+    if (!indicators?.williamsR) return [];
+    return indicators.williamsR.map(p => ({ date: p.date.split("T")[0], value: p.value }));
+  }, [indicators]);
+
+  const volumeData = useMemo(() => {
+    if (!history?.candles || !indicators?.obv) return [];
+    return history.candles.map((c, i) => ({
+      date: c.date.split("T")[0],
+      volume: c.volume,
+      obv: indicators.obv[i]?.value,
+      isBullish: c.close >= c.open,
+    }));
+  }, [history, indicators]);
+
+  const adxData = useMemo(() => {
+    if (!indicators?.adx) return [];
+    return indicators.adx.map(p => ({
+      date: p.date.split("T")[0], adx: p.adx, plusDI: p.plusDI, minusDI: p.minusDI
+    }));
+  }, [indicators]);
+
   const selectedPrediction = useMemo(() => {
     return predictionsData?.predictions.find(p => p.horizon === horizon);
   }, [predictionsData, horizon]);
@@ -167,7 +210,6 @@ export default function ChartPage() {
             <div className="text-destructive">Symbol not found</div>
           )}
         </div>
-
         <div className="flex items-center gap-2">
           <div className="bg-secondary/50 rounded-md p-1 flex">
             {["1mo", "3mo", "6mo", "1y"].map(p => (
@@ -187,7 +229,7 @@ export default function ChartPage() {
         {/* Main Chart Area */}
         <div className="lg:col-span-3 flex flex-col gap-3 overflow-auto min-h-[400px]">
           {/* Price Chart */}
-          <Card className="flex-1 bg-card min-h-[300px] md:min-h-[380px] flex flex-col">
+          <Card className="flex-1 bg-card min-h-[300px] md:min-h-[360px] flex flex-col">
             <CardHeader className="py-2.5 px-3 md:px-4 flex flex-row items-center justify-between border-b border-border shrink-0 flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-sm font-medium">Price Action</CardTitle>
@@ -240,18 +282,18 @@ export default function ChartPage() {
 
           {/* RSI Panel */}
           {showRSI && (
-            <Card className="bg-card h-36 flex flex-col shrink-0">
-              <CardHeader className="py-2 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs text-muted-foreground font-data">RSI (14)</CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowRSI(false)}>Hide</Button>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rsiData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <LineChart data={rsiData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis dataKey="date" hide />
                     <YAxis domain={[0, 100]} ticks={[30, 50, 70]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
-                    <Tooltip {...tooltipStyle} />
+                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "RSI"]} />
                     <ReferenceLine y={70} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} />
                     <ReferenceLine y={30} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} />
                     <Line type="monotone" dataKey="value" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
@@ -263,14 +305,14 @@ export default function ChartPage() {
 
           {/* MACD Panel */}
           {showMACD && (
-            <Card className="bg-card h-44 flex flex-col shrink-0">
-              <CardHeader className="py-2 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs text-muted-foreground font-data">MACD (12, 26, 9)</CardTitle>
+            <Card className="bg-card h-36 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs text-muted-foreground font-data">MACD (12,26,9)</CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowMACD(false)}>Hide</Button>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={macdData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <ComposedChart data={macdData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis dataKey="date" hide />
                     <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
@@ -286,6 +328,153 @@ export default function ChartPage() {
                     <Line type="monotone" dataKey="macd" stroke="hsl(var(--chart-2))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
                     <Line type="monotone" dataKey="signal" stroke="hsl(var(--chart-3))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
                   </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Stochastic Panel */}
+          {showStoch && (
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-xs text-muted-foreground font-data">Stochastic (14,3)</CardTitle>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-blue-400" /> %K</span>
+                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-orange-400" /> %D</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowStoch(false)}>Hide</Button>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stochData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis domain={[0, 100]} ticks={[20, 50, 80]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
+                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "k" ? "%K" : "%D"]} />
+                    <ReferenceLine y={80} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} />
+                    <ReferenceLine y={20} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} />
+                    <Line type="monotone" dataKey="k" stroke="#60a5fa" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="d" stroke="#fb923c" dot={false} strokeWidth={1.5} strokeDasharray="4 2" isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* CCI Panel */}
+          {showCCI && (
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs text-muted-foreground font-data">CCI (20) — Commodity Channel Index</CardTitle>
+                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowCCI(false)}>Hide</Button>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={cciData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
+                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "CCI"]} />
+                    <ReferenceLine y={100} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "+100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                    <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
+                    <ReferenceLine y={-100} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-100", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                    <Line type="monotone" dataKey="value" stroke="#a78bfa" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Williams %R Panel */}
+          {showWilliamsR && (
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs text-muted-foreground font-data">Williams %R (14)</CardTitle>
+                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowWilliamsR(false)}>Hide</Button>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={wrData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis domain={[-100, 0]} ticks={[-80, -50, -20]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
+                    <Tooltip {...tooltipStyle} formatter={(v: any) => [Number(v).toFixed(1), "%R"]} />
+                    <ReferenceLine y={-20} stroke="hsl(var(--chart-5))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-20", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                    <ReferenceLine y={-80} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "-80", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                    <Line type="monotone" dataKey="value" stroke="#34d399" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Volume + OBV Panel */}
+          {showVolume && (
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-xs text-muted-foreground font-data">Volume / OBV</CardTitle>
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <span className="inline-block w-2.5 h-0.5 bg-yellow-400" /> OBV overlay
+                  </span>
+                </div>
+                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowVolume(false)}>Hide</Button>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={volumeData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis yAxisId="vol" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right"
+                      tickFormatter={v => v >= 1e7 ? `${(v/1e7).toFixed(0)}Cr` : v >= 1e5 ? `${(v/1e5).toFixed(0)}L` : `${(v/1e3).toFixed(0)}K`} />
+                    <YAxis yAxisId="obv" orientation="left" hide />
+                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => {
+                      if (name === "volume") return [`${(Number(v)/1e5).toFixed(1)}L`, "Volume"];
+                      if (name === "obv") return [(Number(v)/1e6).toFixed(2) + "M", "OBV"];
+                      return null;
+                    }} />
+                    <Bar yAxisId="vol" dataKey="volume" isAnimationActive={false}
+                      shape={(props: any) => {
+                        const { x, y, width, height, payload } = props;
+                        return <rect x={x} y={y} width={width} height={Math.max(1, height)}
+                          fill={payload.isBullish ? "hsl(var(--chart-1))" : "hsl(var(--chart-5))"} opacity={0.5} />;
+                      }}
+                    />
+                    <Line yAxisId="obv" type="monotone" dataKey="obv" stroke="#facc15" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ADX Panel */}
+          {showADX && (
+            <Card className="bg-card h-32 flex flex-col shrink-0">
+              <CardHeader className="py-1.5 px-3 md:px-4 border-b border-border shrink-0 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-xs text-muted-foreground font-data">ADX (14)</CardTitle>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-white" /> ADX</span>
+                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-green-400" /> +DI</span>
+                    <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-0.5 bg-red-400" /> -DI</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="h-5 text-xs text-muted-foreground px-2" onClick={() => setShowADX(false)}>Hide</Button>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={adxData} margin={{ top: 6, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="date" hide />
+                    <YAxis domain={[0, 60]} ticks={[0, 25, 50]} stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} orientation="right" />
+                    <Tooltip {...tooltipStyle} formatter={(v: any, name) => [Number(v).toFixed(1), name === "adx" ? "ADX" : name === "plusDI" ? "+DI" : "-DI"]} />
+                    <ReferenceLine y={25} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeWidth={1} label={{ value: "25", position: "insideRight", fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                    <Line type="monotone" dataKey="adx" stroke="hsl(var(--foreground))" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="plusDI" stroke="#4ade80" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="minusDI" stroke="#f87171" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                  </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
@@ -316,6 +505,7 @@ export default function ChartPage() {
           {/* ── Technical Tab ── */}
           {sidebarTab === "technical" && (
             <>
+              {/* Signal Summary */}
               <Card className="bg-card">
                 <CardHeader className="pb-3 border-b border-border">
                   <CardTitle className="text-sm">Signal Summary</CardTitle>
@@ -323,7 +513,7 @@ export default function ChartPage() {
                 <CardContent className="p-0">
                   {isIndicatorsLoading ? (
                     <div className="p-4 space-y-3">
-                      <Skeleton className="h-8 w-full" /><Skeleton className="h-20 w-full" />
+                      <Skeleton className="h-8 w-full" /><Skeleton className="h-24 w-full" />
                     </div>
                   ) : indicators ? (
                     <div className="divide-y divide-border">
@@ -331,18 +521,47 @@ export default function ChartPage() {
                         <span className="font-medium text-sm">Overall</span>
                         <SignalBadge signal={indicators.overallSignal} />
                       </div>
-                      <div className="p-3 space-y-2.5">
+                      <div className="p-3 space-y-2">
                         {[
-                          { label: "RSI (14)", value: `${indicators.currentRsi?.toFixed(1)} — ${indicators.rsiSignal.toUpperCase()}`,
-                            cls: indicators.rsiSignal === "oversold" ? "text-bullish" : indicators.rsiSignal === "overbought" ? "text-bearish" : "text-muted-foreground" },
-                          { label: "MACD", value: indicators.macdSignal.toUpperCase(),
-                            cls: indicators.macdSignal === "bullish" ? "text-bullish" : indicators.macdSignal === "bearish" ? "text-bearish" : "text-muted-foreground" },
-                          { label: "Bollinger", value: indicators.bbSignal.replace("_", " ").toUpperCase(),
-                            cls: indicators.bbSignal === "near_lower" ? "text-bullish" : indicators.bbSignal === "near_upper" ? "text-bearish" : "text-muted-foreground" },
+                          {
+                            label: "RSI (14)",
+                            value: `${indicators.currentRsi?.toFixed(1)} — ${indicators.rsiSignal.toUpperCase()}`,
+                            cls: signalColor(indicators.rsiSignal),
+                          },
+                          {
+                            label: "MACD",
+                            value: indicators.macdSignal.toUpperCase(),
+                            cls: signalColor(indicators.macdSignal),
+                          },
+                          {
+                            label: "Bollinger",
+                            value: indicators.bbSignal.replace("_", " ").toUpperCase(),
+                            cls: indicators.bbSignal === "near_lower" ? "text-bullish" : indicators.bbSignal === "near_upper" ? "text-bearish" : "text-muted-foreground",
+                          },
+                          {
+                            label: "Stochastic %K",
+                            value: `${indicators.currentStochK?.toFixed(1) ?? "—"} — ${indicators.stochSignal.toUpperCase()}`,
+                            cls: signalColor(indicators.stochSignal),
+                          },
+                          {
+                            label: "CCI (20)",
+                            value: `${indicators.currentCci?.toFixed(1) ?? "—"} — ${indicators.cciSignal.toUpperCase()}`,
+                            cls: signalColor(indicators.cciSignal),
+                          },
+                          {
+                            label: "Williams %R",
+                            value: `${indicators.currentWilliamsR?.toFixed(1) ?? "—"} — ${indicators.williamsRSignal.toUpperCase()}`,
+                            cls: signalColor(indicators.williamsRSignal),
+                          },
+                          {
+                            label: "ADX (14)",
+                            value: `${indicators.currentAdx?.toFixed(1) ?? "—"} — ${indicators.adxTrend.toUpperCase()}`,
+                            cls: indicators.adxTrend === "bullish" ? "text-bullish" : indicators.adxTrend === "bearish" ? "text-bearish" : "text-muted-foreground",
+                          },
                         ].map(row => (
-                          <div key={row.label} className="flex justify-between items-center text-xs">
-                            <span className="text-muted-foreground font-data">{row.label}</span>
-                            <span className={cn("font-medium", row.cls)}>{row.value}</span>
+                          <div key={row.label} className="flex justify-between items-center text-xs gap-2">
+                            <span className="text-muted-foreground font-data shrink-0">{row.label}</span>
+                            <span className={cn("font-medium text-right", row.cls)}>{row.value}</span>
                           </div>
                         ))}
                       </div>
@@ -351,6 +570,7 @@ export default function ChartPage() {
                 </CardContent>
               </Card>
 
+              {/* Indicator Controls */}
               <Card className="bg-card">
                 <CardHeader className="pb-2 border-b border-border">
                   <CardTitle className="text-sm">Indicators</CardTitle>
@@ -383,6 +603,11 @@ export default function ChartPage() {
                     <div className="grid grid-cols-2 gap-1.5">
                       <Button variant={showRSI ? "default" : "outline"} size="sm" onClick={() => setShowRSI(!showRSI)} className="h-7 text-xs">RSI</Button>
                       <Button variant={showMACD ? "default" : "outline"} size="sm" onClick={() => setShowMACD(!showMACD)} className="h-7 text-xs">MACD</Button>
+                      <Button variant={showStoch ? "default" : "outline"} size="sm" onClick={() => setShowStoch(!showStoch)} className="h-7 text-xs">Stochastic</Button>
+                      <Button variant={showCCI ? "default" : "outline"} size="sm" onClick={() => setShowCCI(!showCCI)} className="h-7 text-xs">CCI</Button>
+                      <Button variant={showWilliamsR ? "default" : "outline"} size="sm" onClick={() => setShowWilliamsR(!showWilliamsR)} className="h-7 text-xs">Williams %R</Button>
+                      <Button variant={showVolume ? "default" : "outline"} size="sm" onClick={() => setShowVolume(!showVolume)} className="h-7 text-xs">Volume</Button>
+                      <Button variant={showADX ? "default" : "outline"} size="sm" onClick={() => setShowADX(!showADX)} className="h-7 text-xs col-span-2">ADX</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -397,6 +622,7 @@ export default function ChartPage() {
                       { label: "52W Low", value: formatPrice(quote.week52Low, currency) },
                       { label: "P/E Ratio", value: quote.pe ? quote.pe.toFixed(1) : "N/A" },
                       { label: "Volume", value: `${(quote.volume / 1000000).toFixed(2)}M` },
+                      { label: "Market Cap", value: quote.marketCap ? formatLargeNum(quote.marketCap, currency) : "N/A" },
                     ].map(row => (
                       <div key={row.label} className="flex justify-between items-center text-xs">
                         <span className="text-muted-foreground">{row.label}</span>
@@ -412,7 +638,6 @@ export default function ChartPage() {
           {/* ── Predictions Tab ── */}
           {sidebarTab === "predictions" && (
             <>
-              {/* Horizon Selector */}
               <div className="shrink-0">
                 <div className="text-xs text-muted-foreground mb-1.5 font-data px-1">SELECT HORIZON</div>
                 <div className="grid grid-cols-3 gap-1">
@@ -436,7 +661,6 @@ export default function ChartPage() {
                 </div>
               ) : selectedPrediction ? (
                 <>
-                  {/* Target card */}
                   <Card className="bg-card">
                     <CardContent className="p-3 space-y-2.5">
                       <div className="flex items-center justify-between">
@@ -461,8 +685,6 @@ export default function ChartPage() {
                       <div className="text-xs text-muted-foreground">
                         Range: {formatPrice(selectedPrediction.confidenceLow, currency)} — {formatPrice(selectedPrediction.confidenceHigh, currency)}
                       </div>
-
-                      {/* Confidence bar */}
                       <div>
                         <div className="flex justify-between text-xs mb-1">
                           <span className="text-muted-foreground">Confidence</span>
@@ -478,12 +700,11 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Forecast chart */}
                   <Card className="bg-card">
                     <CardHeader className="py-2 px-3 border-b border-border shrink-0">
                       <CardTitle className="text-xs text-muted-foreground font-data">PRICE FORECAST</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0" style={{ height: "180px" }}>
+                    <CardContent className="p-0" style={{ height: "160px" }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart data={selectedPrediction.forecast} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -501,9 +722,8 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Support/Resistance + Methodology */}
                   <Card className="bg-card">
-                    <CardContent className="p-3 space-y-2.5">
+                    <CardContent className="p-3 space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">Support</span>
                         <span className="font-data text-bullish">{formatPrice(selectedPrediction.supportLevel, currency)}</span>
@@ -518,7 +738,6 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* All horizons summary */}
                   <Card className="bg-card">
                     <CardHeader className="py-2 px-3 border-b border-border shrink-0">
                       <CardTitle className="text-xs text-muted-foreground font-data">ALL HORIZONS</CardTitle>
@@ -557,11 +776,9 @@ export default function ChartPage() {
                 <div className="space-y-3">
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-40 w-full" />
-                  <Skeleton className="h-32 w-full" />
                 </div>
               ) : fundamentals ? (
                 <>
-                  {/* Valuation verdict */}
                   <Card className="bg-card">
                     <CardContent className="p-3 space-y-2.5">
                       <div className="flex justify-between items-center">
@@ -587,7 +804,6 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Description */}
                   {fundamentals.description && (
                     <Card className="bg-card">
                       <CardContent className="p-3">
@@ -596,7 +812,6 @@ export default function ChartPage() {
                     </Card>
                   )}
 
-                  {/* Key metrics */}
                   <Card className="bg-card">
                     <CardHeader className="py-2 px-3 border-b border-border shrink-0">
                       <CardTitle className="text-xs text-muted-foreground font-data">KEY METRICS</CardTitle>
@@ -622,7 +837,6 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Financials */}
                   <Card className="bg-card">
                     <CardHeader className="py-2 px-3 border-b border-border shrink-0">
                       <CardTitle className="text-xs text-muted-foreground font-data">FINANCIALS</CardTitle>
@@ -644,7 +858,6 @@ export default function ChartPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Shareholding (Indian stocks) */}
                   {fundamentals.promoterHolding != null && (
                     <Card className="bg-card">
                       <CardHeader className="py-2 px-3 border-b border-border shrink-0">

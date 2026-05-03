@@ -8,6 +8,12 @@ import {
   calcRSI,
   calcMACD,
   calcBollingerBands,
+  calcStochastic,
+  calcCCI,
+  calcWilliamsR,
+  calcATR,
+  calcOBV,
+  calcADX,
   computeSignals,
   getCurrentPrice,
   getStockBySymbol,
@@ -100,6 +106,9 @@ router.get("/:symbol/indicators", (req, res) => {
   const days = periodToDays(period);
   const candles = generateCandles(symbol, days, "1d");
   const closes = candles.map(c => c.close);
+  const highs = candles.map(c => c.high);
+  const lows = candles.map(c => c.low);
+  const volumes = candles.map(c => c.volume);
   const dates = candles.map(c => c.date);
 
   const sma20 = calcSMA(closes, 20);
@@ -109,7 +118,28 @@ router.get("/:symbol/indicators", (req, res) => {
   const rsi = calcRSI(closes);
   const macd = calcMACD(closes);
   const bb = calcBollingerBands(closes);
+  const stoch = calcStochastic(highs, lows, closes);
+  const cci = calcCCI(highs, lows, closes);
+  const wr = calcWilliamsR(highs, lows, closes);
+  const atr = calcATR(highs, lows, closes);
+  const obv = calcOBV(closes, volumes);
+  const adx = calcADX(highs, lows, closes);
   const signals = computeSignals(closes);
+
+  // Current values for sidebar summary
+  const lastStoch = stoch[stoch.length - 1];
+  const lastCci = cci[cci.length - 1];
+  const lastWr = wr[wr.length - 1];
+  const lastAdx = adx[adx.length - 1];
+
+  const stochSignal = lastStoch.k == null ? "neutral"
+    : lastStoch.k < 20 ? "oversold" : lastStoch.k > 80 ? "overbought" : "neutral";
+  const cciSignal = lastCci == null ? "neutral"
+    : lastCci < -100 ? "oversold" : lastCci > 100 ? "overbought" : "neutral";
+  const williamsRSignal = lastWr == null ? "neutral"
+    : lastWr < -80 ? "oversold" : lastWr > -20 ? "overbought" : "neutral";
+  const adxTrend = lastAdx.adx == null ? "weak"
+    : lastAdx.adx > 25 ? (lastAdx.plusDI! > lastAdx.minusDI! ? "bullish" : "bearish") : "weak";
 
   res.json({
     symbol,
@@ -126,15 +156,33 @@ router.get("/:symbol/indicators", (req, res) => {
       histogram: macd[i]?.histogram ?? null,
     })),
     bollingerBands: dates.map((date, i) => ({
-      date,
-      upper: bb[i]?.upper ?? null,
-      middle: bb[i]?.middle ?? null,
-      lower: bb[i]?.lower ?? null,
+      date, upper: bb[i]?.upper ?? null, middle: bb[i]?.middle ?? null, lower: bb[i]?.lower ?? null,
     })),
+    stochastic: dates.map((date, i) => ({ date, k: stoch[i]?.k ?? null, d: stoch[i]?.d ?? null })),
+    cci: dates.map((date, i) => ({ date, value: cci[i] ?? null })),
+    williamsR: dates.map((date, i) => ({ date, value: wr[i] ?? null })),
+    atr: dates.map((date, i) => ({ date, value: atr[i] ?? null })),
+    obv: dates.map((date, i) => ({ date, value: obv[i] ?? null })),
+    adx: dates.map((date, i) => ({
+      date, adx: adx[i]?.adx ?? null, plusDI: adx[i]?.plusDI ?? null, minusDI: adx[i]?.minusDI ?? null,
+    })),
+    // Current values
     currentRsi: signals.currentRsi,
+    currentStochK: lastStoch.k,
+    currentStochD: lastStoch.d,
+    currentCci: lastCci,
+    currentWilliamsR: lastWr,
+    currentAdx: lastAdx.adx,
+    currentPlusDI: lastAdx.plusDI,
+    currentMinusDI: lastAdx.minusDI,
+    // Signals
     rsiSignal: signals.rsiSignal,
     macdSignal: signals.macdSignal,
     bbSignal: signals.bbSignal,
+    stochSignal,
+    cciSignal,
+    williamsRSignal,
+    adxTrend,
     overallSignal: signals.overallSignal,
   });
 });

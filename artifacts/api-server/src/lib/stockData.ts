@@ -438,6 +438,222 @@ export function getCurrentPrice(symbol: string): { price: number; change: number
   return { price: latest.close, change, changePercent };
 }
 
+// ── Extended Indicators ────────────────────────────────────────────────────
+
+export interface StochasticData { k: number | null; d: number | null; }
+
+export function calcStochastic(
+  highs: number[], lows: number[], closes: number[], kPeriod = 14, dPeriod = 3
+): StochasticData[] {
+  const n = closes.length;
+  const k: (number | null)[] = new Array(n).fill(null);
+  for (let i = kPeriod - 1; i < n; i++) {
+    const h = Math.max(...highs.slice(i - kPeriod + 1, i + 1));
+    const l = Math.min(...lows.slice(i - kPeriod + 1, i + 1));
+    k[i] = h === l ? 50 : +((closes[i] - l) / (h - l) * 100).toFixed(2);
+  }
+  const kFilled = k.map(v => v ?? 0);
+  const dSmoothed = calcSMA(kFilled, dPeriod);
+  const d: (number | null)[] = k.map((v, i) => v === null ? null : dSmoothed[i]);
+  return closes.map((_, i) => ({ k: k[i], d: d[i] }));
+}
+
+export function calcCCI(
+  highs: number[], lows: number[], closes: number[], period = 20
+): (number | null)[] {
+  return closes.map((_, i) => {
+    if (i < period - 1) return null;
+    const typicals = Array.from({ length: period }, (__, j) => {
+      const idx = i - period + 1 + j;
+      return (highs[idx] + lows[idx] + closes[idx]) / 3;
+    });
+    const mean = typicals.reduce((a, b) => a + b, 0) / period;
+    const meanDev = typicals.reduce((a, b) => a + Math.abs(b - mean), 0) / period;
+    if (meanDev === 0) return 0;
+    return +((typicals[typicals.length - 1] - mean) / (0.015 * meanDev)).toFixed(2);
+  });
+}
+
+export function calcWilliamsR(
+  highs: number[], lows: number[], closes: number[], period = 14
+): (number | null)[] {
+  return closes.map((_, i) => {
+    if (i < period - 1) return null;
+    const h = Math.max(...highs.slice(i - period + 1, i + 1));
+    const l = Math.min(...lows.slice(i - period + 1, i + 1));
+    if (h === l) return -50;
+    return +((h - closes[i]) / (h - l) * -100).toFixed(2);
+  });
+}
+
+export function calcATR(
+  highs: number[], lows: number[], closes: number[], period = 14
+): (number | null)[] {
+  const tr: number[] = highs.map((h, i) =>
+    i === 0 ? h - lows[i] : Math.max(h - lows[i], Math.abs(h - closes[i - 1]), Math.abs(lows[i] - closes[i - 1]))
+  );
+  const result: (number | null)[] = new Array(closes.length).fill(null);
+  if (tr.length < period) return result;
+  let atr = tr.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  result[period - 1] = +atr.toFixed(4);
+  for (let i = period; i < tr.length; i++) {
+    atr = (atr * (period - 1) + tr[i]) / period;
+    result[i] = +atr.toFixed(4);
+  }
+  return result;
+}
+
+export function calcOBV(closes: number[], volumes: number[]): number[] {
+  const obv: number[] = [0];
+  for (let i = 1; i < closes.length; i++) {
+    if (closes[i] > closes[i - 1]) obv.push(obv[i - 1] + volumes[i]);
+    else if (closes[i] < closes[i - 1]) obv.push(obv[i - 1] - volumes[i]);
+    else obv.push(obv[i - 1]);
+  }
+  return obv;
+}
+
+export interface ADXData { adx: number | null; plusDI: number | null; minusDI: number | null; }
+
+export function calcADX(
+  highs: number[], lows: number[], closes: number[], period = 14
+): ADXData[] {
+  const n = closes.length;
+  const results: ADXData[] = new Array(n).fill({ adx: null, plusDI: null, minusDI: null });
+  if (n < period * 2 + 2) return results;
+
+  const tr: number[] = [0], plusDM: number[] = [0], minusDM: number[] = [0];
+  for (let i = 1; i < n; i++) {
+    const up = highs[i] - highs[i - 1], down = lows[i - 1] - lows[i];
+    tr.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i - 1]), Math.abs(lows[i] - closes[i - 1])));
+    if (up > down && up > 0) { plusDM.push(up); minusDM.push(0); }
+    else if (down > up && down > 0) { plusDM.push(0); minusDM.push(down); }
+    else { plusDM.push(0); minusDM.push(0); }
+  }
+
+  let sTR = tr.slice(1, period + 1).reduce((a, b) => a + b, 0);
+  let sPlus = plusDM.slice(1, period + 1).reduce((a, b) => a + b, 0);
+  let sMinus = minusDM.slice(1, period + 1).reduce((a, b) => a + b, 0);
+  let adxVal = 0; const dxArr: number[] = [];
+
+  for (let i = period + 1; i < n; i++) {
+    sTR = sTR - sTR / period + tr[i];
+    sPlus = sPlus - sPlus / period + plusDM[i];
+    sMinus = sMinus - sMinus / period + minusDM[i];
+    const pDI = sTR === 0 ? 0 : +(100 * sPlus / sTR).toFixed(2);
+    const mDI = sTR === 0 ? 0 : +(100 * sMinus / sTR).toFixed(2);
+    const dx = pDI + mDI === 0 ? 0 : +(100 * Math.abs(pDI - mDI) / (pDI + mDI)).toFixed(2);
+    dxArr.push(dx);
+    if (dxArr.length >= period) {
+      adxVal = dxArr.length === period
+        ? dxArr.reduce((a, b) => a + b, 0) / period
+        : (adxVal * (period - 1) + dx) / period;
+      results[i] = { adx: +adxVal.toFixed(2), plusDI: pDI, minusDI: mDI };
+    } else {
+      results[i] = { adx: null, plusDI: pDI, minusDI: mDI };
+    }
+  }
+  return results;
+}
+
+export function computeComprehensiveScore(
+  closes: number[], highs: number[], lows: number[], volumes: number[]
+) {
+  const rsiArr = calcRSI(closes);
+  const macdArr = calcMACD(closes);
+  const bbArr = calcBollingerBands(closes);
+  const stochArr = calcStochastic(highs, lows, closes);
+  const cciArr = calcCCI(highs, lows, closes);
+  const wrArr = calcWilliamsR(highs, lows, closes);
+  const obvArr = calcOBV(closes, volumes);
+
+  const rsi = rsiArr[rsiArr.length - 1];
+  const macd = macdArr[macdArr.length - 1];
+  const bb = bbArr[bbArr.length - 1];
+  const stoch = stochArr[stochArr.length - 1];
+  const cci = cciArr[cciArr.length - 1];
+  const wr = wrArr[wrArr.length - 1];
+  const latest = closes[closes.length - 1];
+
+  let rsiScore = 5;
+  if (rsi !== null) {
+    if (rsi < 25) rsiScore = 9.5; else if (rsi < 35) rsiScore = 7.5;
+    else if (rsi < 45) rsiScore = 6; else if (rsi < 55) rsiScore = 5;
+    else if (rsi < 65) rsiScore = 3.5; else if (rsi < 75) rsiScore = 2; else rsiScore = 0.5;
+  }
+  let macdScore = 5;
+  if (macd.histogram !== null && macd.macd !== null) {
+    if (macd.histogram > 0 && macd.macd > 0) macdScore = 8;
+    else if (macd.histogram > 0) macdScore = 6.5;
+    else if (macd.histogram < 0 && macd.macd < 0) macdScore = 2;
+    else macdScore = 3.5;
+  }
+  let stochScore = 5;
+  if (stoch.k !== null && stoch.d !== null) {
+    const { k, d } = stoch;
+    if (k < 20 && k > d) stochScore = 9.5; else if (k < 20) stochScore = 7.5;
+    else if (k < 40) stochScore = 6; else if (k < 60) stochScore = 5;
+    else if (k < 80) stochScore = 3.5; else if (k > 80 && k < d) stochScore = 1.5; else stochScore = 2.5;
+  }
+  let cciScore = 5;
+  if (cci !== null) {
+    if (cci < -200) cciScore = 9.5; else if (cci < -100) cciScore = 7.5;
+    else if (cci < -50) cciScore = 6; else if (cci < 50) cciScore = 5;
+    else if (cci < 100) cciScore = 3.5; else if (cci < 200) cciScore = 2; else cciScore = 0.5;
+  }
+  let wrScore = 5;
+  if (wr !== null) {
+    if (wr < -80) wrScore = 8.5; else if (wr < -60) wrScore = 6.5;
+    else if (wr < -40) wrScore = 5; else if (wr < -20) wrScore = 3.5; else wrScore = 2;
+  }
+  let bbScore = 5;
+  if (bb.upper !== null && bb.lower !== null && bb.middle !== null) {
+    if (latest <= bb.lower * 1.005) bbScore = 8.5; else if (latest < bb.middle) bbScore = 5.5;
+    else if (latest >= bb.upper * 0.995) bbScore = 1.5; else bbScore = 4.5;
+  }
+  let obvScore = 5;
+  if (obvArr.length > 20) {
+    const chg = (obvArr[obvArr.length - 1] - obvArr[obvArr.length - 11]) / (Math.abs(obvArr[obvArr.length - 11]) + 1);
+    if (chg > 0.1) obvScore = 8; else if (chg > 0.02) obvScore = 6.5;
+    else if (chg < -0.1) obvScore = 2; else if (chg < -0.02) obvScore = 3.5;
+  }
+
+  const raw = rsiScore*0.25 + macdScore*0.20 + stochScore*0.18 + cciScore*0.12 + wrScore*0.10 + bbScore*0.10 + obvScore*0.05;
+  const score = Math.max(5, Math.min(95, Math.round(raw * 10)));
+
+  const signals: string[] = [];
+  if (rsiScore >= 7.5) signals.push("RSI oversold — strong buy zone");
+  else if (rsiScore <= 2) signals.push("RSI overbought — take profits");
+  if (macdScore >= 7) signals.push("MACD bullish crossover confirmed");
+  else if (macdScore <= 3) signals.push("MACD bearish crossover");
+  if (stochScore >= 8) signals.push("Stochastic oversold with bullish reversal");
+  else if (stochScore <= 2.5) signals.push("Stochastic overbought");
+  if (cciScore >= 7.5) signals.push("CCI deeply oversold");
+  if (wrScore >= 8) signals.push("Williams %R: extreme oversold");
+  if (bbScore >= 8) signals.push("Price at lower Bollinger Band support");
+  if (obvScore >= 6.5) signals.push("OBV rising — institutional accumulation");
+
+  const direction = score >= 58 ? "bullish" : score <= 42 ? "bearish" : "neutral";
+  const overallSignal = score >= 70 ? "strong_buy" : score >= 58 ? "buy" : score <= 30 ? "strong_sell" : score <= 42 ? "sell" : "neutral";
+  return { score, direction, overallSignal, signals: signals.slice(0, 3), currentRsi: rsi };
+}
+
+export function generateHorizonPrediction(
+  symbol: string, currentPrice: number, volatility: number, score: number, horizonDays: number
+) {
+  let s = symbol.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + horizonDays * 31 + Math.floor(Date.now() / 86400000);
+  const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+
+  const biasPct = ((score - 50) / 50) * 0.12 * Math.min(horizonDays / 30, 2.5);
+  const horizonVol = volatility * Math.sqrt(horizonDays / 252);
+  const changePercent = +((biasPct + (rng() - 0.48) * horizonVol * 0.4) * 100).toFixed(2);
+  const targetPrice = +(currentPrice * (1 + changePercent / 100)).toFixed(2);
+  const direction = changePercent > 0.5 ? "bullish" : changePercent < -0.5 ? "bearish" : "neutral";
+  const baseConf = score >= 68 ? 76 : score >= 58 ? 68 : score >= 42 ? 56 : 48;
+  const confidence = Math.max(30, Math.min(88, Math.round(baseConf - Math.min(horizonDays * 0.2, 18) + (rng() - 0.5) * 8)));
+  return { targetPrice, changePercent, direction, confidence };
+}
+
 export function computeSignals(closes: number[]) {
   const rsiValues = calcRSI(closes);
   const macdData = calcMACD(closes);

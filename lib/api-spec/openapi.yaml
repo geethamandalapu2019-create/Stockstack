@@ -12,6 +12,7 @@ tags:
   - name: watchlist
   - name: trades
   - name: dashboard
+  - name: predictions
 
 paths:
   /healthz:
@@ -391,6 +392,31 @@ paths:
                 items:
                   $ref: "#/components/schemas/SwingSignal"
 
+  /predictions/top:
+    get:
+      operationId: getTopPredictions
+      tags: [predictions]
+      summary: Top stock predictions ranked by composite multi-indicator score
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top predictions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TopPredictionsResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -493,6 +519,94 @@ components:
             $ref: "#/components/schemas/Candle"
       required: [symbol, period, interval, currency, candles]
 
+    StochasticPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        k:
+          type: ["number", "null"]
+        d:
+          type: ["number", "null"]
+      required: [date, k, d]
+
+    ADXPoint:
+      type: object
+      properties:
+        date:
+          type: string
+        adx:
+          type: ["number", "null"]
+        plusDI:
+          type: ["number", "null"]
+        minusDI:
+          type: ["number", "null"]
+      required: [date, adx, plusDI, minusDI]
+
+    TopHorizonPrediction:
+      type: object
+      properties:
+        targetPrice:
+          type: number
+        changePercent:
+          type: number
+        direction:
+          type: string
+          enum: [bullish, bearish, neutral]
+        confidence:
+          type: integer
+        label:
+          type: string
+      required: [targetPrice, changePercent, direction, confidence, label]
+
+    TopStockPrediction:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        sector:
+          type: string
+        exchange:
+          type: string
+        currency:
+          type: string
+        currentPrice:
+          type: number
+        overallScore:
+          type: integer
+        direction:
+          type: string
+          enum: [bullish, bearish, neutral]
+        overallSignal:
+          type: string
+          enum: [strong_buy, buy, neutral, sell, strong_sell]
+        signals:
+          type: array
+          items:
+            type: string
+        currentRsi:
+          type: ["number", "null"]
+        predictions:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/TopHorizonPrediction"
+      required: [symbol, name, sector, exchange, currency, currentPrice, overallScore, direction, overallSignal, signals, currentRsi, predictions]
+
+    TopPredictionsResponse:
+      type: object
+      properties:
+        query:
+          type: ["string", "null"]
+        total:
+          type: integer
+        stocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopStockPrediction"
+      required: [query, total, stocks]
+
     IndicatorPoint:
       type: object
       properties:
@@ -563,7 +677,45 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/BollingerPoint"
+        stochastic:
+          type: array
+          items:
+            $ref: "#/components/schemas/StochasticPoint"
+        cci:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        williamsR:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        atr:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        obv:
+          type: array
+          items:
+            $ref: "#/components/schemas/IndicatorPoint"
+        adx:
+          type: array
+          items:
+            $ref: "#/components/schemas/ADXPoint"
         currentRsi:
+          type: ["number", "null"]
+        currentStochK:
+          type: ["number", "null"]
+        currentStochD:
+          type: ["number", "null"]
+        currentCci:
+          type: ["number", "null"]
+        currentWilliamsR:
+          type: ["number", "null"]
+        currentAdx:
+          type: ["number", "null"]
+        currentPlusDI:
+          type: ["number", "null"]
+        currentMinusDI:
           type: ["number", "null"]
         rsiSignal:
           type: string
@@ -574,10 +726,22 @@ components:
         bbSignal:
           type: string
           enum: [near_upper, neutral, near_lower]
+        stochSignal:
+          type: string
+          enum: [oversold, neutral, overbought]
+        cciSignal:
+          type: string
+          enum: [oversold, neutral, overbought]
+        williamsRSignal:
+          type: string
+          enum: [oversold, neutral, overbought]
+        adxTrend:
+          type: string
+          enum: [bullish, bearish, weak]
         overallSignal:
           type: string
           enum: [strong_buy, buy, neutral, sell, strong_sell]
-      required: [symbol, period, rsi, sma20, sma50, ema12, ema26, macd, bollingerBands, currentRsi, rsiSignal, macdSignal, bbSignal, overallSignal]
+      required: [symbol, period, rsi, sma20, sma50, ema12, ema26, macd, bollingerBands, stochastic, cci, williamsR, atr, obv, adx, currentRsi, currentStochK, currentStochD, currentCci, currentWilliamsR, currentAdx, currentPlusDI, currentMinusDI, rsiSignal, macdSignal, bbSignal, stochSignal, cciSignal, williamsRSignal, adxTrend, overallSignal]
 
     PredictionPoint:
       type: object
