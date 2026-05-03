@@ -65,6 +65,12 @@ function getCapCategoryFilter(cap: string | undefined) {
   return cap as "large" | "mid" | "small";
 }
 
+function getBucket(stock: { marketCapB: number }): "large" | "mid" | "small" {
+  if (stock.marketCapB >= 5000) return "large";
+  if (stock.marketCapB >= 1500) return "mid";
+  return "small";
+}
+
 // GET /predictions/top?q=&limit=10
 router.get("/top", (req, res) => {
   const q = ((req.query.q as string) ?? "").toLowerCase().trim();
@@ -76,11 +82,11 @@ router.get("/top", (req, res) => {
     pool = STOCKS.filter(s =>
       s.currency === "INR" &&
       s.exchange === "NSE" &&
-      (!cap || s.capCategory === cap) &&
+      (!cap || getBucket(s) === cap) &&
       (s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))
     );
   } else {
-    pool = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE" && (!cap || s.capCategory === cap));
+    pool = STOCKS.filter(s => s.currency === "INR" && s.exchange === "NSE" && (!cap || getBucket(s) === cap));
   }
 
   const results = pool
